@@ -1,14 +1,14 @@
 <template>
-    <Layout>
-        <h1 class="text-3xl font-bold underline">
-            {{ test }}
-        </h1>
-        <Input />
-    </Layout>
+    <div class="flex flex-col gap-2">
+        <TextInput label="Input" icon="tabler:barbell" icon_size="35px"/>
+        <UiBox>Test</UiBox>
+        <UiBox>Test</UiBox>
+        <UiBox>Test</UiBox>
+    </div>
 </template>
 <script setup>
-    import Layout from '@/Layout.vue';
-    import Input from '@components/input.vue';
+    import TextInput from '@components/Input/text.vue'
+    import UiBox from '@components/Ui/Box.vue'
 
     const test = 'Hello From Vue';
 </script>

@@ -10,7 +10,7 @@
         @inertiaHead
         @vite('resources/css/app.css')
     </head>
-    <body class="font-sans antialiased dark:bg-black dark:text-white/50">
+    <body class="min-h-screen bg-main text-primary antialiased font-sans"></body>
         @inertia
     </body>
 </html>

@@ -1,12 +1,12 @@
 <template>
-    <nav>
-        <Link href="/">Home</Link>
-        <Link href="/workouts">Workouts</Link>
-        <Link href="/exercises">Exercises</Link>
-    </nav>
-    <slot />
+    <div class="flex pl-[var(--sidenav-width)] min-h-screen">
+        <SideNav />
+        <div class="container mx-auto px-5">
+            <slot />
+        </div>
+    </div>
 </template>
 <script setup>
-import {Link} from '@inertiajs/vue3';
+import SideNav from '@components/SideNav.vue'
 
 </script>
