@@ -5,3 +5,20 @@
 :root{
     --sidenav-width: 250px;
 }
+
+body{
+    @apply scrollbar overflow-x-hidden;
+}
+
+@layer utilities {
+    .scrollbar::-webkit-scrollbar{
+        width: 6px;
+        height: 4px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb{
+        background: rgba(113, 113, 146, .35);
+        border-radius: 3px;
+    }
+}
+

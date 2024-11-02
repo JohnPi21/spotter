@@ -8,7 +8,12 @@
                         <h3>{{ meso.name }}</h3>
                         <div class="text-secondary text-sm">{{ meso.duration }} - {{ meso.frequency }}</div>
                     </div>
-                    <div class="hover:cursor-pointer"><Icon icon="iconamoon:menu-kebab-vertical" width="18px"/></div>
+                    <div class="relative">
+                        <div class="hover:cursor-pointer"><Icon icon="iconamoon:menu-kebab-vertical" width="18px"/></div>
+                        <UiDropdownMenu :idx="idx">
+                            <div v-for="li in 15">First el</div>
+                        </UiDropdownMenu>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -17,9 +22,10 @@
 
 <script setup>
     import { Icon } from '@iconify/vue';
+    import { ref } from 'vue';
     import UiBox from '@components/Ui/Box.vue';
     import UiTitle from '@components/Ui/Title.vue';
-    import { ref } from 'vue';
+    import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
 
     const mesocycles = ref([
         {name: 'Superman Workout', duration: '6 weeks', frequency: '3 Days / Week'},

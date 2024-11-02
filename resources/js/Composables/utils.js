@@ -1,4 +1,6 @@
-export function useOnClickOutside(refElement, callback, excludes = []) {
+import {ref, onMounted, onBeforeUnmount} from 'vue';
+
+function onClickOutside(refElement, callback, excludes = []) {
     if (!refElement) return;
 
     const handleClickOutside = (event) => {
@@ -37,4 +39,8 @@ export function useOnClickOutside(refElement, callback, excludes = []) {
         window.removeEventListener('click', handleClickOutside);
         window.removeEventListener('touchstart', handleClickOutside);
     });
+}
+
+export const useUtils = {
+    onClickOutside,
 }

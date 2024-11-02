@@ -15,6 +15,7 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './resources/js'),
             '@components': path.resolve(__dirname, './resources/js/Components'),
+            '@composables': path.resolve(__dirname, './resources/js/Composables'),
         }
     }
 });
