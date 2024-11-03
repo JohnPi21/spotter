@@ -22,7 +22,7 @@
     const userStore = useUserStore();
 
     const links = [
-        {name: 'Current Workout', path: '/', icon: 'tabler:barbell'},
+        {name: 'Current Workout', path: '/mesocycles/active', icon: 'tabler:barbell'},
         {name: 'Mesocycles', path: '/mesocycles', icon: 'entypo:cycle'},
         {name: 'Execises', path: '/', icon: 'solar:bill-list-linear'},
         {name: 'Templates', path: '/', icon: 'carbon:template'},
