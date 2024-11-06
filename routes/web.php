@@ -9,7 +9,7 @@ Route::get('/', function () {
 });
 
 Route::get('/mesocycles', function() {
-    return Inertia::render('mesocycles');
+    return Inertia::render('mesocycles/index');
 });
 
 Route::get('/mesocycles/{id}', [MesocycleController::class, 'show']);

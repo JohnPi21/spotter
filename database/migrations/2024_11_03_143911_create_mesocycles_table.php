@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\MesoTemplate;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,8 +21,11 @@ return new class extends Migration
             $table->unsignedTinyInteger('weeks');
             $table->foreignIdFor(User::class);
             $table->json('notes');
+            $table->unsignedTinyInteger('status');
+            $table->foreignIdFor(MesoTemplate::class);
             $table->timestamp('started_at');
             $table->timestamp('finished_at');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
