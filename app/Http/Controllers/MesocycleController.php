@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Mesocycle;
 use App\Models\User;
+use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class MesocycleController extends Controller
 {
     public function index(): \Inertia\Response 
     {
+        dd(Exercise::get()->first());
         return Inertia::render('mesocycles/index');
     }
 

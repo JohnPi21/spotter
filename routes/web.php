@@ -8,8 +8,6 @@ Route::get('/', function () {
     return Inertia::render('hello');
 });
 
-Route::get('/mesocycles', function() {
-    return Inertia::render('mesocycles/index');
-});
+Route::get('/mesocycles', [MesocycleController::class, 'index']);
 
 Route::get('/mesocycles/{id}', [MesocycleController::class, 'show']);

@@ -14,12 +14,12 @@ return new class extends Migration
     {
         Schema::create('meso_days', function (Blueprint $table) {
             $table->id();
-            $table->unsignedTinyInteger('week');
             $table->foreignIdFor(Mesocycle::class);
+            $table->unsignedTinyInteger('week');
             $table->unsignedSmallInteger('weight');
             $table->string('label');
-            $table->tinyInteger('status');
             $table->unsignedTinyInteger('position');
+            $table->tinyInteger('status');
             $table->json('notes');
             $table->timestamps();
         });

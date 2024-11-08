@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\MuscleGroup;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignIdFor(MuscleGroup::class);
-            $table->string('youtube_id');
+            $table->foreignIdFor(User::class)->nullable();
+            $table->string('youtube_id')->nullable();
             $table->string('exercise_type');
             $table->softDeletes();
             $table->timestamps();
