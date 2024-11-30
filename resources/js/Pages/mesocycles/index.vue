@@ -1,5 +1,5 @@
 <template>
-    <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" />
+    <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" url="/mesocycles/create"/>
     <UiBox>
         <ul>
             <li v-for="(meso,idx) in mesocycles" :key="idx">

@@ -13,12 +13,16 @@ class MesocycleController extends Controller
 {
     public function index(): \Inertia\Response 
     {
-        dd(Exercise::get()->first());
         return Inertia::render('mesocycles/index');
     }
 
     public function show(int $id): \Inertia\Response
     {
         return Inertia::render('mesocycles/show', ['id' => $id]);
+    }
+
+    public function create(): \Inertia\Response
+    {
+        return Inertia::render('mesocycles/create');
     }
 }
