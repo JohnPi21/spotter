@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('days');
             $table->unsignedTinyInteger('weeks');
             $table->foreignIdFor(User::class);
-            $table->json('notes');
+            $table->json('notes')->nullable();
             $table->unsignedTinyInteger('status');
             $table->foreignIdFor(MesoTemplate::class);
             $table->timestamp('started_at');

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('label');
             $table->unsignedTinyInteger('position');
             $table->tinyInteger('status');
-            $table->json('notes');
+            $table->json('notes')->nullable();
             $table->timestamps();
         });
     }

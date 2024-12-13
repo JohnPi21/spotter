@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mesocycle;
 use App\Models\User;
 use App\Models\Exercise;
+use App\Models\MuscleGroup;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,12 @@ class MesocycleController extends Controller
 
     public function create(): \Inertia\Response
     {
-        return Inertia::render('mesocycles/create');
+        $muscle_groups = MuscleGroup::all();
+        $exercises = Exercise::all();
+
+        return Inertia::render('mesocycles/create', [
+            'muscle_groups' => $muscle_groups,
+            'exercises' => $exercises
+        ]);
     }
 }

@@ -1,8 +1,8 @@
 <template>
-    <InputWrapper>
-        <template v-slot:label v-if="props.label.length > 0">
+    <div>
+        <div v-if="props.label && props.label.length > 0">
             {{ props.label }}
-        </template>
+        </div>
 
         <div class="dropdown" ref="inputDropdown">
             <div class="dropdown-header" @click="toggleDropdown" :class="{ active: isOpen }">
@@ -23,10 +23,13 @@
                 </slot>
             </div>
         </div>
-    </InputWrapper>
+    </div>
 </template>
 
 <script setup>
+    import {ref, defineEmits, defineProps, reactive, computed, watch, onMounted, onUnmounted} from "vue";
+    import {useUtils} from '@composables/utils.js'
+
     const emit = defineEmits(["update:modelValue", "updateFilter", "change"]);
 
     const props = defineProps({
@@ -106,22 +109,24 @@
 
     const inputDropdown = ref();
 
-    Utility.onClickOutside(inputDropdown, () => {
+    useUtils.onClickOutside(inputDropdown, () => {
         isOpen.value = false;
     })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .dropdown {
     position: relative;
     width: 100%;
     font-family: Arial, sans-serif;
-    color: $text-secondary;
+    color: grey;
+    /* color: $text-secondary; */
     min-width: 200px;
 }
 
 .dropdown-header {
-    @include flex(center);
+    display: flex;
+    align-items: center;
     background: transparent;
     padding: 0 10px;
     border-radius: 8px;
@@ -132,18 +137,19 @@
     line-height: 40px;
     gap: 5px;
 
-    &:hover {
-        background: #94979e29;
-        color: #fff;
-    }
+}
 
-    &.active {
-        background: #94979e29;
-    }
+.dropdown-header:hover {
+    background: #94979e29;
+    color: #fff;
+}
 
-    .icon {
-        padding: 0;
-    }
+.dropdown-header.active {
+    background: #94979e29;
+}
+
+.dropdown-header .icon {
+    padding: 0;
 }
 
 .dropdown-list {
@@ -151,7 +157,8 @@
     top: 120%;
     left: 0;
     min-width: min-content;
-    background-color: $bg-element;
+    /* background-color: $bg-element; */
+    background-color: grey;
     border: 1px solid #272a31;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -161,12 +168,13 @@
     width: 100%;
     padding: 5px;
 
-    @include scrollBar();
+    /* @include scrollBar(); */
 }
 
 .filter {
     border: none;
-    border-bottom: 1px solid $bg-element-border;
+    /* border-bottom: 1px solid $bg-element-border; */
+    border-bottom: 1px solid grey;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
