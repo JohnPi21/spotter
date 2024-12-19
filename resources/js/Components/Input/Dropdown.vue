@@ -4,19 +4,21 @@
             {{ props.label }}
         </div>
 
-        <div class="dropdown" ref="inputDropdown">
-            <div class="dropdown-header" @click="toggleDropdown" :class="{ active: isOpen }">
-                <Icon :name="icon" size="25px" v-if="icon" />
+        <div class="dropdown text-secondary" ref="inputDropdown">
+            <div class="dropdown-header bg-input border-input-border border active:bg-layer hover:bg-layer" @click="toggleDropdown" :class="{ active: isOpen }">
+                <Icon :icon="icon" width="25px" v-if="icon" />
                 {{ selectedOption.label }}
             </div>
-            <div v-show="isOpen" class="dropdown-list">
-                <div class="filter input-group" v-if="includeFilter">
-                    <input type="text" v-model="filter_by" placeholder="Filter" @input="emitFilter" />
+            <div v-show="isOpen" class="dropdown-list bg-layer scrollbar">
+                <div class="filter input-group bg-layer" v-if="filter">
+                    <!-- <input type="text" v-model="filter_by" placeholder="Filter" @input="emitFilter" /> -->
+
+                    <InputText v-model="filter_by" placeholder="Filter" @input="emitFilter"/>
                 </div>
-                <slot name="options" class="dropdown-list" :selectOption="selectOption"
+                <slot name="options" class="dropdown-list bg-layer" :selectOption="selectOption"
                     :selectedOption="selectedOption">
                     <!-- This is fallback content in case we don t use slot-->
-                    <div v-for="(option, index) in filteredOptions" :key="index" class="menu-item"
+                    <div v-for="(option, index) in filteredOptions" :key="index" class="p-2 hover:bg-layer-light cursor-pointer bg-layer"
                         @click="selectOption(option)">
                         {{ option.label }}
                     </div>
@@ -29,6 +31,8 @@
 <script setup>
     import {ref, defineEmits, defineProps, reactive, computed, watch, onMounted, onUnmounted} from "vue";
     import {useUtils} from '@composables/utils.js'
+    import InputText from '@components/Input/text.vue'
+    import { Icon } from '@iconify/vue';
 
     const emit = defineEmits(["update:modelValue", "updateFilter", "change"]);
 
@@ -39,7 +43,7 @@
         default: { type: String, default: "Select an option" }, // The text displayed before choosing an option	
         all: { type: Boolean, default: false },					// Returns the index of the option
         icon: { type: String }, 								// Expects the icon name from header
-        includeFilter: { type: Boolean, default: false }, 		// Specifies if it should include filter
+        filter: { type: Boolean, default: false }, 		// Specifies if it should include filter
         value_key: { type: [String, Number, Boolean], default: 'value' } // Changes the emit value key {label: First, value_key: 1}
     });
 
@@ -98,7 +102,7 @@
             }
         }
 
-        if (props.includeFilter) {
+        if (props.filter) {
             emitFilter();
         }
     });
@@ -119,7 +123,6 @@
     position: relative;
     width: 100%;
     font-family: Arial, sans-serif;
-    color: grey;
     /* color: $text-secondary; */
     min-width: 200px;
 }
@@ -127,25 +130,25 @@
 .dropdown-header {
     display: flex;
     align-items: center;
-    background: transparent;
+    /* background: transparent; */
     padding: 0 10px;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     user-select: none;
-    color: #f3f3f380;
+    /* color: #f3f3f380; */
     font-size: 14px;
-    line-height: 40px;
+    line-height: 35px;
     gap: 5px;
 
 }
 
 .dropdown-header:hover {
-    background: #94979e29;
+    /* background: #94979e29; */
     color: #fff;
 }
 
 .dropdown-header.active {
-    background: #94979e29;
+    /* background: #94979e29; */
 }
 
 .dropdown-header .icon {
@@ -154,11 +157,10 @@
 
 .dropdown-list {
     position: absolute;
-    top: 120%;
+    top: 100%;
     left: 0;
     min-width: min-content;
     /* background-color: $bg-element; */
-    background-color: grey;
     border: 1px solid #272a31;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -171,10 +173,15 @@
     /* @include scrollBar(); */
 }
 
+.dropdown-list {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
 .filter {
     border: none;
     /* border-bottom: 1px solid $bg-element-border; */
-    border-bottom: 1px solid grey;
+    /* border-bottom: 1px solid grey; */
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }

@@ -24,11 +24,11 @@ class MesocycleController extends Controller
 
     public function create(): \Inertia\Response
     {
-        $muscle_groups = MuscleGroup::all();
+        $muscleGroups = MuscleGroup::pluck('name', 'id')->toArray();
         $exercises = Exercise::all();
 
         return Inertia::render('mesocycles/create', [
-            'muscle_groups' => $muscle_groups,
+            'muscleGroups' => $muscleGroups,
             'exercises' => $exercises
         ]);
     }

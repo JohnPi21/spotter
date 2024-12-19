@@ -1,23 +1,23 @@
 <template>
-    <div class="flex justify-between">
+    <div class="flex justify-between mb-4">
         <div class="flex flex-col">
             <InputText v-model="meso.name"/>
             <p class="text-secondary text-sm">Generated from Template</p>
         </div>
     </div>
 
-    <div class="flex gap-2">
-        <UiBox class="flex flex-col gap-2">
+    <div class="flex gap-2" >
+        <UiBox class="flex flex-col gap-2" v-for="(day, idx) in days" :key="idx">
             <div class="flex items-center justify-between gap-3">
                 <InputText v-model="day.label" />
-                <Icon icon="material-symbols-light:delete-outline" width="22px"/>
+                <Icon icon="material-symbols-light:delete-outline" width="22px" class="cursor-pointer hover:text-red-hover transition"/>
             </div>
-            <UiBox class="bg-layer-light">
+            <UiBox class="bg-layer-light flex flex-col gap-2" v-for="exercise in day.exercises">
                 <div class="flex flex-center justify-between">
-                    <div class="bg-orange opacity-50 px-2 rounded">Chest</div>
-                    <Icon icon="material-symbols-light:delete-outline" width="22px"/>
+                    <div class="bg-orange px-2 rounded">{{ exercise.muscleGroup }}</div>
+                    <Icon icon="material-symbols-light:delete-outline" width="22px" class="cursor-pointer hover:text-red-hover transition"/>
                 </div>
-                <InputDropdown :options="[{label: 'Test', value: 'test'}]"/>
+                <InputDropdown :options="[]" :filter="true"/>
             </UiBox>
         </UiBox>
     </div>
@@ -31,12 +31,12 @@
 
     const props = defineProps({
         exercises : Array,
-        muscle_groups : Array
+        muscleGroups : Object
     })
 
     onMounted(() => {
         console.log(props.exercises)
-        console.log(props.muscle_groups)
+        console.log(props.muscleGroups)
     })
 
 
@@ -50,38 +50,39 @@
 
     const days = reactive([
         {
-            label: 'Untitled', muscle_groups: [
-                {id: 1, name: 'Chest', exercise: {id: 1, name: 'Press'}},
-                {id: 2, name: 'Quads', exercise: {id: 2, name: 'Squat'}},
-                {id: 3, name: 'Back', exercise:  {id: 3, name: 'Rows'}},
+            label: 'Untitled', 
+            exercises: [
+                {id: 1, muscleGroup: 1, name: 'Dumbbell Press (Flat)'},
+                {id: 2, muscleGroup: 2, name: 'Smith Machine Squat (Feet Forward)'},
+                {id: 3, muscleGroup: 3,  name: 'Seated Cable Row'},
             ]
         },
         {
-            label: 'Untitled', muscle_groups: [
-                {id: 1, name: 'Chest', exercise: 1},
-                {id: 1, name: 'Chest', exercise: 1},
-                {id: 2, name: 'BAck', exercise: {id: 1, name: 'Rows'}},
+            label: 'Untitled',
+            exercises: [
+                {id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)'},
+                {id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)'},
+                {id: 3, muscleGroup: 'Back',  name: 'Seated Cable Row'},
             ]
         },
         {
-            label: 'Untitled', muscle_groups: [
-                {id: 1, name: 'Chest', exercise: 1},
-                {id: 1, name: 'Chest', exercise: 1},
-                {id: 2, name: 'BAck', exercise: {id: 1, name: 'Rows'}},
+            label: 'Untitled',
+            exercises: [
+                {id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)'},
+                {id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)'},
+                {id: 3, muscleGroup: 'Back',  name: 'Seated Cable Row'},
             ]
         },
     ])
 
-    // I can only let IDs here and the names to display will come from muscle_groups[id]
-    const day = ref({
-        label: 'Untitled', muscle_groups: [
-            {id: 1, name: 'Chest', exercise: 1},
-            {id: 1, name: 'Chest', exercise: 1},
-            {id: 2, name: 'BAck', exercise: {id: 1, name: 'Rows'}},
-        ]
+    // I can only let IDs here and the names to display will come from exercises[id]
+    const day_template = ref({
+            label: 'Untitled',
+            exercises: [
+                {id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)'},
+                {id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)'},
+                {id: 3, muscleGroup: 'Back',  name: 'Seated Cable Row'},
+            ]
     })
 
-    // const muscle_groups = ref([
-    //     {id: 1, name: 'Chest'} 
-    // ])
 </script>
