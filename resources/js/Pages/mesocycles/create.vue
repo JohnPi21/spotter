@@ -23,6 +23,7 @@
     </div>
 </template>
 <script setup>
+// Check task list spotter (firts one)
     import { ref, reactive, defineProps, onMounted } from 'vue';
     import InputText from '@components/Input/text.vue';
     import InputDropdown from "@components/Input/Dropdown.vue"
