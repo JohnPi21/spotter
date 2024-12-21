@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-    import {ref, defineEmits, defineProps, reactive, computed, watch, onMounted, onUnmounted} from "vue";
+    import {ref, defineEmits, reactive, computed, watch, onMounted, onUnmounted} from "vue";
     import {useUtils} from '@composables/utils.js'
     import InputText from '@components/Input/text.vue'
     import { Icon } from '@iconify/vue';

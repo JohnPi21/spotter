@@ -19,8 +19,17 @@
                 </div>
                 <InputDropdown :options="[]" :filter="true"/>
             </UiBox>
+
+            <div class="bg-input p-1 rounded flex items-center justify-center gap-1 border border-layer-border cursor-pointer hover:bg-layer transition">
+                <Icon icon="ic:baseline-plus" width="21px"/>
+                Add Exercise
+            </div>
         </UiBox>
+
     </div>
+    <!-- {{ exercises }} -->
+    <!-- {{ muscleGroups }} -->
+
 </template>
 <script setup>
 // Check task list spotter (firts one)
@@ -39,7 +48,6 @@
         console.log(props.exercises)
         console.log(props.muscleGroups)
     })
-
 
     const meso = ref({
         name : 'Untitled',
