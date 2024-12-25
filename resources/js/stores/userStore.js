@@ -12,3 +12,13 @@ export const useUserStore = defineStore('user', {
     }
 
 })
+
+// export const useUserStore = defineStore('user', () => {
+//     const user = ref(null);
+
+//     function setUser(userData){
+//         user.value = userData;
+//     }
+
+//     return {user, setUser}
+// })

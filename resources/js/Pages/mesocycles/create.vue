@@ -20,9 +20,9 @@
                 <InputDropdown :options="[]" :filter="true"/>
             </UiBox>
 
-            <div class="bg-input p-1 rounded flex items-center justify-center gap-1 border border-layer-border cursor-pointer hover:bg-layer transition">
+            <div class="bg-input p-1 rounded flex items-center justify-center gap-1 border border-layer-border cursor-pointer hover:bg-layer transition" @click="modalStore.openModal('MuscleGroups', props.muscleGroups)">
                 <Icon icon="ic:baseline-plus" width="21px"/>
-                Add Exercise
+                Add Muscle Group
             </div>
         </UiBox>
 
@@ -38,11 +38,14 @@
     import InputDropdown from "@components/Input/Dropdown.vue"
     import UiBox from '@components/Ui/Box.vue';
     import { Icon } from '@iconify/vue';
+    import { useModalStore } from '@stores/modalStore';
 
     const props = defineProps({
         exercises : Array,
         muscleGroups : Object
     })
+
+    const modalStore = useModalStore();
 
     onMounted(() => {
         console.log(props.exercises)

@@ -16,6 +16,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, './resources/js'),
             '@components': path.resolve(__dirname, './resources/js/Components'),
             '@composables': path.resolve(__dirname, './resources/js/Composables'),
+            '@stores': path.resolve(__dirname, './resources/js/stores'),
         }
     }
 });
