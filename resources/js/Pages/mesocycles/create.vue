@@ -101,17 +101,15 @@
         ]
     })
 
-    function openMuscleGroupModal(day_id) {
-        modalStore.openModal('MuscleGroups', props.muscleGroups, addMuscleGroup);
-        selected_day.value = day_id;
+    function openMuscleGroupModal(dayId) {
+        modalStore.openModal('MuscleGroups', props.muscleGroups, (selectedMuscleGroup) => {
+            addMuscleGroup(selectedMuscleGroup, dayId)
+        });
     }
 
     // @TODO: get muscle group from here and form an object to add based on the selected muscle group
-    function addMuscleGroup(muscleGroup) {
-        console.log(days);
-        console.log(days[selected_day.value]);
-        console.log(selected_day.value);
-        days[selected_day.value].exercises.push(day_template.value.exercises[0]);
+    function addMuscleGroup(selectedMuscleGroup, dayId) {
+        days[dayId].exercises.push(day_template.value.exercises[0]);
     }
 
 

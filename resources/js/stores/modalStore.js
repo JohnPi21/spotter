@@ -5,6 +5,10 @@ export const useModalStore = defineStore('modal', {
         currentModal: null,
         data: null,
         callback: null,
+
+        lastModal: null,
+        lastData: null,
+        lastCallback: null,
     }),
 
     actions: {
@@ -17,13 +21,16 @@ export const useModalStore = defineStore('modal', {
         closeModal(callback_param) {
             this.lastModal = this.currentModal;
             this.lastData = this.data;
-
-            this.currentModal = null;
-            this.data = null;
+            this.lastCallback = this.callback;
 
             if (typeof this.callback === 'function') {
                 this.callback(callback_param);
             }
+
+            this.currentModal = null;
+            this.data = null;
+            this.callback = null;
+
         }
     }
 })
