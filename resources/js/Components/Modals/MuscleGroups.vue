@@ -18,7 +18,6 @@
     const modalStore = useModalStore();
 
     const props = modalStore.data;
-    console.log(modalStore.data)
 
     const selected = ref(null);
 </script>
