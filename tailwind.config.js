@@ -15,6 +15,7 @@ export default {
 				'input': '#2A2A2A',        // Dark gray for input backgrounds
 				
 				// Border Colors
+				'main-border': '#0e0e0eb3',    // Soft border color for containers and sections
 				'layer-border': '#333333',    // Soft border color for containers and sections
 				'input-border': '#4E4E4E',    // Neutral gray for input borders
 				'input-border-focus': '#6B7280',    // Neutral gray for input borders
