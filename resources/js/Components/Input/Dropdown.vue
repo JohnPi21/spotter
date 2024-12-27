@@ -5,7 +5,8 @@
         </div>
 
         <div class="dropdown text-secondary" ref="inputDropdown">
-            <div class="dropdown-header bg-input border-input-border border active:bg-layer hover:bg-layer" @click="toggleDropdown" :class="{ active: isOpen }">
+            <div class="dropdown-header bg-input border-input-border border active:bg-layer hover:bg-layer"
+                @click="toggleDropdown" :class="{ active: isOpen }">
                 <Icon :icon="icon" width="25px" v-if="icon" />
                 {{ selectedOption.label }}
             </div>
@@ -13,13 +14,13 @@
                 <div class="filter input-group bg-layer" v-if="filter">
                     <!-- <input type="text" v-model="filter_by" placeholder="Filter" @input="emitFilter" /> -->
 
-                    <InputText v-model="filter_by" placeholder="Filter" @input="emitFilter"/>
+                    <InputText v-model="filter_by" placeholder="Filter" @input="emitFilter" />
                 </div>
                 <slot name="options" class="dropdown-list bg-layer" :selectOption="selectOption"
                     :selectedOption="selectedOption">
                     <!-- This is fallback content in case we don t use slot-->
-                    <div v-for="(option, index) in filteredOptions" :key="index" class="p-2 hover:bg-layer-light cursor-pointer bg-layer"
-                        @click="selectOption(option)">
+                    <div v-for="(option, index) in filteredOptions" :key="index"
+                        class="p-2 hover:bg-layer-light cursor-pointer bg-layer" @click="selectOption(option)">
                         {{ option.label }}
                     </div>
                 </slot>
@@ -29,8 +30,8 @@
 </template>
 
 <script setup>
-    import {ref, defineEmits, reactive, computed, watch, onMounted, onUnmounted} from "vue";
-    import {useUtils} from '@composables/utils.js'
+    import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
+    import { useUtils } from '@composables/utils.js'
     import InputText from '@components/Input/text.vue'
     import { Icon } from '@iconify/vue';
 

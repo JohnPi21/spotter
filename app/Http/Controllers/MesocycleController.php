@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MesocycleController extends Controller
 {
-    public function index(): \Inertia\Response 
+    public function index(): \Inertia\Response
     {
         return Inertia::render('mesocycles/index');
     }
@@ -26,10 +26,16 @@ class MesocycleController extends Controller
     {
         $muscleGroups = MuscleGroup::pluck('name', 'id')->toArray();
         $exercises = Exercise::all();
+        $exerciseDropdown = [];
+
+        foreach ($exercises as $option) {
+            $exerciseDropdown[$option->muscle_group_id][] = ['value' => $option->id, 'label' => $option->name];
+        }
 
         return Inertia::render('mesocycles/create', [
             'muscleGroups' => $muscleGroups,
-            'exercises' => $exercises
+            'exercises' => $exercises,
+            'exerciseDropdown' => $exerciseDropdown,
         ]);
     }
 }

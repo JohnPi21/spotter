@@ -15,11 +15,12 @@
             </div>
             <UiBox class="bg-layer-light flex flex-col gap-2" v-for="exercise in day.exercises">
                 <div class="flex flex-center justify-between">
-                    <div class="bg-orange px-2 rounded">{{ exercise.muscleGroup }}</div>
+                    <div class="bg-orange px-2 rounded">{{ getMuscleGroup(exercise.muscleGroup) }}</div>
                     <Icon icon="material-symbols-light:delete-outline" width="22px"
                         class="cursor-pointer hover:text-red-hover transition" />
                 </div>
-                <InputDropdown :options="[]" :filter="true" />
+                <InputDropdown :options="exerciseDropdown[exercise.muscleGroup]" :filter="true" />
+                <!-- {{ exerciseDropdown[exercise.muscleGroup] }} -->
             </UiBox>
 
             <div class="bg-input p-1 rounded flex items-center justify-center gap-1 border border-layer-border cursor-pointer hover:bg-layer transition"
@@ -45,15 +46,16 @@
 
     const props = defineProps({
         exercises: Array,
-        muscleGroups: Object
+        muscleGroups: Object,
+        exerciseDropdown: Object,
     })
 
     const modalStore = useModalStore();
-    const selected_day = ref(null);
 
     onMounted(() => {
         console.log(props.exercises)
         console.log(props.muscleGroups)
+        console.log(props.exerciseDropdown)
     })
 
     const meso = ref({
@@ -61,32 +63,40 @@
         days: [
             { label: 'Untitled', }
         ]
-
     })
+
+    function getExercise(id) {
+        return props.exercises[id]
+    }
+
+    function getMuscleGroup(id) {
+        return props.muscleGroups[id]
+    }
 
     const days = reactive([
         {
             label: 'Untitled',
             exercises: [
-                { id: 1, muscleGroup: 1, name: 'Dumbbell Press (Flat)' },
-                { id: 2, muscleGroup: 2, name: 'Smith Machine Squat (Feet Forward)' },
-                { id: 3, muscleGroup: 3, name: 'Seated Cable Row' },
+                { muscleGroup: 1, exerciseId: 22, },
+                { muscleGroup: 2, exerciseId: 183, },
+                { muscleGroup: 3, exerciseId: 56, },
+                { muscleGroup: 3, exerciseId: null, },
             ]
         },
         {
             label: 'Untitled',
             exercises: [
-                { id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)' },
-                { id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)' },
-                { id: 3, muscleGroup: 'Back', name: 'Seated Cable Row' },
+                { muscleGroup: 1, exerciseId: 22, },
+                { muscleGroup: 2, exerciseId: 183, },
+                { muscleGroup: 3, exerciseId: 56, },
             ]
         },
         {
             label: 'Untitled',
             exercises: [
-                { id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)' },
-                { id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)' },
-                { id: 3, muscleGroup: 'Back', name: 'Seated Cable Row' },
+                { muscleGroup: 1, exerciseId: 22, },
+                { muscleGroup: 2, exerciseId: 183, },
+                { muscleGroup: 3, exerciseId: 56, },
             ]
         },
     ])
@@ -94,11 +104,7 @@
     // I can only let IDs here and the names to display will come from exercises[id]
     const day_template = ref({
         label: 'Untitled',
-        exercises: [
-            { id: 1, muscleGroup: 'Chest', name: 'Dumbbell Press (Flat)' },
-            { id: 2, muscleGroup: 'Quads', name: 'Smith Machine Squat (Feet Forward)' },
-            { id: 3, muscleGroup: 'Back', name: 'Seated Cable Row' },
-        ]
+        exercises: []
     })
 
     function openMuscleGroupModal(dayId) {
@@ -109,8 +115,7 @@
 
     // @TODO: get muscle group from here and form an object to add based on the selected muscle group
     function addMuscleGroup(selectedMuscleGroup, dayId) {
-        days[dayId].exercises.push(day_template.value.exercises[0]);
+        days[dayId].exercises.push({ muscleGroup: selectedMuscleGroup, exerciseId: null });
     }
-
 
 </script>
