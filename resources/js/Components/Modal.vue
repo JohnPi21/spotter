@@ -8,17 +8,17 @@
 
 </template>
 <script setup>
-import UiBox from '@components/Ui/Box.vue';
-import { useModalStore } from '@stores/modalStore';
+    import UiBox from '@components/Ui/Box.vue';
+    import { useModalStore } from '@stores/modalStore';
 
-import MuscleGroups from '@components/Modals/MuscleGroups.vue';
-import Exercises from '@components/Modals/Exercises.vue';
+    import MuscleGroups from '@components/Modals/MuscleGroups.vue';
+    import Exercises from '@components/Modals/Exercises.vue';
 
-const modalStore = useModalStore();
+    const modalStore = useModalStore();
 
-const modals = {
-    "MuscleGroups"  : MuscleGroups,
-    "Exercises"     : Exercises
-}
+    const modals = {
+        "MuscleGroups": MuscleGroups,
+        "Exercises": Exercises
+    }
 
 </script>

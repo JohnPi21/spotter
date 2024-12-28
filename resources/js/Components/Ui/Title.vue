@@ -3,21 +3,25 @@
         <h1 class="text-2xl font-extrabold tracking-tight leading-tight">{{ title }}</h1>
 
         <Link :href="props.url" v-if="url">
-            <UiButton><Icon :icon="icon" />{{ button }}</UiButton>
+        <ButtonPrimary>
+            <Icon :icon="icon" />{{ button }}
+        </ButtonPrimary>
         </Link>
 
-        <UiButton v-else><Icon :icon="icon" />{{ button }}</UiButton>
+        <ButtonPrimary v-else>
+            <Icon :icon="icon" />{{ button }}
+        </ButtonPrimary>
     </div>
 </template>
 <script setup>
-    import UiButton from '@components/Ui/Button.vue';
+    import ButtonPrimary from '@components/Button/Primary.vue';
     import { Icon } from '@iconify/vue';
-    import {Link } from '@inertiajs/vue3';
+    import { Link } from '@inertiajs/vue3';
 
     const props = defineProps({
         title: String,
         button: String,
         icon: String,
-        url: {type: String, default: null}
+        url: { type: String, default: null }
     })
 </script>

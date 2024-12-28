@@ -13,7 +13,7 @@ export default {
 				'layer': '#1A1A1A',        // Slightly lighter for content sections
 				'layer-light': '#242424',  // Lightest layer, for subtle distinction
 				'input': '#2A2A2A',        // Dark gray for input backgrounds
-				
+
 				// Border Colors
 				'main-border': '#0e0e0eb3',    // Soft border color for containers and sections
 				'layer-border': '#333333',    // Soft border color for containers and sections
@@ -56,6 +56,7 @@ export default {
 				'text-orange': '#FB923C',     // Tailwind Orange 500 for text
 				'border-orange': '#F97316',   // Tailwind Orange 600 for borders
 				'border-orange-hover': '#EA580C', // Hover border color for orange button
+				'orange-300': 'rgb(249 115 22 / 30%)',
 			},
 		},
 	},

@@ -5,7 +5,7 @@
         </div>
 
         <div class="dropdown text-secondary" ref="inputDropdown">
-            <div class="dropdown-header bg-input border-input-border border active:bg-layer hover:bg-layer"
+            <div class="dropdown-header bg-input border border-layer active:bg-layer-light hover:bg-layer-light transition"
                 @click="toggleDropdown" :class="{ active: isOpen }">
                 <Icon :icon="icon" width="25px" v-if="icon" />
                 {{ selectedOption.label }}
@@ -20,7 +20,8 @@
                     :selectedOption="selectedOption">
                     <!-- This is fallback content in case we don t use slot-->
                     <div v-for="(option, index) in filteredOptions" :key="index"
-                        class="p-2 hover:bg-layer-light cursor-pointer bg-layer" @click="selectOption(option)">
+                        class="p-2 hover:bg-layer-light hover:text-primary cursor-pointer bg-layer"
+                        @click="selectOption(option)">
                         {{ option.label }}
                     </div>
                 </slot>

@@ -18,19 +18,23 @@ export const useModalStore = defineStore('modal', {
             this.callback = callback;
         },
 
-        closeModal(callback_param) {
+        closeModal() {
             this.lastModal = this.currentModal;
             this.lastData = this.data;
             this.lastCallback = this.callback;
 
-            if (typeof this.callback === 'function') {
-                this.callback(callback_param);
-            }
-
             this.currentModal = null;
             this.data = null;
             this.callback = null;
+        },
 
+        confirmClose(callbackParam) {
+            if (typeof this.callback === 'function') {
+                this.callback(callbackParam);
+            }
+
+            this.closeModal();
         }
+
     }
 })

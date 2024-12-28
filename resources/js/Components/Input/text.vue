@@ -26,7 +26,7 @@
     import { ref } from 'vue';
     import { watch } from 'vue';
     import { onMounted } from 'vue';
-    import {Icon} from '@iconify/vue';
+    import { Icon } from '@iconify/vue';
     import InputWrapper from '@components/Input/Wrapper.vue'
 
     const props = defineProps({
