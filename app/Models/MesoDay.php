@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class MesoDay extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
 }

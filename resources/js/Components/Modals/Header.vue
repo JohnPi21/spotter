@@ -3,7 +3,8 @@
         <div class="flex justify-between mb-2">
             <h3>{{ props.title }}</h3>
             <button
-                class="pointer bg-layer-light opacity-70 border border-layer-border rounded flex items-center justify-center aspect-square w-6 transition hover:opacity-100">
+                class="pointer bg-layer-light opacity-70 border border-layer-border rounded flex items-center justify-center aspect-square w-6 transition hover:opacity-100"
+                @click="modalStore.closeModal()">
                 <Icon icon="material-symbols-light:close" width="18px" class="" />
             </button>
         </div>
@@ -11,8 +12,11 @@
 </template>
 <script setup>
     import { Icon } from '@iconify/vue';
+    import { useModalStore } from '@stores/modalStore.js';
 
     const props = defineProps({
         title: ''
     })
+
+    const modalStore = useModalStore();
 </script>

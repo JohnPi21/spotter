@@ -4,7 +4,7 @@
             <InputText v-model="meso.name" />
             <p class="text-secondary text-sm">Generated from Template</p>
         </div>
-        <ButtonPrimary>Create Meso</ButtonPrimary>
+        <ButtonPrimary @click="submit">Create Meso</ButtonPrimary>
     </div>
 
     <div class="flex gap-2 flex-wrap">
@@ -46,6 +46,7 @@
     import ButtonSecondary from '@components/Button/Secondary.vue';
     import { Icon } from '@iconify/vue';
     import { useModalStore } from '@stores/modalStore';
+    import { useForm } from '@inertiajs/vue3';
 
     const props = defineProps({
         exercises: Array,
@@ -130,5 +131,46 @@
             { muscleGroup: selectedMuscleGroup, exerciseId: null }
         );
     }
+
+    // Dummy data
+    const requestData = {
+        meso: {
+            name: 'Hypertrophy Plan',
+            unit: 'kg',
+            weeks: 4,
+            status: 'active', // Example status
+        },
+        days: [
+            {
+                label: 'Day 1',
+                exercises: [
+                    { muscleGroup: 1, exerviseId: 101 },
+                    { muscleGroup: 2, exerviseId: 102 },
+                ],
+            },
+            {
+                label: 'Day 2',
+                exercises: [
+                    { muscleGroup: 3, exerviseId: 103 },
+                    { muscleGroup: 4, exerviseId: 104 },
+                ],
+            },
+            {
+                label: 'Day 3',
+                exercises: [
+                    { muscleGroup: 5, exerviseId: 105 },
+                    { muscleGroup: 6, exerviseId: 106 },
+                ],
+            },
+        ],
+    };
+
+    const mesoForm = useForm(requestData);
+
+    function submit() {
+        mesoForm.post('/mesocycles')
+    }
+
+
 
 </script>
