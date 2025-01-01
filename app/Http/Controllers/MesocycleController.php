@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\User;
 use App\Models\Exercise;
@@ -16,7 +17,12 @@ class MesocycleController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return Inertia::render('mesocycles/index');
+
+        $mesocycles = Mesocycle::all();
+
+        return Inertia::render('mesocycles/index', [
+            'mesocycles' => $mesocycles
+        ]);
     }
 
     public function show(int $id): \Inertia\Response
@@ -43,6 +49,7 @@ class MesocycleController extends Controller
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
+
         $muscleGroups = MuscleGroup::pluck('id')->toArray();
 
         $validated = $request->validate([
@@ -53,7 +60,7 @@ class MesocycleController extends Controller
             'days.*.label'                      => ['string'],
             'days.*.exercises'                  => ['array'],
             'days.*.exercises.*.muscleGroup'    => ['integer', 'min:1', Rule::in($muscleGroups)],
-            'days.*.exercises.*.exerviseId'     => ['integer', 'min:1', 'exists:exercises,id']
+            'days.*.exercises.*.exerciseId'     => ['integer', 'min:1', 'exists:exercises,id']
         ]);
 
         $mesocycle = new Mesocycle();
@@ -69,18 +76,28 @@ class MesocycleController extends Controller
 
         $mesocycle->save();
 
-        foreach ($mesocycle['weeks'] as $week) {
+        for ($i = 1; $i <= $mesocycle['weeks']; $i++) {
 
             foreach ($validated['days'] as $idx => $day) {
-                MesoDay::create([
+                $createdDay = MesoDay::create([
                     "mesocycle_id" => $mesocycle['id'],
+                    "week"         => $i,
                     "label"        => $day['label'],
                     "position"     => $idx,
                     "status"       => 0,
                 ]);
+
+                foreach ($day['exercises'] as $position => $exercise) {
+                    DayExercise::create([
+                        "meso_day_id" => $createdDay->id,
+                        "exercise_id" => $exercise['exerciseId'],
+                        "position"    => (int)$position,
+                    ]);
+                }
             }
         }
 
-        return to_route('mesoocucles/index');
+
+        return to_route('mesocycles');
     }
 }

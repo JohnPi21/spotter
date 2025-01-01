@@ -11,18 +11,17 @@ Route::get('/', function () {
 
 Route::controller(MesocycleController::class)->group(function () {
 
-    Route::get('/mesocycles', 'index');
+    Route::get('/mesocycles', 'index')->name('mesocycles');
 
-    Route::get('/mesocycles/create', 'create');
+    Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
 
     Route::post('/mesocycles', 'store');
 
     Route::get('/mesocycles/{id}', 'show');
 
-    Route::get('mesocycles/{id}/edit', 'edit');
+    Route::get('mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
 
     Route::put('mesocycles/{id}', 'update');
 
     Route::delete('mesocycles/{id}', 'destroy');
-
 });

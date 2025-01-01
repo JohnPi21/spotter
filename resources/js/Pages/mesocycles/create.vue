@@ -144,22 +144,22 @@
             {
                 label: 'Day 1',
                 exercises: [
-                    { muscleGroup: 1, exerviseId: 101 },
-                    { muscleGroup: 2, exerviseId: 102 },
+                    { muscleGroup: 1, exerciseId: 101 },
+                    { muscleGroup: 2, exerciseId: 102 },
                 ],
             },
             {
                 label: 'Day 2',
                 exercises: [
-                    { muscleGroup: 3, exerviseId: 103 },
-                    { muscleGroup: 4, exerviseId: 104 },
+                    { muscleGroup: 3, exerciseId: 103 },
+                    { muscleGroup: 4, exerciseId: 104 },
                 ],
             },
             {
                 label: 'Day 3',
                 exercises: [
-                    { muscleGroup: 5, exerviseId: 105 },
-                    { muscleGroup: 6, exerviseId: 106 },
+                    { muscleGroup: 5, exerciseId: 105 },
+                    { muscleGroup: 6, exerciseId: 106 },
                 ],
             },
         ],

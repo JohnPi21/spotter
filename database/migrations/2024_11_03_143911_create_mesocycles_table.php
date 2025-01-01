@@ -22,9 +22,9 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->json('notes')->nullable();
             $table->unsignedTinyInteger('status');
-            $table->foreignIdFor(MesoTemplate::class);
-            $table->timestamp('started_at');
-            $table->timestamp('finished_at');
+            $table->foreignIdFor(MesoTemplate::class)->nullable();
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
