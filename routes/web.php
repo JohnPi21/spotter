@@ -17,7 +17,7 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::post('/mesocycles', 'store');
 
-    Route::get('/mesocycles/{id}', 'show');
+    Route::get('/mesocycles/{mesocycle}', 'show');
 
     Route::get('mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
 

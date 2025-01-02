@@ -3,7 +3,7 @@
     <UiBox>
         <ul>
             <li v-for="(meso, idx) in mesocycles" :key="idx">
-                <Link href="mesocycles/show">
+                <Link :href="`mesocycles/${meso.id}`">
                 <div class="flex justify-between items-center">
                     <div class="flex flex-col gap-1">
                         <h3>{{ meso.name }}</h3>
@@ -38,12 +38,7 @@
         mesocycles: Array
     })
 
-    // const mesocycles = ref([
-    //     {name: 'Superman Workout', duration: '6 weeks', frequency: '3 Days / Week'},
-    //     {name: 'Spiderman Workout', duration: '6 weeks', frequency: '3 Days / Week'},
-    //     {name: 'Ironman Workout', duration: '6 weeks', frequency: '3 Days / Week'},
-    //     {name: 'Hilk Workout', duration: '6 weeks', frequency: '3 Days / Week'},
-    // ]);
+    console.log(props.mesocycles)
 </script>
 
 <style scoped></style>

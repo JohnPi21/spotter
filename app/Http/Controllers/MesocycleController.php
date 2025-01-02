@@ -17,7 +17,6 @@ class MesocycleController extends Controller
 {
     public function index(): \Inertia\Response
     {
-
         $mesocycles = Mesocycle::all();
 
         return Inertia::render('mesocycles/index', [
@@ -25,9 +24,10 @@ class MesocycleController extends Controller
         ]);
     }
 
-    public function show(int $id): \Inertia\Response
+    public function show(Mesocycle $mesocycle): \Inertia\Response
     {
-        return Inertia::render('mesocycles/show', ['id' => $id]);
+        // dd($mesocycle);
+        return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
 
     public function create(): \Inertia\Response
