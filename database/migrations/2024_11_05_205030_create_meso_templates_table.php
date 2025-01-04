@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('sex');
             $table->foreignIdFor(User::class)->nullable();
-            $table->foreignIdFor(Mesocycle::class);
             $table->tinyInteger('frequency');
             $table->timestamps();
         });

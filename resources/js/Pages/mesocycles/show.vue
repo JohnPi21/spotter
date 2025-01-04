@@ -126,50 +126,45 @@
                     <input type="checkbox" class="mr-2">
                 </div>
             </div>
-
-            <!-- <div class="flex items-center justify-between gap-5">
-                <div class="flex-grow flex-1"></div>
-                <div class="flex-grow flex flex-2 justify-center ">
-                    <p>Weight</p>
-                </div>
-                <div class="flex-grow flex flex-2 justify-center ">
-                    <p>REPS</p>
-                </div>
-                <div class="flex-grow flex flex-1 justify-end">LOG</div>
-            </div>
-
-            <div class="flex items-center justify-between gap-5" v-for="i in 5">
-                <div class="flex-grow flex-1 justify-self-start">
-                    <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
-                </div>
-                <div class="flex-grow flex justify-center flex-2 ">
-                    <InputText v-model="val" />
-                </div>
-                <div class="flex-grow flex justify-center flex-2 ">
-                    <InputText v-model="val" />
-                </div>
-                <div class="flex-grow flex-1 flex justify-end">
-                    <input type="checkbox" class="mr-2">
-                </div>
-            </div> -->
         </UiBox>
-
-
     </div>
 </template>
 <script setup>
     import { ref, reactive } from 'vue';
+    import { Icon } from '@iconify/vue'
     import UiBox from '@components/Ui/Box.vue';
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
-    import { Icon } from '@iconify/vue'
     import InputText from '@components/Input/text.vue'
 
-    const props = defineProps({
-        mesocycle: Object
-    })
+    // const props = defineProps({
+    //     mesocycle: Object
+    // })
+
+    const mesocycle = {
+        id: 1,
+        name: "Hypertrophy Plan",
+        unit: "kg",
+        days: 3,
+        day: {
+            label: 'Day 1',
+            exercises: [
+                { muscleGroup: 1, exerciseId: 22, },
+                { muscleGroup: 2, exerciseId: 70, },
+                { muscleGroup: 3, exerciseId: 87, },
+                { muscleGroup: 3, exerciseId: null, },
+            ]
+        },
+        weeks: 4,
+        user_id: 1,
+        notes: null,
+        status: 1,
+        meso_template_id: null,
+        started_at: null,
+        finished_at: null,
+        deleted_at: null,
+        created_at: "2025-01-01 14:46:32",
+        updated_at: "2025-01-01 14:46:32"
+    };
 
     const val = ref();
-
-
-
 </script>

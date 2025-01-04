@@ -26,7 +26,8 @@ class MesocycleController extends Controller
 
     public function show(Mesocycle $mesocycle): \Inertia\Response
     {
-        // dd($mesocycle);
+        // dd(Exercise::first());
+        // Mesocycle => [day => [exercises => [name => '', muscle_group_name => '']]]
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
 
