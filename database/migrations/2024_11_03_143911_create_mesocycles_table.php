@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('name', 64);
             $table->string('unit', 4);
-            $table->unsignedTinyInteger('days');
-            $table->unsignedTinyInteger('weeks');
+            $table->unsignedTinyInteger('days_per_week');
+            $table->unsignedTinyInteger('weeks_duration');
             $table->foreignIdFor(User::class);
             $table->json('notes')->nullable();
             $table->unsignedTinyInteger('status');

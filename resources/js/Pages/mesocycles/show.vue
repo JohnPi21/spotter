@@ -130,15 +130,19 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive } from 'vue';
+    import { ref, reactive, onMounted } from 'vue';
     import { Icon } from '@iconify/vue'
     import UiBox from '@components/Ui/Box.vue';
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
     import InputText from '@components/Input/text.vue'
 
-    // const props = defineProps({
-    //     mesocycle: Object
-    // })
+    const props = defineProps({
+        mesocycle: Object
+    })
+
+    onMounted(() => {
+        console.log(props.mesocycle)
+    })
 
     const mesocycle = {
         id: 1,

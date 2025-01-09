@@ -3,7 +3,7 @@
     <UiBox>
         <ul>
             <li v-for="(meso, idx) in mesocycles" :key="idx">
-                <Link :href="`mesocycles/${meso.id}`">
+                <Link :href="`mesocycles/${meso.id}/day/1`">
                 <div class="flex justify-between items-center">
                     <div class="flex flex-col gap-1">
                         <h3>{{ meso.name }}</h3>

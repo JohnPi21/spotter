@@ -19,9 +19,11 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::get('/mesocycles/{mesocycle}', 'show');
 
-    Route::get('mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
+    Route::get('/mesocycles/{mesocycle}/day/{dayID}', 'getDay');
 
-    Route::put('mesocycles/{id}', 'update');
+    Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
 
-    Route::delete('mesocycles/{id}', 'destroy');
+    Route::put('/mesocycles/{id}', 'update');
+
+    Route::delete('/mesocycles/{id}', 'destroy');
 });

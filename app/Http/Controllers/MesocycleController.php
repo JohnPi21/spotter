@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\DayExercise;
 use App\Models\Mesocycle;
+use App\Models\MesoDay;
 use App\Models\User;
 use App\Models\Exercise;
-use App\Models\MesoDay;
 use App\Models\MuscleGroup;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,10 +26,13 @@ class MesocycleController extends Controller
 
     public function show(Mesocycle $mesocycle): \Inertia\Response
     {
-        // dd(Exercise::first());
-        // Mesocycle => [day => [exercises => [name => '', muscle_group_name => '']]]
+        $mesocycle = Mesocycle::with([
+            'days.exercises' => ['muscleGroup', 'sets']
+        ])->find($mesocycle->id);
+
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
+
 
     public function create(): \Inertia\Response
     {
@@ -100,5 +103,16 @@ class MesocycleController extends Controller
 
 
         return to_route('mesocycles');
+    }
+
+    public function getDay(Mesocycle $mesocycle, $dayID): \Inertia\Response
+    {
+        $day = MesoDay::with(['exercises' => ['sets', 'muscleGroup']])->findOrFail($dayID);
+
+        $mesocycle->setRelation('day', $day);
+
+        $mesocycle->unsetRelation('days');
+
+        return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
 }

@@ -10,7 +10,7 @@ class Mesocycle extends Model
 {
     use HasFactory;
 
-    public function day(): HasMany
+    public function days(): HasMany
     {
         return $this->hasMany(MesoDay::class);
     }
