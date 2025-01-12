@@ -56,7 +56,7 @@ export default {
 				'text-orange': '#FB923C',     // Tailwind Orange 500 for text
 				'border-orange': '#F97316',   // Tailwind Orange 600 for borders
 				'border-orange-hover': '#EA580C', // Hover border color for orange button
-				'orange-300': 'rgb(249 115 22 / 30%)',
+				'orange-700': 'rgb(249 115 22 / 70%)',
 			},
 		},
 	},

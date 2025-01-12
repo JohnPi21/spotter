@@ -6,7 +6,7 @@
 
         <div class="dropdown text-secondary" ref="inputDropdown">
             <div class="dropdown-header bg-input border border-layer active:bg-layer-light hover:bg-layer-light transition"
-                @click="toggleDropdown" :class="{ active: isOpen }">
+                @click="toggleDropdown" :class="{ active: isOpen, selected : selectedOption.value }">
                 <Icon :icon="icon" width="25px" v-if="icon" />
                 {{ selectedOption.label }}
             </div>
@@ -149,8 +149,8 @@
     color: #fff;
 }
 
-.dropdown-header.active {
-    /* background: #94979e29; */
+.dropdown-header.selected {
+    @apply bg-layer; 
 }
 
 .dropdown-header .icon {

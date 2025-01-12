@@ -3,7 +3,7 @@
         <UiBox class="flex justify-between items-center">
             <div class="flex flex-col">
                 <p class="text-secondary text-sm">{{ mesocycle.name }}</p>
-                <h3>WEEK 1 DAY 1 First Day Name</h3>
+                <h3>WEEK {{ day.week }} DAY {{ day.order }}: {{ day.label }} </h3>
             </div>
             <div class="flex align-end items-center gap-3">
                 <Icon icon="quill:calendar" width="18px" />
@@ -57,15 +57,74 @@
             </div>
         </UiBox>
 
-        <!-- <UiBox v-for="(exercise, idx) in day" :key="idx">
+        <UiBox class="flex flex-col gap-2" v-for="(exercise, exercise_idx) in day.exercises">
             <div class="flex items-center justify-between">
-                <div class="bg-orange-300 px-2 rounded">{{ getMuscleGroup(exercise.muscleGroup) }}</div>
-            </div>
-        </UiBox> -->
+                <div class="bg-orange-700 px-2 rounded">{{ exercise.muscle_group.name }}</div>
 
-        <UiBox class="flex flex-col gap-2" v-for="e in 3">
+                <div class="flex align-end items-center gap-4">
+                    <Icon icon="line-md:youtube" width="20px" />
+                    <div class="relative">
+                        <div class="hover:cursor-pointer">
+                            <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                        </div>
+                        <UiDropdownMenu :idx="exercise_idx" class="min-w-40">
+                            <li>
+                                <Icon icon="icon-park-outline:write" /> New Note
+                            </li>
+                            <li>
+                                <Icon icon="mdi:arrow-up" /> Move Up
+                            </li>
+                            <li>
+                                <Icon icon="mdi:arrow-down" /> Move Down
+                            </li>
+                            <li>
+                                <Icon icon="ph:swap" /> Replace
+                            </li>
+                            <li>
+                                <Icon icon="material-symbols:add" /> Add Set
+                            </li>
+                            <li>
+                                <Icon icon="ix:skip" /> Skip
+                            </li>
+                            <li class="!text-red">
+                                <Icon icon="material-symbols:delete-outline" /> Delete
+                            </li>
+                        </UiDropdownMenu>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col">
+                <h4>{{ exercise.name }}</h4>
+                <p class="text-secondary text-sm">{{exercise.exercise_type}}</p>
+            </div>
+
+            <div class="grid grid-cols-6 gap-5">
+                <div></div>
+                <div class="col-span-2 text-center">WEIGHT</div>
+                <div class="col-span-2 text-center">REPS</div>
+                <div class="justify-self-end">LOG</div>
+            </div>
+
+            <div class="grid grid-cols-6 gap-5" v-for="set in exercise.sets">
+                <div class="flex items-center justify-start">
+                    <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                </div>
+                <div class="col-span-2">
+                    <InputText v-model="val" />
+                </div>
+                <div class="col-span-2">
+                    <InputText v-model="val" />
+                </div>
+                <div class="flex items-center justify-end">
+                    <input type="checkbox" class="mr-2">
+                </div>
+            </div>
+        </UiBox>
+
+        <!-- <UiBox class="flex flex-col gap-2" v-for="e in 3">
             <div class="flex items-center justify-between">
-                <div class="bg-orange-300 px-2 rounded">Chest</div>
+                <div class="bg-orange-700 px-2 rounded">Chest</div>
 
                 <div class="flex align-end items-center gap-4">
                     <Icon icon="line-md:youtube" width="20px" />
@@ -126,7 +185,7 @@
                     <input type="checkbox" class="mr-2">
                 </div>
             </div>
-        </UiBox>
+        </UiBox> -->
     </div>
 </template>
 <script setup>
@@ -139,6 +198,8 @@
     const props = defineProps({
         mesocycle: Object
     })
+
+    const day = ref(props.mesocycle.day);
 
     onMounted(() => {
         console.log(props.mesocycle)

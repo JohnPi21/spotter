@@ -1,6 +1,6 @@
 <template>
     <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" url="/mesocycles/create" />
-    <UiBox>
+    <UiBox v-if="mesocycles.length > 0">
         <ul>
             <li v-for="(meso, idx) in mesocycles" :key="idx">
                 <Link :href="`mesocycles/${meso.id}/day/1`">
@@ -25,6 +25,7 @@
             </li>
         </ul>
     </UiBox>
+    <h2 class="text-xl text-center pt-3" v-else>No Mesocycles Created.</h2>
 </template>
 
 <script setup>

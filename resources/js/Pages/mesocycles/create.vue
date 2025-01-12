@@ -7,6 +7,11 @@
         <ButtonPrimary @click="submit">Create Meso</ButtonPrimary>
     </div>
 
+    <UiBox v-if="errors && errors.length > 0">
+        <ul class="flex flex-col">
+            <li v-for="(error, field) in errors">{{ field }} : {{ error }}</li>
+        </ul>
+    </UiBox>
     <div class="flex gap-2 flex-wrap">
         <UiBox class="flex flex-col gap-2 h-fit" v-for="(day, dayIdx) in days" :key="dayIdx">
             <div class="flex items-center justify-between gap-3">
@@ -16,11 +21,11 @@
             </div>
             <UiBox class="bg-layer-light flex flex-col gap-2" v-for="(exercise, exerciseIdx) in day.exercises">
                 <div class="flex flex-center justify-between">
-                    <div class="bg-orange-300 px-2 rounded">{{ getMuscleGroup(exercise.muscleGroup) }}</div>
+                    <div class="bg-orange-700 px-2 rounded">{{ getMuscleGroup(exercise.muscleGroup) }}</div>
                     <Icon icon="material-symbols-light:delete-outline" width="22px"
                         class="cursor-pointer hover:text-red transition" @click="removeExercise(dayIdx, exerciseIdx)" />
                 </div>
-                <InputDropdown :options="exerciseDropdown[exercise.muscleGroup]" :selected="exercise.exerciseId"
+                <InputDropdown :options="exerciseDropdown[exercise.muscleGroup]" v-model="exercise.exerciseId" :selected="exercise.exerciseId"
                     :filter="true" />
             </UiBox>
 
@@ -52,62 +57,26 @@
         exercises: Array,
         muscleGroups: Object,
         exerciseDropdown: Object,
+        errors: Object
     })
 
     const modalStore = useModalStore();
 
-    onMounted(() => {
-        console.log(props.exercises)
-        console.log(props.muscleGroups)
-        console.log(props.exerciseDropdown)
-    })
-
     const meso = ref({
-        name: 'Untitled',
-        days: [
-            { label: 'Untitled', }
-        ]
+        name: 'Untitled Meso',
+        unit: 'kg',
+        weeks_duration: 4
     })
 
-    function getExercise(id) {
-        return props.exercises[id]
-    }
+    const days = reactive([])
 
     function getMuscleGroup(id) {
         return props.muscleGroups[id]
     }
 
-    const days = reactive([
-        {
-            label: 'Untitled',
-            exercises: [
-                { muscleGroup: 1, exerciseId: 22, },
-                { muscleGroup: 2, exerciseId: 70, },
-                { muscleGroup: 3, exerciseId: 87, },
-                { muscleGroup: 3, exerciseId: null, },
-            ]
-        },
-        {
-            label: 'Untitled',
-            exercises: [
-                { muscleGroup: 1, exerciseId: 22, },
-                { muscleGroup: 2, exerciseId: 70, },
-                { muscleGroup: 3, exerciseId: 87, },
-            ]
-        },
-        {
-            label: 'Untitled',
-            exercises: [
-                { muscleGroup: 1, exerciseId: 22, },
-                { muscleGroup: 2, exerciseId: 70, },
-                { muscleGroup: 3, exerciseId: 87, },
-            ]
-        },
-    ])
-
     function addDay() {
         days.push({
-            label: 'Untitled',
+            label: 'Day ' + (parseInt(days.length) + 1),
             exercises: []
         })
     }
@@ -132,45 +101,10 @@
         );
     }
 
-    // Dummy data
-    const requestData = {
-        meso: {
-            name: 'Hypertrophy Plan',
-            unit: 'kg',
-            weeks: 4,
-            status: 'active', // Example status
-        },
-        days: [
-            {
-                label: 'Day 1',
-                exercises: [
-                    { muscleGroup: 1, exerciseId: 101 },
-                    { muscleGroup: 2, exerciseId: 102 },
-                ],
-            },
-            {
-                label: 'Day 2',
-                exercises: [
-                    { muscleGroup: 3, exerciseId: 103 },
-                    { muscleGroup: 4, exerciseId: 104 },
-                ],
-            },
-            {
-                label: 'Day 3',
-                exercises: [
-                    { muscleGroup: 5, exerciseId: 105 },
-                    { muscleGroup: 6, exerciseId: 106 },
-                ],
-            },
-        ],
-    };
-
-    const mesoForm = useForm(requestData);
-
     function submit() {
+        const mesoForm = useForm({'days' : [...days], 'meso' : {...meso.value}})
+
         mesoForm.post('/mesocycles')
     }
-
-
 
 </script>

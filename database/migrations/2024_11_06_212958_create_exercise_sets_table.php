@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('exercise_sets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedTinyInteger('reps');
-            $table->unsignedInteger('weight');
+            $table->unsignedInteger('day_exercise_id');
+            $table->unsignedTinyInteger('reps')->nullable();
+            $table->unsignedInteger('weight')->nullable();
             $table->unsignedTinyInteger('status');
             // $table->boolean('bodyweight');
             // $table->boolean('assisted');

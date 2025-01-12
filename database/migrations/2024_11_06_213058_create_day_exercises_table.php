@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(MesoDay::class);
             $table->foreignIdFor(Exercise::class);
             $table->unsignedTinyInteger('position');
-            $table->foreignIdFor(ExerciseSet::class)->nullable();
+            // $table->foreignIdFor(ExerciseSet::class)->nullable();
             $table->timestamps();
         });
     }

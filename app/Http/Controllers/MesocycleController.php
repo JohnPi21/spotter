@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
-use App\Models\User;
 use App\Models\Exercise;
+use App\Models\ExerciseSet;
 use App\Models\MuscleGroup;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class MesocycleController extends Controller
@@ -59,7 +58,7 @@ class MesocycleController extends Controller
         $validated = $request->validate([
             'meso.name'                         => ['string'],
             'meso.unit'                         => [Rule::in(['kg', 'lbs'])],
-            'meso.weeks'                        => ['integer', 'min:3', 'max:6'],
+            'meso.weeksDuration'                => ['integer', 'min:3', 'max:6'],
             'days'                              => ['array'],
             'days.*.label'                      => ['string'],
             'days.*.exercises'                  => ['array'],
@@ -71,16 +70,16 @@ class MesocycleController extends Controller
 
         $validatedMeso = collect($validated['meso']);
 
-        $mesocycle->name    = $validatedMeso['name'];
-        $mesocycle->unit    = $validatedMeso['unit'];
-        $mesocycle->weeks   = $validatedMeso['weeks'];
-        $mesocycle->days    = count($validated['days']);
-        $mesocycle->user_id = 1;
-        $mesocycle->status  = 1;
+        $mesocycle->name            = $validatedMeso['name'];
+        $mesocycle->unit            = $validatedMeso['unit'];
+        $mesocycle->weeks_duration  = $validatedMeso['weeksDuration'];
+        $mesocycle->days_per_week   = count($validated['days']);
+        $mesocycle->user_id         = 1;
+        $mesocycle->status          = 1;
 
         $mesocycle->save();
 
-        for ($i = 1; $i <= $mesocycle['weeks']; $i++) {
+        for ($i = 1; $i <= $mesocycle['weeks_duration']; $i++) {
 
             foreach ($validated['days'] as $idx => $day) {
                 $createdDay = MesoDay::create([
@@ -92,10 +91,15 @@ class MesocycleController extends Controller
                 ]);
 
                 foreach ($day['exercises'] as $position => $exercise) {
-                    DayExercise::create([
+                    $exerciseDay = DayExercise::create([
                         "meso_day_id" => $createdDay->id,
                         "exercise_id" => $exercise['exerciseId'],
                         "position"    => (int)$position,
+                    ]);
+
+                    ExerciseSet::create([
+                        "day_exercise_id"   => $exerciseDay,
+                        "status"            => 0
                     ]);
                 }
             }
@@ -105,9 +109,17 @@ class MesocycleController extends Controller
         return to_route('mesocycles');
     }
 
-    public function getDay(Mesocycle $mesocycle, $dayID): \Inertia\Response
+    public function getDay(Mesocycle $mesocycle, int $dayID): \Inertia\Response
     {
         $day = MesoDay::with(['exercises' => ['sets', 'muscleGroup']])->findOrFail($dayID);
+
+        $week_days = MesoDay::where('mesocycle_id', $mesocycle->id)
+                            ->where('week', $day->week)
+                            ->get();
+
+        $day->order = $week_days->search(function($d) use ($day){
+            return $d->id == $day->id;
+        }) + 1;
 
         $mesocycle->setRelation('day', $day);
 
