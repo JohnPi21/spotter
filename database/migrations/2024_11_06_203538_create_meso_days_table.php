@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignIdFor(Mesocycle::class);
             $table->unsignedTinyInteger('week');
             $table->unsignedTinyInteger('day_order');
-            $table->unsignedSmallInteger('weight')->nullable();
+            $table->unsignedSmallInteger('body_weight')->nullable();
             $table->string('label');
             $table->unsignedTinyInteger('position');
             $table->tinyInteger('status');

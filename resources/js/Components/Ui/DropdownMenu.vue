@@ -18,6 +18,11 @@
     const dropdown = ref(null);
 
     function toggleDropdown(index) {
+        if (dropdown.value == index) {
+            dropdown.value = null;
+            return
+        }
+
         dropdown.value = index;
     }
 

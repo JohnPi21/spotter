@@ -4,11 +4,11 @@
             {{ props.label }}
         </template>
 
-        <Icon v-if="props.icon" :icon="props.icon" :size="props.icon_size" class="w-8 h-5 peer" />
+        <Icon v-if="props.icon" :icon="props.icon" :size="props.icon - iconSize" class="w-8 h-5 peer" />
 
         <input autocomplete="off" :readonly="props.readonly" :pattern="props.pattern" :disabled="props.readonly"
             :name="name" :type="props.type" :placeholder="props.placeholder" v-model="input_value" @input="update"
-            @change="update" :required="props.required"
+            @change="update" :required="props.required" :class="inputClass"
             class="bg-transparent px-2 py-1 border-none focus:outline-none rounded text-primary placeholder-secondary w-full peer-[]:pl-0" />
 
         <slot></slot>
@@ -59,10 +59,14 @@
         icon: {
             type: String,
         },
-        icon_size: {
+        iconSize: {
             type: String,
             default: '25px',
         },
+        inputClass: {
+            type: String,
+            default: ''
+        }
     });
 
     const emit = defineEmits(['update:modelValue']);

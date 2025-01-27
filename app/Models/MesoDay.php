@@ -19,8 +19,13 @@ class MesoDay extends Model
         return $this->belongsTo(Mesocycle::class);
     }
 
-    public function exercises(): HasManyThrough
+    public function dayExercises(): HasMany
     {
-        return $this->hasManyThrough(Exercise::class, DayExercise::class, 'meso_day_id', 'id', 'id', 'exercise_id');
+        return $this->hasMany(DayExercise::class, 'meso_day_id', 'id');
     }
+
+    // public function exercises(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(Exercise::class, DayExercise::class, 'meso_day_id', 'id', 'id', 'exercise_id');
+    // }
 }

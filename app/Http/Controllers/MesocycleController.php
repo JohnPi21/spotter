@@ -114,7 +114,8 @@ class MesocycleController extends Controller
     {
         $mesocycle->load('days:id,mesocycle_id,label');
 
-        $day->load(['exercises' => ['sets', 'muscleGroup']]);
+        $day->load(['dayExercises' => ['exercise' => ['muscleGroup'], 'sets']]);
+        // dd($day);
 
         $calendar = [];
         $weekIdx = 1;
