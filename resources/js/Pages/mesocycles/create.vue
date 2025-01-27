@@ -1,17 +1,24 @@
 <template>
     <div class="flex justify-between items-center mb-4">
         <div class="flex flex-col">
-            <InputText v-model="meso.name" />
+            <InputText v-model="meso.name" placeholder="Untitled Meso" />
             <p class="text-secondary text-sm">Generated from Template</p>
         </div>
         <ButtonPrimary @click="submit">Create Meso</ButtonPrimary>
     </div>
 
-    <UiBox v-if="errors && errors.length > 0">
-        <ul class="flex flex-col">
-            <li v-for="(error, field) in errors">{{ field }} : {{ error }}</li>
-        </ul>
-    </UiBox>
+    <ul class="flex flex-col gap-2 my-2" v-if="errors && Object.keys(errors).length > 0">
+        <li class="bg-red rounded-sm p-2 flex align-center gap-2" v-for="(error, field) in errors">
+            <span class="flex items-center">
+                <Icon icon="ix:error-filled" size="20px" />
+            </span>
+            <span>
+                {{ field }} : {{ error }}
+            </span>
+        </li>
+    </ul>
+
+    <!-- {{ errors }} -->
     <div class="flex gap-2 flex-wrap">
         <UiBox class="flex flex-col gap-2 h-fit" v-for="(day, dayIdx) in days" :key="dayIdx">
             <div class="flex items-center justify-between gap-3">
@@ -25,8 +32,8 @@
                     <Icon icon="material-symbols-light:delete-outline" width="22px"
                         class="cursor-pointer hover:text-red transition" @click="removeExercise(dayIdx, exerciseIdx)" />
                 </div>
-                <InputDropdown :options="exerciseDropdown[exercise.muscleGroup]" v-model="exercise.exerciseId" :selected="exercise.exerciseId"
-                    :filter="true" />
+                <InputDropdown :options="exerciseDropdown[exercise.muscleGroup]" v-model="exercise.exerciseId"
+                    :selected="exercise.exerciseId" :filter="true" />
             </UiBox>
 
             <ButtonSecondary @click="openMuscleGroupModal(dayIdx)">
@@ -54,18 +61,18 @@
     import { useForm } from '@inertiajs/vue3';
 
     const props = defineProps({
+        errors: Object,
         exercises: Array,
         muscleGroups: Object,
         exerciseDropdown: Object,
-        errors: Object
     })
 
     const modalStore = useModalStore();
 
     const meso = ref({
-        name: 'Untitled Meso',
+        name: '',
         unit: 'kg',
-        weeks_duration: 4
+        weeksDuration: 4
     })
 
     const days = reactive([])
@@ -102,7 +109,7 @@
     }
 
     function submit() {
-        const mesoForm = useForm({'days' : [...days], 'meso' : {...meso.value}})
+        const mesoForm = useForm({ 'days': [...days], 'meso': { ...meso.value } })
 
         mesoForm.post('/mesocycles')
     }

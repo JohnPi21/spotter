@@ -85,6 +85,7 @@ class MesocycleController extends Controller
                 $createdDay = MesoDay::create([
                     "mesocycle_id" => $mesocycle['id'],
                     "week"         => $i,
+                    "day_order"    => $idx + 1,
                     "label"        => $day['label'],
                     "position"     => $idx,
                     "status"       => 0,
@@ -98,7 +99,7 @@ class MesocycleController extends Controller
                     ]);
 
                     ExerciseSet::create([
-                        "day_exercise_id"   => $exerciseDay,
+                        "day_exercise_id"   => $exerciseDay->id,
                         "status"            => 0
                     ]);
                 }
@@ -109,21 +110,37 @@ class MesocycleController extends Controller
         return to_route('mesocycles');
     }
 
-    public function getDay(Mesocycle $mesocycle, int $dayID): \Inertia\Response
+    public function getDay(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
-        $day = MesoDay::with(['exercises' => ['sets', 'muscleGroup']])->findOrFail($dayID);
+        $mesocycle->load('days:id,mesocycle_id,label');
 
-        $week_days = MesoDay::where('mesocycle_id', $mesocycle->id)
-                            ->where('week', $day->week)
-                            ->get();
+        $day->load(['exercises' => ['sets', 'muscleGroup']]);
 
-        $day->order = $week_days->search(function($d) use ($day){
-            return $d->id == $day->id;
-        }) + 1;
+        $calendar = [];
+        $weekIdx = 1;
+
+        foreach ($mesocycle->days as $idx => $d) {
+            $calendar[$weekIdx][] = $d;
+
+            if (count($calendar[$weekIdx]) == $mesocycle->days_per_week) {
+                $weekIdx++;
+            }
+        }
+
+        $mesocycle->calendar = $calendar;
+        // dd($calendar);
+
+        // Split days in days / week
+
+        // $week_days = MesoDay::where('mesocycle_id', $mesocycle->id)
+        //     ->where('week', $day->week)
+        //     ->get();
+
+        // $day->order = $week_days->search(function ($d) use ($day) {
+        //     return $d->id == $day->id;
+        // }) + 1;
 
         $mesocycle->setRelation('day', $day);
-
-        $mesocycle->unsetRelation('days');
 
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }

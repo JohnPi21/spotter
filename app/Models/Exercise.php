@@ -18,6 +18,13 @@ class Exercise extends Model
 
     public function sets(): HasManyThrough
     {
-        return $this->hasManyThrough(ExerciseSet::class, DayExercise::class, 'exercise_id', 'id', 'id', 'exercise_set_id');
+        return $this->hasManyThrough(
+            ExerciseSet::class,       // Final model
+            DayExercise::class,       // Intermediate model
+            'exercise_id',            // Foreign key on day_exercises table (links to this model)
+            'day_exercise_id',        // Foreign key on exercise_sets table (links to exercises)
+            'id',                     // Local key on this model (meso_days)
+            'id'                      // Local key on day_exercises (links to exercises)
+        );
     }
 }

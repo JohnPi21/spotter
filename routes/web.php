@@ -19,7 +19,7 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::get('/mesocycles/{mesocycle}', 'show');
 
-    Route::get('/mesocycles/{mesocycle}/day/{dayID}', 'getDay');
+    Route::get('/mesocycles/{mesocycle}/day/{day}', 'getDay');
 
     Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
 
