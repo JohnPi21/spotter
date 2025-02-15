@@ -63,7 +63,7 @@
                     <p>WEEK {{ idx }}</p>
                     <Link :href="`/mesocycles/${mesocycle.id}/day/${day.id}`"
                         class="bg-main px-2 py-1 rounded-sm w-full text-center" v-for="day in week"
-                        :class="[{ 'bg-orange-700': $page.url.endsWith(day.id) }]">
+                        :class="[{ 'bg-orange-700': $page.url.endsWith(day.id.toString()) }]">
                     {{ day.label }}
                     </Link>
                 </div>
@@ -124,14 +124,14 @@
                     <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
                 </div>
                 <div class="col-span-2">
-                    <InputText :placeholder="set?.taget_weight ?? mesocycle.unit" v-model="set.weight"
+                    <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight"
                         inputClass="text-center" />
                 </div>
                 <div class="col-span-2">
                     <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
-                    <input type="checkbox" v-model="set.status" class="mr-2">
+                    <input type="checkbox" v-model="set.status" @change="handleUpdate(set)" class="mr-2">
                 </div>
             </div>
         </UiBox>
@@ -139,32 +139,34 @@
         <ButtonPrimary>Finish Workout</ButtonPrimary>
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
     import { ref, reactive, onMounted } from 'vue';
     import { Icon } from '@iconify/vue'
     import UiBox from '@components/Ui/Box.vue';
     import ButtonPrimary from '@components/Button/Primary.vue';
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
     import InputText from '@components/Input/text.vue'
-    import { Link } from '@inertiajs/vue3';
-    // import {usePage } from '@inertiajs/vue3';
+    import { Link, useForm } from '@inertiajs/vue3';
 
-    // const page = usePage();
+    const props = defineProps<{ mesocycle: Mesocycle }>();
 
-    const props = defineProps({
-        mesocycle: Object
-    })
-
-    const mesocycle = ref({});
     const day = ref(props.mesocycle.day);
 
     onMounted(() => {
-        mesocycle.value = props.mesocycle;
-        console.log(props.mesocycle)
+        console.log(props.mesocycle);
     })
 
+    function handleUpdate(set: ExerciseSet) {
+        if (!set.status) {
+            return
+        }
 
-    const day_form = ref({
+        const form = useForm(set).post('/sets', {
+            onSuccess: () => {
+                console.log(set);
+            }
+        })
+    }
 
-    });
+
 </script>

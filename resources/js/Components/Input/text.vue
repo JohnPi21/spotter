@@ -4,7 +4,7 @@
             {{ props.label }}
         </template>
 
-        <Icon v-if="props.icon" :icon="props.icon" :size="props.icon - iconSize" class="w-8 h-5 peer" />
+        <Icon v-if="props.icon" :icon="props.icon" :size="iconSize" class="w-8 h-5 peer" />
 
         <input autocomplete="off" :readonly="props.readonly" :pattern="props.pattern" :disabled="props.readonly"
             :name="name" :type="props.type" :placeholder="props.placeholder" v-model="input_value" @input="update"
@@ -47,6 +47,7 @@
             default: 'text',
         },
         modelValue: {
+            type: [String, Number, undefined],
             default: '',
         },
         readonly: {
@@ -74,7 +75,7 @@
     const name = ref('');
 
     onMounted(() => {
-        name.value = props.name || 'input'
+        // name.value = props.name || 'input'
     });
 
     function update() {

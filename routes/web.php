@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MesocycleController;
+use App\Http\Controllers\ExerciseSetController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
@@ -27,3 +28,5 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::delete('/mesocycles/{id}', 'destroy');
 });
+
+Route::post('/sets', [ExerciseSetController::class, 'store']);
