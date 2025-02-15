@@ -70,6 +70,9 @@
             </div>
         </UiBox>
 
+        <UiErrors :errors="errors" />
+
+
         <UiBox class="flex flex-col gap-2" v-for="(dayExercise, exercise_idx) in day.day_exercises">
             <div class="flex items-center justify-between">
                 <div class="bg-orange-700 px-2 rounded">{{ dayExercise.exercise.muscle_group.name }}</div>
@@ -143,12 +146,16 @@
     import { ref, reactive, onMounted } from 'vue';
     import { Icon } from '@iconify/vue'
     import UiBox from '@components/Ui/Box.vue';
+    import UiErrors from '@/Components/Ui/Errors.vue';
     import ButtonPrimary from '@components/Button/Primary.vue';
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
     import InputText from '@components/Input/text.vue'
-    import { Link, useForm } from '@inertiajs/vue3';
+    import { Link, useForm, usePage } from '@inertiajs/vue3';
 
-    const props = defineProps<{ mesocycle: Mesocycle }>();
+    const props = defineProps<{
+        mesocycle: Mesocycle,
+        errors?: Object,
+    }>();
 
     const day = ref(props.mesocycle.day);
 
@@ -161,9 +168,10 @@
             return
         }
 
-        const form = useForm(set).post('/sets', {
-            onSuccess: () => {
-                console.log(set);
+        useForm(set).post('/sets', {
+            preserveState: true,
+            onSuccess: (res) => {
+                console.log(usePage().props);
             }
         })
     }

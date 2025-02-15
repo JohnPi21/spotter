@@ -7,7 +7,8 @@
         <ButtonPrimary @click="submit">Create Meso</ButtonPrimary>
     </div>
 
-    <ul class="flex flex-col gap-2 my-2" v-if="errors && Object.keys(errors).length > 0">
+    <UiErrors :errors="errors" />
+    <!-- <ul class="flex flex-col gap-2 my-2" v-if="errors && Object.keys(errors).length > 0">
         <li class="bg-red rounded-sm p-2 flex align-center gap-2" v-for="(error, field) in errors">
             <span class="flex items-center">
                 <Icon icon="ix:error-filled" size="20px" />
@@ -16,7 +17,7 @@
                 {{ field }} : {{ error }}
             </span>
         </li>
-    </ul>
+    </ul> -->
 
     <!-- {{ errors }} -->
     <div class="flex gap-2 flex-wrap">
@@ -54,6 +55,7 @@
     import InputText from '@components/Input/text.vue';
     import InputDropdown from "@components/Input/Dropdown.vue"
     import UiBox from '@components/Ui/Box.vue';
+    import UiErrors from '@/Components/Ui/Errors.vue';
     import ButtonPrimary from '@components/Button/Primary.vue';
     import ButtonSecondary from '@components/Button/Secondary.vue';
     import { Icon } from '@iconify/vue';
