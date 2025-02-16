@@ -29,4 +29,4 @@ Route::controller(MesocycleController::class)->group(function () {
     Route::delete('/mesocycles/{id}', 'destroy');
 });
 
-Route::post('/sets', [ExerciseSetController::class, 'store']);
+Route::patch('/sets/{set}', [ExerciseSetController::class, 'update']);

@@ -134,7 +134,8 @@
                     <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
-                    <input type="checkbox" v-model="set.status" @change="handleUpdate(set)" class="mr-2">
+                    <input type="checkbox" v-model="set.status" :true-value="1" :false-value="0"
+                        @change="handleUpdate(set)" class="mr-2">
                 </div>
             </div>
         </UiBox>
@@ -151,6 +152,7 @@
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
     import InputText from '@components/Input/text.vue'
     import { Link, useForm, usePage } from '@inertiajs/vue3';
+    import axios from 'axios';
 
     const props = defineProps<{
         mesocycle: Mesocycle,
@@ -163,17 +165,20 @@
         console.log(props.mesocycle);
     })
 
-    function handleUpdate(set: ExerciseSet) {
+    // TODO: straight up redirect in laravel to /show and that s it (reload the page)
+    async function handleUpdate(set: ExerciseSet, idx) {
         if (!set.status) {
-            return
+            return;
         }
 
-        useForm(set).post('/sets', {
-            preserveState: true,
-            onSuccess: (res) => {
-                console.log(usePage().props);
-            }
-        })
+        try {
+            const res = await axios.patch(`/sets/${set.id}`, { ...set })
+        } catch (error) {
+            console.log(error)
+            // Make an notificaiton error to handle these
+        }
+
+        set = res.set;
     }
 
 
