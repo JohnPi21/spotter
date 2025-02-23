@@ -5,15 +5,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laravel</title>
+    <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-    @vite('resources/js/app.ts')
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
+    @routes
+    @vite(['resources/js/app.ts', "resources/js/Pages/{$page['component']}.vue"])
     @inertiaHead
     @vite('resources/css/app.css')
 </head>
 
-<body class="min-h-screen bg-main text-primary antialiased font-sans"></body>
-@inertia
+<body class="font-sans antialiased min-h-screen bg-main text-primary">
+    @inertia
 </body>
 
 </html>

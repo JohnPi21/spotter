@@ -134,8 +134,8 @@
                     <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
-                    <input type="checkbox" v-model="set.status" :true-value="1" :false-value="0"
-                        @change="handleUpdate(set)" class="mr-2">
+                    <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" :true-value="1" :false-value="0"
+                        @change="handleUpdate(set)" class="mr-2"/>
                 </div>
             </div>
         </UiBox>
@@ -146,12 +146,13 @@
 <script setup lang="ts">
     import { ref, reactive, onMounted } from 'vue';
     import { Icon } from '@iconify/vue'
-    import UiBox from '@components/Ui/Box.vue';
+    import UiBox from '@/Components/Ui/Box.vue';
     import UiErrors from '@/Components/Ui/Errors.vue';
-    import ButtonPrimary from '@components/Button/Primary.vue';
-    import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
-    import InputText from '@components/Input/text.vue'
+    import ButtonPrimary from '@/Components/Button/Primary.vue';
+    import UiDropdownMenu from '@/Components/Ui/DropdownMenu.vue';
+    import InputText from '@/Components/Input/text.vue'
     import { Link, useForm, usePage } from '@inertiajs/vue3';
+    import Checkbox from '@/Components/Checkbox.vue';
     import axios from 'axios';
 
     const props = defineProps<{
@@ -166,7 +167,7 @@
     })
 
     // TODO: straight up redirect in laravel to /show and that s it (reload the page)
-    async function handleUpdate(set: ExerciseSet, idx) {
+    async function handleUpdate(set: ExerciseSet) {
         if (!set.status) {
             return;
         }
@@ -178,7 +179,7 @@
             // Make an notificaiton error to handle these
         }
 
-        set = res.set;
+        // set = res.set;
     }
 
 

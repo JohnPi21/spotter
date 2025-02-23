@@ -1,12 +1,20 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: [
-		"./resources/**/*.blade.php",
-		"./resources/**/*.js",
-		"./resources/**/*.vue",
-	],
-	theme: {
-		extend: {
+    content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
+        './resources/js/**/*.vue',
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
 			colors: {
 				// Background Colors
 				'main': '#0A0A0A',         // Very dark background for the main page
@@ -58,8 +66,8 @@ export default {
 				'border-orange-hover': '#EA580C', // Hover border color for orange button
 				'orange-700': 'rgb(249 115 22 / 70%)',
 			},
-		},
-	},
-	plugins: [],
-}
+        },
+    },
 
+    plugins: [forms],
+};

@@ -1,23 +1,29 @@
-import './bootstrap'; // Core not the framework
-import { createApp, h } from 'vue';
+import './bootstrap';
 import { createInertiaApp } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { createApp, DefineComponent, h } from 'vue';
 import { createPinia } from 'pinia';
-import Layout from '@/Layout.vue';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    resolve: name => {
-        const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
-        const page = pages[`./Pages/${name}.vue`]
-
-        page.default.layout = page.default.layout || Layout;
-
-        return page;
-    },
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob<DefineComponent>('./Pages/**/*.vue'),
+        ),
     setup({ el, App, props, plugin }) {
-        const pinia = createPinia()
+        const pinia = createPinia();
+
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
-            .mount(el)
+            .use(ZiggyVue)
+            .mount(el);
     },
-})
+    progress: {
+        color: '#4B5563',
+    },
+});

@@ -1,7 +1,16 @@
-// resources/js/types/global.d.ts
-export {}; // Ensure this file is treated as a module
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
+import { AxiosInstance } from 'axios';
+import { route as ziggyRoute } from 'ziggy-js';
+import { PageProps as AppPageProps } from './';
 
 declare global {
+    interface Window {
+        axios: AxiosInstance;
+    }
+
+    /* eslint-disable no-var */
+    var route: typeof ziggyRoute;
+
     type ExerciseSet = {
         id: number;
         day_exercise_id: number;
@@ -85,4 +94,14 @@ declare global {
         days: Day[];
         day: Day;
     };
+}
+
+declare module 'vue' {
+    interface ComponentCustomProperties {
+        route: typeof ziggyRoute;
+    }
+}
+
+declare module '@inertiajs/core' {
+    interface PageProps extends InertiaPageProps, AppPageProps {}
 }

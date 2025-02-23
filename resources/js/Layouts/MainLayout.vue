@@ -8,7 +8,7 @@
     </div>
 </template>
 <script setup>
-import SideNav from '@components/SideNav.vue';
-import Modal from '@components/Modal.vue';
+import SideNav from '@/Components/SideNav.vue';
+import Modal from '@/Components/Modal.vue';
 
 </script>

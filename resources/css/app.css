@@ -2,23 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{
+:root {
     --sidenav-width: 250px;
 }
 
-body{
+body {
     @apply scrollbar overflow-x-hidden;
 }
 
 @layer utilities {
-    .scrollbar::-webkit-scrollbar{
+    .scrollbar::-webkit-scrollbar {
         width: 6px;
         height: 4px;
     }
 
-    .scrollbar::-webkit-scrollbar-thumb{
-        background: rgba(113, 113, 146, .35);
+    .scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(113, 113, 146, 0.35);
         border-radius: 3px;
     }
 }
-
