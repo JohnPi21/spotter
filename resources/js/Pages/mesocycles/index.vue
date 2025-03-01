@@ -1,4 +1,6 @@
 <template>
+    <Head title="Mesocycles"></Head>
+
     <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" url="/mesocycles/create" />
     <UiBox v-if="mesocycles.length > 0">
         <ul>
@@ -16,7 +18,15 @@
                                 <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
                             </div>
                             <UiDropdownMenu :idx="idx">
-                                <div v-for="li in 15">First el</div>
+                                <li class="flex justify-between" @click="setActive(meso.id)">
+                                    <p>Set Active</p>
+                                    <Icon name="gg:check-o"/>
+                                </li>
+
+                                <li class="flex justify-between" @click="destroy(meso.id)">
+                                    <p>Delete</p>
+                                    <Icon name="material-symbols-light:delete"/>
+                                </li>
                             </UiDropdownMenu>
                         </div>
                     </div>
@@ -33,13 +43,24 @@
     import UiBox from '@components/Ui/Box.vue';
     import UiTitle from '@components/Ui/Title.vue';
     import UiDropdownMenu from '@components/Ui/DropdownMenu.vue';
-    import { Link } from '@inertiajs/vue3';
+    import { Link, useForm } from '@inertiajs/vue3';
+    import { Head } from '@inertiajs/vue3'
 
     const props = defineProps({
-        mesocycles: Array
+        title: String,
+        mesocycles: Array,
     })
 
-    console.log(props.mesocycles)
+    function setActive(id){
+        useForm().patch(`/mesocycles/${id}`)
+    }
+
+    function destroy(id){
+        console.log(id)
+        if(! confirm('Are you sure you want to delete mesocycles?')) return;
+
+        useForm().delete(`/mesocycles/${id}`);
+    }
 </script>
 
 <style scoped></style>

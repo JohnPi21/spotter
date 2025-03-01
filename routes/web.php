@@ -27,7 +27,9 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::put('/mesocycles/{id}', 'update');
 
-    Route::delete('/mesocycles/{id}', 'destroy');
+    Route::patch('/mesocycles/{mesocycle}', 'activate');
+
+    Route::delete('/mesocycles/{mesocycle}', 'destroy');
 });
 
 Route::patch('/sets/{set}', [ExerciseSetController::class, 'update']);

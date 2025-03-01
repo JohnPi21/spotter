@@ -8,6 +8,7 @@ use App\Models\MesoDay;
 use App\Models\Exercise;
 use App\Models\ExerciseSet;
 use App\Models\MuscleGroup;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,7 @@ class MesocycleController extends Controller
         $mesocycles = Mesocycle::all();
 
         return Inertia::render('mesocycles/index', [
+            'title'     => 'Mesocycles',
             'mesocycles' => $mesocycles
         ]);
     }
@@ -29,7 +31,10 @@ class MesocycleController extends Controller
             'days.exercises' => ['muscleGroup', 'sets']
         ])->find($mesocycle->id);
 
-        return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
+        return Inertia::render('mesocycles/show', [
+            'title'     => 'Mesocycle',
+            'mesocycle' => $mesocycle
+        ]);
     }
 
 
@@ -75,7 +80,7 @@ class MesocycleController extends Controller
         $mesocycle->weeks_duration  = $validatedMeso['weeksDuration'];
         $mesocycle->days_per_week   = count($validated['days']);
         $mesocycle->user_id         = 1;
-        $mesocycle->status          = 1;
+        $mesocycle->status          = 0;
 
         $mesocycle->save();
 
@@ -106,6 +111,23 @@ class MesocycleController extends Controller
             }
         }
 
+
+        return to_route('mesocycles');
+    }
+
+    public function activate(Mesocycle $mesocycle): RedirectResponse
+    {
+        Mesocycle::where('user_id', 1)->update(['status' => 0]);
+
+        $mesocycle->status = 1;
+        $mesocycle->save();
+
+        return to_route('mesocycles');
+    }
+
+    public function destroy(Mesocycle $mesocycle): RedirectResponse
+    {
+        $mesocycle->delete();
 
         return to_route('mesocycles');
     }

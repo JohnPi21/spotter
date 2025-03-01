@@ -134,7 +134,7 @@
                     <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
-                    <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" :true-value="1" :false-value="0"
+                    <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1" false-value="0"
                         @change="handleUpdate(set)" class="mr-2"/>
                 </div>
             </div>

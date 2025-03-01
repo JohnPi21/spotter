@@ -1,8 +1,8 @@
 <template>
-    <div class="flex pl-[var(--sidenav-width)] min-h-screen">
+    <div class="flex min-h-screen">
         <SideNav />
         <Modal />
-        <div class="container mx-auto px-5">
+        <div class="container pl-[var(--sidenav-width)] mx-auto px-5">
             <slot />
         </div>
     </div>
@@ -10,5 +10,4 @@
 <script setup>
 import SideNav from '@/Components/SideNav.vue';
 import Modal from '@/Components/Modal.vue';
-
 </script>
