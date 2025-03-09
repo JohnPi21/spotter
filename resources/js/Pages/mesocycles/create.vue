@@ -8,18 +8,6 @@
     </div>
 
     <UiErrors :errors="errors" />
-    <!-- <ul class="flex flex-col gap-2 my-2" v-if="errors && Object.keys(errors).length > 0">
-        <li class="bg-red rounded-sm p-2 flex align-center gap-2" v-for="(error, field) in errors">
-            <span class="flex items-center">
-                <Icon icon="ix:error-filled" size="20px" />
-            </span>
-            <span>
-                {{ field }} : {{ error }}
-            </span>
-        </li>
-    </ul> -->
-
-    <!-- {{ errors }} -->
     <div class="flex gap-2 flex-wrap">
         <UiBox class="flex flex-col gap-2 h-fit" v-for="(day, dayIdx) in days" :key="dayIdx">
             <div class="flex items-center justify-between gap-3">
@@ -37,15 +25,25 @@
                     :selected="exercise.exerciseId" :filter="true" />
             </UiBox>
 
-            <ButtonSecondary @click="openMuscleGroupModal(dayIdx)">
+            <ButtonSecondary @click="selectMuscleGroupDay(dayIdx)">
                 <Icon icon="ic:baseline-plus" width="21px" />
                 Add Muscle Group
             </ButtonSecondary>
         </UiBox>
+
+        <Modal :show="isModalOpen" @close="isModalOpen = false">
+            <ul>
+                <li v-for="(muscle, idx) in props.muscleGroups" :key="idx" @click="addMuscleGroup(idx)"
+                    class="p-2 border-b border-main-border cursor-pointer text-secondary hover:text-primary transition hover:bg-layer-light last:border-b-0 flex items-center justify-between">
+                    {{ muscle }}
+                </li>
+            </ul>
+        </Modal>
         <ButtonSecondary class="h-fit min-w-44" @click="addDay()" v-if="days.length < 7">
             <Icon icon="ic:baseline-plus" width="21px" />
             Add Day
         </ButtonSecondary>
+
     </div>
 
 </template>
@@ -59,7 +57,7 @@
     import ButtonPrimary from '@components/Button/Primary.vue';
     import ButtonSecondary from '@components/Button/Secondary.vue';
     import { Icon } from '@iconify/vue';
-    import { useModalStore } from '@stores/modalStore';
+    import Modal from '@/Components/Modal.vue';
     import { useForm } from '@inertiajs/vue3';
 
     const props = defineProps({
@@ -69,13 +67,12 @@
         exerciseDropdown: Object,
     })
 
-    const modalStore = useModalStore();
-
     const meso = ref({
         name: '',
         unit: 'kg',
         weeksDuration: 4
     })
+    const isModalOpen = ref(false);
 
     const days = reactive([])
 
@@ -98,16 +95,16 @@
         days[dayId].exercises.splice(exerciseId, 1);
     }
 
-    function openMuscleGroupModal(dayId) {
-        modalStore.openModal('MuscleGroups', props.muscleGroups, (selectedMuscleGroup) => {
-            addMuscleGroup(selectedMuscleGroup, dayId)
-        });
+    const selectedDay = ref(null);
+
+    function selectMuscleGroupDay(dayId){
+        selectedDay.value = dayId;
+        isModalOpen.value = true;
     }
 
-    function addMuscleGroup(selectedMuscleGroup, dayId) {
-        days[dayId].exercises.push(
-            { muscleGroup: selectedMuscleGroup, exerciseId: null }
-        );
+    function addMuscleGroup(muscleGroupId) {
+        days[selectedDay.value].exercises.push({muscleGroup: muscleGroupId, exerciseId: null});
+        isModalOpen.value = false;
     }
 
     function submit() {

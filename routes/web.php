@@ -5,6 +5,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\ExerciseSetController;
+use App\Http\Controllers\MesoDayController;
+use App\Models\MesoDay;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -21,8 +23,6 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::get('/mesocycles/{mesocycle}', 'show');
 
-    Route::get('/mesocycles/{mesocycle}/day/{day}', 'getDay');
-
     Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
 
     Route::put('/mesocycles/{id}', 'update');
@@ -30,6 +30,10 @@ Route::controller(MesocycleController::class)->group(function () {
     Route::patch('/mesocycles/{mesocycle}', 'activate');
 
     Route::delete('/mesocycles/{mesocycle}', 'destroy');
+});
+
+Route::controller(MesoDayController::class)->group(function () {
+    Route::get('/mesocycles/{mesocycle}/day/{day}', 'show');
 });
 
 Route::patch('/sets/{set}', [ExerciseSetController::class, 'update']);

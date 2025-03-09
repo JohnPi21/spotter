@@ -58,6 +58,7 @@
                 </div>
             </div>
 
+            <!-- ===== Calendar ===== -->
             <div class="flex justify-between gap-1">
                 <div class="flex flex-col items-center flex-1 gap-1" v-for="(week, idx) in mesocycle.calendar">
                     <p>WEEK {{ idx }}</p>
@@ -70,9 +71,11 @@
             </div>
         </UiBox>
 
+        <!-- ===== Errors ===== -->
         <UiErrors :errors="errors" />
 
 
+        <!-- ===== Exercises ===== -->
         <UiBox class="flex flex-col gap-2" v-for="(dayExercise, exercise_idx) in day.day_exercises">
             <div class="flex items-center justify-between">
                 <div class="bg-orange-700 px-2 rounded">{{ dayExercise.exercise.muscle_group.name }}</div>

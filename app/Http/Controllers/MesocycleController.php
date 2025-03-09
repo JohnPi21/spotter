@@ -131,40 +131,4 @@ class MesocycleController extends Controller
 
         return to_route('mesocycles');
     }
-
-    public function getDay(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
-    {
-        $mesocycle->load('days:id,mesocycle_id,label');
-
-        $day->load(['dayExercises' => ['exercise' => ['muscleGroup'], 'sets']]);
-        // dd($day);
-
-        $calendar = [];
-        $weekIdx = 1;
-
-        foreach ($mesocycle->days as $idx => $d) {
-            $calendar[$weekIdx][] = $d;
-
-            if (count($calendar[$weekIdx]) == $mesocycle->days_per_week) {
-                $weekIdx++;
-            }
-        }
-
-        $mesocycle->calendar = $calendar;
-        // dd($calendar);
-
-        // Split days in days / week
-
-        // $week_days = MesoDay::where('mesocycle_id', $mesocycle->id)
-        //     ->where('week', $day->week)
-        //     ->get();
-
-        // $day->order = $week_days->search(function ($d) use ($day) {
-        //     return $d->id == $day->id;
-        // }) + 1;
-
-        $mesocycle->setRelation('day', $day);
-
-        return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
-    }
 }
