@@ -26,18 +26,6 @@ class MesoDayController extends Controller
         $exerciseIds = $day->dayExercises()->pluck('exercise_id');
         $daysIds = $mesocycle->days->pluck('id');
 
-        // $ex = DayExercise::whereIn('meso_day_id', $daysIds)
-        //                 ->whereIn('exercise_id', $exerciseIds)
-        //                 ->where('meso_day_id', '<', $day->id)
-        //                 ->orderBy('id', 'DESC')
-        //                 ->with('sets')
-        //                 ->get();
-
-        // $test = Db::table('meso_days')->whereIn('id', [1, 2])->
-        $test = DB::table('day_exercises')->whereIn('meso_day_id', $daysIds)->selectRaw('MAX(id)')->groupBy('meso_day_id')->get();
-        dd($test);
-
-
         // Get only the latest `DayExercise` per `exercise_id` where `weight` and `reps` are NOT NULL
         $latestDayExercises = DayExercise::whereIn('id', function ($query) use ($exerciseIds, $daysIds, $day) {
             $query->selectRaw('MAX(id)')
@@ -53,25 +41,44 @@ class MesoDayController extends Controller
                         ->whereNotNull('exercise_sets.reps'); // Ensuring valid data
                 })
                 ->groupBy('exercise_id');
-        })
-        ->with(['sets' => function ($query) {
+        })->with(['sets' => function ($query) {
             $query->whereNotNull('weight')->whereNotNull('reps'); // Only load valid sets
         }])
         ->orderBy('id', 'DESC')
-        ->get();
+        ->get()
+        ->keyBy('exercise_id');
 
-                        // dd($latestDayExercises);
-        
-        $targetValues = [];
+        // days =>
+                // days -> sets (sets / exercise)
+                // days -> sets (sets / exercise)
+
+        // day => 
+                // exercise in a day -> sets
+                // exercise in a day -> sets
+
+        $lastSets = [];
 
         foreach ($latestDayExercises as $dayExercise) {
-            foreach ($dayExercise->sets as $set) {
-                $targetValues[$dayExercise->exercise_id]['reps'][] = $set->reps;
-                $targetValues[$dayExercise->exercise_id]['weight'][] = $set->weight;
-            }
+            $lastSets[$dayExercise->exercise_id] = $dayExercise->sets;
         }
 
-        dd($targetValues);
+        foreach ($day->dayExercises as $dayExercise) {
+            if(isset($lastSets[$dayExercise->exercise_id])){
+                for ($i=0; $i < count($dayExercise->sets); $i++) { 
+                    // Create set entry if it does not exist
+                    if(! $dayExercise->sets[$i]){
+                        $dayExercise->sets[$i]->day_exercise_id = $dayExercise->id;
+                        $dayExercise->sets[$i]->status          = 0;
+
+                        $dayExercise->sets[$i]->target_reps     = $lastSets[$i]->reps;
+                        $dayExercise->sets[$i]->target_weight   = $lastSets[$i]->weight;
+                    } else{
+                        $dayExercise->sets[$i]->target_reps     = $lastSets[$dayExercise->exercise_id][$i]->reps;
+                        $dayExercise->sets[$i]->target_weight   = $lastSets[$dayExercise->exercise_id][$i]->weight;
+                    }
+                }
+            }
+        }
 
         $calendar = [];
         $weekIdx = 1;

@@ -38,6 +38,8 @@ Route::controller(MesoDayController::class)->group(function () {
 
 Route::patch('/sets/{set}', [ExerciseSetController::class, 'update']);
 
+Route::post('/sets', [ExerciseSetController::class, 'store']);
+
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [

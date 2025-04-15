@@ -8,53 +8,21 @@
                 </div>
                 <div class="flex align-end items-center gap-3">
                     <Icon icon="quill:calendar" width="18px" />
-                    <div class="relative">
-                        <div class="hover:cursor-pointer">
-                            <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
-                        </div>
-                        <UiDropdownMenu idx="1">
-                            <li class="flex !justify-center bg-layer">
-                                Mesocycle
-                            </li>
-                            <li>
-                                <Icon icon="clarity:note-line" /> View Notes
-                            </li>
-                            <li>
-                                <Icon icon="tabler:italic" /> Rename
-                            </li>
-                            <li>
-                                <Icon icon="bi:graph-up-arrow" /> Progressions
-                            </li>
-                            <li>
-                                <Icon icon="carbon:book" /> Summary
-                            </li>
-                            <li>
-                                <Icon icon="carbon:stop-outline" /> End
-                            </li>
 
-                            <li class="flex !justify-center bg-layer">
-                                Workout
+                    <UiDropdownMenu idx="1">
+                        <template #header>
+                            <div class="hover:cursor-pointer">
+                                <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                            </div>
+                        </template>
+
+                        <template v-for="(section, index) in dropdownItems" :key="index">
+                            <li class="flex !justify-center bg-layer">{{ section.section }}</li>
+                            <li v-for="(item, i) in section.items" :key="i">
+                                <Icon :icon="item.icon" /> {{ item.label }}
                             </li>
-                            <li>
-                                <Icon icon="icon-park-outline:write" /> New Note
-                            </li>
-                            <li>
-                                <Icon icon="tabler:italic" /> Relabel
-                            </li>
-                            <li>
-                                <Icon icon="material-symbols:add" /> Add Exercise
-                            </li>
-                            <li>
-                                <Icon icon="hugeicons:weight-scale" /> Bodyweight
-                            </li>
-                            <li>
-                                <Icon icon="carbon:reset" /> Reset
-                            </li>
-                            <li>
-                                <Icon icon="carbon:stop-outline" /> End
-                            </li>
-                        </UiDropdownMenu>
-                    </div>
+                        </template>
+                    </UiDropdownMenu>
                 </div>
             </div>
 
@@ -82,34 +50,18 @@
 
                 <div class="flex align-end items-center gap-4">
                     <Icon icon="line-md:youtube" width="20px" />
-                    <div class="relative">
-                        <div class="hover:cursor-pointer">
-                            <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
-                        </div>
-                        <UiDropdownMenu :idx="exercise_idx" class="min-w-40">
-                            <li>
-                                <Icon icon="icon-park-outline:write" /> New Note
-                            </li>
-                            <li>
-                                <Icon icon="mdi:arrow-up" /> Move Up
-                            </li>
-                            <li>
-                                <Icon icon="mdi:arrow-down" /> Move Down
-                            </li>
-                            <li>
-                                <Icon icon="ph:swap" /> Replace
-                            </li>
-                            <li>
-                                <Icon icon="material-symbols:add" /> Add Set
-                            </li>
-                            <li>
-                                <Icon icon="ix:skip" /> Skip
-                            </li>
-                            <li class="!text-red">
-                                <Icon icon="material-symbols:delete-outline" /> Delete
-                            </li>
-                        </UiDropdownMenu>
-                    </div>
+
+                    <UiDropdownMenu :idx="exercise_idx">
+                        <template #header>
+                            <div class="hover:cursor-pointer">
+                                <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                            </div>
+                        </template>
+
+                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class" @click="item.action(dayExercise.id)" >
+                            <Icon :icon="item.icon" /> {{ item.label }}
+                        </li>
+                    </UiDropdownMenu>
                 </div>
             </div>
 
@@ -137,8 +89,8 @@
                     <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
-                    <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1" false-value="0"
-                        @change="handleUpdate(set)" class="mr-2"/>
+                    <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1"
+                        false-value="0" @change="updateSet(set)" class="mr-2" />
                 </div>
             </div>
         </UiBox>
@@ -154,7 +106,7 @@
     import ButtonPrimary from '@/Components/Button/Primary.vue';
     import UiDropdownMenu from '@/Components/Ui/DropdownMenu.vue';
     import InputText from '@/Components/Input/text.vue'
-    import { Link, useForm, usePage } from '@inertiajs/vue3';
+    import { Link, router, useForm, usePage } from '@inertiajs/vue3';
     import Checkbox from '@/Components/Checkbox.vue';
     import axios from 'axios';
 
@@ -170,7 +122,7 @@
     })
 
     // TODO: straight up redirect in laravel to /show and that s it (reload the page)
-    async function handleUpdate(set: ExerciseSet) {
+    async function updateSet(set: ExerciseSet) {
         if (!set.status) {
             return;
         }
@@ -181,9 +133,105 @@
             console.log(error)
             // Make an notificaiton error to handle these
         }
-
-        // set = res.set;
     }
 
 
+    async function removeExercise(dayExerciseID: number, exerciseID: number){
+        router.delete('/', {
+            preserveState: 'errors'
+        })
+    }
+
+    async function addSet(dayExerciseID: number) {
+        router.post('/sets', { dayExerciseID }, {
+            preserveState: false,
+        });
+    }
+
+    async function removeSet(dayExerciseID: number, setID: number){
+        router.delete(`/sets/${dayExerciseID}/${setID}`, {
+            preserveState: false
+        })
+    }
+
+
+
+    const dropdownItems = [
+        {
+            section: "Mesocycle",
+            items: [
+                { icon: "clarity:note-line", label: "View Notes" },
+                { icon: "tabler:italic", label: "Rename" },
+                { icon: "bi:graph-up-arrow", label: "Progressions" },
+                { icon: "carbon:book", label: "Summary" },
+                { icon: "carbon:stop-outline", label: "End" },
+            ],
+        },
+        {
+            section: "Workout",
+            items: [
+                { icon: "icon-park-outline:write", label: "New Note" },
+                { icon: "tabler:italic", label: "Relabel" },
+                { icon: "material-symbols:add", label: "Add Exercise" },
+                { icon: "hugeicons:weight-scale", label: "Bodyweight" },
+                { icon: "carbon:reset", label: "Reset" },
+                { icon: "carbon:stop-outline", label: "End" },
+            ],
+        },
+    ];
+
+    const exerciseDropdownItems = [
+        {
+            icon: "icon-park-outline:write",
+            label: "New Note",
+            action: () => console.log("New Note clicked"),
+        },
+        {
+            icon: "mdi:arrow-up",
+            label: "Move Up",
+            action: () => console.log("Move Up clicked"),
+        },
+        {
+            icon: "mdi:arrow-down",
+            label: "Move Down",
+            action: () => console.log("Move Down clicked"),
+        },
+        {
+            icon: "ph:swap",
+            label: "Replace",
+            action: () => console.log("Replace clicked"),
+        },
+        {
+            icon: "material-symbols:add",
+            label: "Add Set",
+            action: (dayID: number) => addSet(dayID),
+        },
+        {
+            icon: "ix:skip",
+            label: "Skip",
+            action: () => console.log("Skip clicked"),
+        },
+        {
+            icon: "material-symbols:delete-outline",
+            label: "Delete",
+            class: "!text-red",
+            action: (dayID: number, exerciseID) => removeExercise(dayID, exerciseID),
+        },
+    ];
+
+    const setDropdownItems = [
+        {
+            icon: "material-symbols:delete-outline",
+            label: "Change Type",
+            class: "!text-red",
+            action: () => console.log('Should Open Modal')
+        },
+
+        {
+            icon: "material-symbols:delete-outline",
+            label: "Delete",
+            class: "!text-red",
+            action: (dayID: number, setID: number) => removeSet(dayID, setID),
+        },
+    ];
 </script>
