@@ -154,6 +154,10 @@
         })
     }
 
+    async function addComment(){
+        console.log('addig comment');
+    }
+
 
 
     const dropdownItems = [
