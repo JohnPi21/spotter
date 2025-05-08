@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class MesoDayController extends Controller
 {
+
     public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
         $mesocycle->load('days:id,mesocycle_id,label');
@@ -98,5 +99,14 @@ class MesoDayController extends Controller
         // dd($mesocycle);
 
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
+    }
+
+    public function completeDay(MesoDay $day)
+    {
+        $day->status = 1;
+
+        $day->save();
+
+        return  redirect()->back();
     }
 }

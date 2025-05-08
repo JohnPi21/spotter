@@ -58,7 +58,7 @@
                             </div>
                         </template>
 
-                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class" @click="item.action(dayExercise.id)" >
+                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class" @click="item.action(day.id, dayExercise.id)">
                             <Icon :icon="item.icon" /> {{ item.label }}
                         </li>
                     </UiDropdownMenu>
@@ -77,10 +77,21 @@
                 <div class="justify-self-end">LOG</div>
             </div>
 
-            <div class="grid grid-cols-6 gap-5" v-for="set in dayExercise.sets">
+            <div class="grid grid-cols-6 gap-5" v-for="(set, set_idx) in dayExercise.sets">
                 <div class="flex items-center justify-start">
-                    <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                    <UiDropdownMenu :idx="set_idx">
+                        <template #header>
+                            <div class="hover:cursor-pointer">
+                                <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                            </div>
+                        </template>
+
+                        <li v-for="(item, i) in setDropdownItems" :key="i" :class="item.class" @click="item.action(set.id)">
+                            <Icon :icon="item.icon" /> {{ item.label }}
+                        </li>
+                    </UiDropdownMenu>
                 </div>
+
                 <div class="col-span-2">
                     <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight"
                         inputClass="text-center" />
@@ -95,7 +106,7 @@
             </div>
         </UiBox>
 
-        <ButtonPrimary>Finish Workout</ButtonPrimary>
+        <ButtonPrimary @click="completeDay(day.id)">Finish Workout</ButtonPrimary>
     </div>
 </template>
 <script setup lang="ts">
@@ -148,14 +159,19 @@
         });
     }
 
-    async function removeSet(dayExerciseID: number, setID: number){
-        router.delete(`/sets/${dayExerciseID}/${setID}`, {
+    async function removeSet(setID: number){
+        router.delete(`/sets/${setID}`, {
             preserveState: false
         })
     }
 
     async function addComment(){
         console.log('addig comment');
+    }
+
+    async function completeDay(dayID: number)
+    {
+        router.patch(`/day/${dayID}`)
     }
 
 
@@ -219,7 +235,7 @@
             icon: "material-symbols:delete-outline",
             label: "Delete",
             class: "!text-red",
-            action: (dayID: number, exerciseID) => removeExercise(dayID, exerciseID),
+            action: (dayID: number, exerciseID: number) => removeExercise(dayID, exerciseID),
         },
     ];
 
@@ -227,7 +243,6 @@
         {
             icon: "material-symbols:delete-outline",
             label: "Change Type",
-            class: "!text-red",
             action: () => console.log('Should Open Modal')
         },
 
@@ -235,7 +250,7 @@
             icon: "material-symbols:delete-outline",
             label: "Delete",
             class: "!text-red",
-            action: (dayID: number, setID: number) => removeSet(dayID, setID),
+            action: (setID: number) => removeSet(setID),
         },
     ];
 </script>

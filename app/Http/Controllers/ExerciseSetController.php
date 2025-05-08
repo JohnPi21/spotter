@@ -46,4 +46,11 @@ class ExerciseSetController extends Controller
         // @TODO: check out how to pass back data for the updated $set (serach for partial reload in inertia )
         // return redirect()->back()->with('success', 'Exercise set updated successfully!')->with('set', $set);
     }
+
+    public function destroy(ExerciseSet $set)
+    {
+        $set->delete();
+
+        return redirect()->back();
+    }
 }
