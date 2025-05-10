@@ -13,14 +13,7 @@ class MesoDayController extends Controller
 
     public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
-        $mesocycle->load('days:id,mesocycle_id,label');
-
-
-        // DayExercise::whereIn('exercise_id', $day->)
-
-        // ExerciseSet::whereHas('day_exercise_id', function(Builder $query) {
-        //     $query->whereIn('meso_day_id', $mesocycle->days->pluck('id'))
-        // })->where('meso_day_id');
+        $mesocycle->load('days:id,mesocycle_id,label,status');
 
         $day->load(['dayExercises' => ['exercise' => ['muscleGroup'], 'sets']]);
 
@@ -45,17 +38,17 @@ class MesoDayController extends Controller
         })->with(['sets' => function ($query) {
             $query->whereNotNull('weight')->whereNotNull('reps'); // Only load valid sets
         }])
-        ->orderBy('id', 'DESC')
-        ->get()
-        ->keyBy('exercise_id');
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->keyBy('exercise_id');
 
         // days =>
-                // days -> sets (sets / exercise)
-                // days -> sets (sets / exercise)
+        // days -> sets (sets / exercise)
+        // days -> sets (sets / exercise)
 
         // day => 
-                // exercise in a day -> sets
-                // exercise in a day -> sets
+        // exercise in a day -> sets
+        // exercise in a day -> sets
 
         $lastSets = [];
 
@@ -64,16 +57,16 @@ class MesoDayController extends Controller
         }
 
         foreach ($day->dayExercises as $dayExercise) {
-            if(isset($lastSets[$dayExercise->exercise_id])){
-                for ($i=0; $i < count($dayExercise->sets); $i++) { 
+            if (isset($lastSets[$dayExercise->exercise_id])) {
+                for ($i = 0; $i < count($dayExercise->sets); $i++) {
                     // Create set entry if it does not exist
-                    if(! $dayExercise->sets[$i]){
+                    if (! $dayExercise->sets[$i]) {
                         $dayExercise->sets[$i]->day_exercise_id = $dayExercise->id;
                         $dayExercise->sets[$i]->status          = 0;
 
                         $dayExercise->sets[$i]->target_reps     = $lastSets[$i]->reps;
                         $dayExercise->sets[$i]->target_weight   = $lastSets[$i]->weight;
-                    } else{
+                    } elseif (isset($lastSets[$dayExercise->exercise_id][$i])) {
                         $dayExercise->sets[$i]->target_reps     = $lastSets[$dayExercise->exercise_id][$i]->reps;
                         $dayExercise->sets[$i]->target_weight   = $lastSets[$dayExercise->exercise_id][$i]->weight;
                     }
@@ -96,14 +89,12 @@ class MesoDayController extends Controller
 
         $mesocycle->setRelation('day', $day);
 
-        // dd($mesocycle);
-
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
 
-    public function completeDay(MesoDay $day)
+    public function toggleDay(MesoDay $day)
     {
-        $day->status = 1;
+        $day->status = $day->status == 0 ? 1 : 0;
 
         $day->save();
 

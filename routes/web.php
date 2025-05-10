@@ -16,6 +16,8 @@ Route::controller(MesocycleController::class)->group(function () {
 
     Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
 
+    Route::get('/mesocycles/current-day', [MesocycleController::class, 'currentActiveDay'])->name('mesocycles.current');
+
     Route::post('/mesocycles', 'store');
 
     Route::get('/mesocycles/{mesocycle}', 'show');
@@ -31,10 +33,9 @@ Route::controller(MesocycleController::class)->group(function () {
 
 Route::controller(MesoDayController::class)->group(function () {
 
-    Route::get('/mesocycles/{mesocycle}/day/{day}', 'show');
+    Route::get('/mesocycles/{mesocycle}/day/{day}', 'show')->name('day.show');
 
-    Route::patch('/day/{day}', 'completeDay');
-
+    Route::patch('/day/{day}', 'toggleDay');
 });
 
 Route::patch('/sets/{set}', [ExerciseSetController::class, 'update']);

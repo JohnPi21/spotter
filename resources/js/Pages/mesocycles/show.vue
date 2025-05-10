@@ -1,12 +1,18 @@
 <template>
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
         <UiBox class="flex flex-col">
-            <div class="flex justify-between items-center">
+
+            <div class="flex justify-between items-center mb-2">
                 <div class="flex flex-col">
                     <p class="text-secondary text-sm">{{ mesocycle.name }}</p>
                     <h3>WEEK {{ day.week }} DAY {{ day.day_order }}: {{ day.label }} </h3>
                 </div>
+
                 <div class="flex align-end items-center gap-3">
+                    <div class="bg-green px-2 rounded flex items-center gap-1" v-if="mesocycle.day.status === 1">
+                        <p>Completed</p>
+                        <Icon icon="ep:success-filled" />
+                    </div>
                     <Icon icon="quill:calendar" width="18px" />
 
                     <UiDropdownMenu idx="1">
@@ -30,10 +36,13 @@
             <div class="flex justify-between gap-1">
                 <div class="flex flex-col items-center flex-1 gap-1" v-for="(week, idx) in mesocycle.calendar">
                     <p>WEEK {{ idx }}</p>
-                    <Link :href="`/mesocycles/${mesocycle.id}/day/${day.id}`"
-                        class="bg-main px-2 py-1 rounded-sm w-full text-center" v-for="day in week"
-                        :class="[{ 'bg-orange-700': $page.url.endsWith(day.id.toString()) }]">
-                    {{ day.label }}
+                    <Link :href="`/mesocycles/${mesocycle.id}/day/${weekDay.id}`"
+                        class="bg-main px-2 py-1 rounded-sm w-full text-center flex items-center justify-center gap-1"
+                        v-for="weekDay in week"
+                        :class="[{ 'bg-orange-700': isActiveDay(weekDay.id) }, { 'border-border-green border opacity-50': weekDay.status == 1 }]">
+
+                    <Icon icon="ep:success-filled" class="text-green" v-if="weekDay.status == 1" />
+                    {{ weekDay.label }}
                     </Link>
                 </div>
             </div>
@@ -58,7 +67,8 @@
                             </div>
                         </template>
 
-                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class" @click="item.action(day.id, dayExercise.id)">
+                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class"
+                            @click="item.action(day.id, dayExercise.id)">
                             <Icon :icon="item.icon" /> {{ item.label }}
                         </li>
                     </UiDropdownMenu>
@@ -86,7 +96,8 @@
                             </div>
                         </template>
 
-                        <li v-for="(item, i) in setDropdownItems" :key="i" :class="item.class" @click="item.action(set.id)">
+                        <li v-for="(item, i) in setDropdownItems" :key="i" :class="item.class"
+                            @click="item.action(set.id)">
                             <Icon :icon="item.icon" /> {{ item.label }}
                         </li>
                     </UiDropdownMenu>
@@ -97,7 +108,8 @@
                         inputClass="text-center" />
                 </div>
                 <div class="col-span-2">
-                    <InputText :placeholder="set?.target_reps ?? '3 RIR'" v-model="set.reps" inputClass="text-center" />
+                    <InputText :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
+                        v-model="set.reps" inputClass="text-center" />
                 </div>
                 <div class="flex items-center justify-end">
                     <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1"
@@ -106,15 +118,18 @@
             </div>
         </UiBox>
 
-        <ButtonPrimary @click="completeDay(day.id)">Finish Workout</ButtonPrimary>
+        <ButtonPrimary @click="toggleDay(day.id)" v-if="mesocycle.day.status === 0">Finish Workout</ButtonPrimary>
+        <ButtonSecondary @click="toggleDay(day.id)" v-else>Reactivate</ButtonSecondary>
+
     </div>
 </template>
 <script setup lang="ts">
-    import { ref, reactive, onMounted } from 'vue';
+    import { ref, reactive, onMounted, computed } from 'vue';
     import { Icon } from '@iconify/vue'
     import UiBox from '@/Components/Ui/Box.vue';
     import UiErrors from '@/Components/Ui/Errors.vue';
     import ButtonPrimary from '@/Components/Button/Primary.vue';
+    import ButtonSecondary from '@/Components/Button/Secondary.vue';
     import UiDropdownMenu from '@/Components/Ui/DropdownMenu.vue';
     import InputText from '@/Components/Input/text.vue'
     import { Link, router, useForm, usePage } from '@inertiajs/vue3';
@@ -127,6 +142,13 @@
     }>();
 
     const day = ref(props.mesocycle.day);
+
+    function isActiveDay(dayID: Number) {
+        const url = usePage().url.split("/");
+        const length = url.length - 1;
+
+        return Number(url[length]) === dayID
+    }
 
     onMounted(() => {
         console.log(props.mesocycle);
@@ -147,7 +169,7 @@
     }
 
 
-    async function removeExercise(dayExerciseID: number, exerciseID: number){
+    async function removeExercise(dayExerciseID: number, exerciseID: number) {
         router.delete('/', {
             preserveState: 'errors'
         })
@@ -159,18 +181,17 @@
         });
     }
 
-    async function removeSet(setID: number){
+    async function removeSet(setID: number) {
         router.delete(`/sets/${setID}`, {
             preserveState: false
         })
     }
 
-    async function addComment(){
+    async function addComment() {
         console.log('addig comment');
     }
 
-    async function completeDay(dayID: number)
-    {
+    async function toggleDay(dayID: number) {
         router.patch(`/day/${dayID}`)
     }
 

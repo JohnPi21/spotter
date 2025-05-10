@@ -131,4 +131,27 @@ class MesocycleController extends Controller
 
         return to_route('mesocycles');
     }
+
+    public function currentActiveDay(): RedirectResponse
+    {
+        $mesocycle = Mesocycle::where('status', 1)->first();
+
+        // $days = [16, 15, 14, 13, 12];
+        // $day[13] has status 1 meaning i have to get $day[14] next;
+        $days = MesoDay::where('mesocycle_id', $mesocycle->id)->orderBy('id', 'DESC')->get();
+
+        $index = $days->search(fn($day) => $day->status === 1);
+
+        $currentDay = [];
+
+        if ($index && isset($days[$index - 1])) {
+            $currentDay = $days[$index - 1];
+        } elseif ($index !== false) {
+            $currentDay = $days[$index];
+        } else {
+            $currentDay = $days->last();
+        }
+
+        return to_route("day.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay->id]);
+    }
 }

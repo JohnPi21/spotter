@@ -71,6 +71,7 @@ declare global {
         id: number;
         mesocycle_id: number;
         label: string;
+        status: number;
     };
 
     type Calendar = Record<number, CalendarEntry[]>;

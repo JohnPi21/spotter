@@ -35,7 +35,7 @@
             default: '',
         },
         placeholder: {
-            type: String,
+            type: String, Number,
             default: '',
         },
         required: {
