@@ -1,13 +1,15 @@
 <template>
     <div class="flex min-h-screen">
-        <SideNav />
+        <SideNav class="hidden md:block" />
         <Modal />
-        <div class="container pl-[var(--sidenav-width)] mx-auto px-5">
+        <div class="container md:pl-[var(--sidenav-width)] px-3 mx-auto">
             <slot />
         </div>
+        <MobileNav />
     </div>
 </template>
-<script setup>
-import SideNav from '@/Components/SideNav.vue';
-import Modal from '@/Components/Modal.vue';
+<script setup lang="ts">
+    import SideNav from '@/Components/SideNav.vue';
+    import Modal from '@/Components/Modal.vue';
+    import MobileNav from '@/Components/MobileNav.vue'
 </script>

@@ -16,18 +16,15 @@
         </div>
     </aside>
 </template>
-<script setup>
+<script setup lang="ts">
     import { Link } from '@inertiajs/vue3';
     import { Icon } from '@iconify/vue';
     import { useUserStore } from '../stores/userStore';
 
-    const userStore = useUserStore();
-
     const links = [
         { name: 'Current Workout', path: '/mesocycles/current-day', icon: 'tabler:barbell' },
         { name: 'Mesocycles', path: '/mesocycles', icon: 'entypo:cycle' },
-        { name: 'Execises', path: '/', icon: 'solar:bill-list-linear' },
-        { name: 'Templates', path: '/', icon: 'carbon:template' },
+        { name: 'Account', path: '/', icon: 'codicon:account' },
     ]
 </script>
 <style lang="scss" scoped></style>
