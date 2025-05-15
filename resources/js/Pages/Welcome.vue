@@ -1,5 +1,11 @@
 <script setup lang="ts">
+
+import DefaultLayout from '@/Layouts/DefaultLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+
+defineOptions({
+    layout: DefaultLayout
+})
 
 defineProps<{
     canLogin?: boolean;

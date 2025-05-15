@@ -6,6 +6,10 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
+defineOptions({
+    layout: GuestLayout
+});
+
 const props = defineProps<{
     email: string;
     token: string;
@@ -28,7 +32,6 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
         <Head title="Reset Password" />
 
         <form @submit.prevent="submit">
@@ -93,5 +96,4 @@ const submit = () => {
                 </PrimaryButton>
             </div>
         </form>
-    </GuestLayout>
 </template>
