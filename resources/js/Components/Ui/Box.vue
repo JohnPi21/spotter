@@ -7,11 +7,11 @@
 <script setup></script>
 
 <style scoped>
-    :slotted(ul){
-        @apply list-none ;
-    }
+:slotted(ul) {
+    @apply list-none;
+}
 
-    :slotted(ul li){
-        @apply py-3 border-b border-layer-border last:border-none last:pb-0 first:pt-0;
-    }
+:slotted(ul li) {
+    @apply py-3 border-b border-layer-border last:border-none last:pb-0 first:pt-0;
+}
 </style>

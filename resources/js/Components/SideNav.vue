@@ -25,9 +25,10 @@
 
     const links = [
         { name: 'Current Workout', path: '/mesocycles/current-day', icon: 'tabler:barbell' },
-        { name: 'Mesocycles', path: '/mesocycles', icon: 'entypo:cycle' },
-        { name: 'Execises', path: '/', icon: 'solar:bill-list-linear' },
-        { name: 'Templates', path: '/', icon: 'carbon:template' },
+        { name: 'Mesocycles', path: '/', icon: 'entypo:cycle' },
+        { name: 'Account', path: '/profile', icon: 'codicon:account' },
+        // { name: 'Execises', path: '/', icon: 'solar:bill-list-linear' },
+        // { name: 'Templates', path: '/', icon: 'carbon:template' },
     ]
 </script>
 <style lang="scss" scoped></style>

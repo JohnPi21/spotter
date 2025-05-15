@@ -5,7 +5,7 @@
         <div class="container md:pl-[var(--sidenav-width)] px-3 mx-auto">
             <slot />
         </div>
-        <MobileNav />
+        <MobileNav class="block md:hidden" />
     </div>
 </template>
 <script setup lang="ts">
