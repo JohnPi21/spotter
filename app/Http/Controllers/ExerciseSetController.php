@@ -11,10 +11,10 @@ class ExerciseSetController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'dayExerciseID' => 'required|int|exists:day_exercises,id'
+            'day_exercise_id' => 'required|int|exists:day_exercises,id'
         ]);
 
-        $dayExerciseID = $validated['dayExerciseID'];
+        $dayExerciseID = $validated['day_exercise_id'];
 
         $set = new ExerciseSet();
 

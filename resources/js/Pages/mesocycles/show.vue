@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
         <UiBox class="flex flex-col">
-
+            <ModalsExercises />
             <div class="flex justify-between items-center mb-2">
                 <div class="flex flex-col">
                     <p class="text-secondary text-sm">{{ mesocycle.name }}</p>
@@ -24,7 +24,7 @@
 
                         <template v-for="(section, index) in dropdownItems" :key="index">
                             <li class="flex !justify-center bg-layer">{{ section.section }}</li>
-                            <li v-for="(item, i) in section.items" :key="i">
+                            <li v-for="(item, i) in section.items" :key="i" @click="item?.action ? item.action() : ''">
                                 <Icon :icon="item.icon" /> {{ item.label }}
                             </li>
                         </template>
@@ -68,7 +68,7 @@
                         </template>
 
                         <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class"
-                            @click="item.action(day.id, dayExercise.id)">
+                            @click="item.action(dayExercise.id)">
                             <Icon :icon="item.icon" /> {{ item.label }}
                         </li>
                     </UiDropdownMenu>
@@ -135,6 +135,7 @@
     import { Link, router, useForm, usePage } from '@inertiajs/vue3';
     import Checkbox from '@/Components/Checkbox.vue';
     import axios from 'axios';
+    import ModalsExercises from '@/Components/Modals/Exercises.vue';
 
     const props = defineProps<{
         mesocycle: Mesocycle,
@@ -169,14 +170,14 @@
     }
 
 
-    async function removeExercise(dayExerciseID: number, exerciseID: number) {
-        router.delete('/', {
+    async function removeExercise(dayExerciseID: number) {
+        router.delete(`/day/${day.value.id}/exercises/${dayExerciseID}`, {
             preserveState: 'errors'
         })
     }
 
     async function addSet(dayExerciseID: number) {
-        router.post('/sets', { dayExerciseID }, {
+        router.post('/sets', { day_exercise_id: dayExerciseID }, {
             preserveState: false,
         });
     }
@@ -195,6 +196,13 @@
         router.patch(`/day/${dayID}`)
     }
 
+    async function addExercise() {
+        router.post(`/day/${day.value.id}/exercises`, {
+            preserveState: false,
+            // @TODO: Make a modal to select exercises and replace also in mesocycle create
+            exercise_id: 46
+        })
+    }
 
 
     const dropdownItems = [
@@ -213,8 +221,12 @@
             items: [
                 { icon: "icon-park-outline:write", label: "New Note" },
                 { icon: "tabler:italic", label: "Relabel" },
-                { icon: "material-symbols:add", label: "Add Exercise" },
-                { icon: "hugeicons:weight-scale", label: "Bodyweight" },
+                {
+                    icon: "material-symbols:add",
+                    label: "Add Exercise",
+                    action: () => addExercise()
+                },
+                { icon: "hugeicons:weight-scale", label: "Bodyweight", },
                 { icon: "carbon:reset", label: "Reset" },
                 { icon: "carbon:stop-outline", label: "End" },
             ],
@@ -245,7 +257,7 @@
         {
             icon: "material-symbols:add",
             label: "Add Set",
-            action: (dayID: number) => addSet(dayID),
+            action: (dayExerciseID: number) => addSet(dayExerciseID),
         },
         {
             icon: "ix:skip",
@@ -256,7 +268,7 @@
             icon: "material-symbols:delete-outline",
             label: "Delete",
             class: "!text-red",
-            action: (dayID: number, exerciseID: number) => removeExercise(dayID, exerciseID),
+            action: (dayExerciseID: number) => removeExercise(dayExerciseID),
         },
     ];
 

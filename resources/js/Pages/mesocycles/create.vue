@@ -97,13 +97,13 @@
 
     const selectedDay = ref(null);
 
-    function selectMuscleGroupDay(dayId){
+    function selectMuscleGroupDay(dayId) {
         selectedDay.value = dayId;
         isModalOpen.value = true;
     }
 
     function addMuscleGroup(muscleGroupId) {
-        days[selectedDay.value].exercises.push({muscleGroup: muscleGroupId, exerciseId: null});
+        days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseId: null });
         isModalOpen.value = false;
     }
 

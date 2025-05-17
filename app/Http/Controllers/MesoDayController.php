@@ -6,6 +6,7 @@ use App\Models\DayExercise;
 use Inertia\Inertia;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 class MesoDayController extends Controller
@@ -92,7 +93,7 @@ class MesoDayController extends Controller
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
 
-    public function toggleDay(MesoDay $day)
+    public function toggleDay(MesoDay $day): RedirectResponse
     {
         $day->status = $day->status == 0 ? 1 : 0;
 
