@@ -26,6 +26,7 @@ declare global {
     type MuscleGroup = {
         id: number;
         name: string;
+        exercises?: Exercise[];
     };
 
     type Exercise = {

@@ -1,7 +1,9 @@
 <template>
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
         <UiBox class="flex flex-col">
-            <ModalsExercises />
+
+            <ModalsExercises v-model="exercisesModal"/>
+
             <div class="flex justify-between items-center mb-2">
                 <div class="flex flex-col">
                     <p class="text-secondary text-sm">{{ mesocycle.name }}</p>
@@ -143,6 +145,7 @@
     }>();
 
     const day = ref(props.mesocycle.day);
+    const exercisesModal = ref<Boolean>(false);
 
     function isActiveDay(dayID: Number) {
         const url = usePage().url.split("/");
@@ -197,6 +200,8 @@
     }
 
     async function addExercise() {
+        exercisesModal.value = true;
+        return;
         router.post(`/day/${day.value.id}/exercises`, {
             preserveState: false,
             // @TODO: Make a modal to select exercises and replace also in mesocycle create

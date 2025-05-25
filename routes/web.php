@@ -6,6 +6,7 @@ use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ExerciseController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -39,6 +40,10 @@ Route::controller(ExerciseSetController::class)->group(function () {
 Route::controller(DayExerciseController::class)->group(function () {
     Route::post('/day/{day}/exercises/', 'store');
     Route::delete('day/{day}/exercises/{exercise}', 'destroy');
+});
+
+Route::controller(ExerciseController::class)->group(function () {
+    Route::get('/exercises', 'index');
 });
 
 Route::middleware('auth')->group(function () {
