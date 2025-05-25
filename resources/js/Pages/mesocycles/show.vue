@@ -145,7 +145,7 @@
     }>();
 
     const day = ref(props.mesocycle.day);
-    const exercisesModal = ref<Boolean>(false);
+    const exercisesModal = ref<boolean>();
 
     function isActiveDay(dayID: Number) {
         const url = usePage().url.split("/");
