@@ -22,11 +22,9 @@ class DayExerciseController extends Controller
         ]);
 
         if ((int) $day->status === 1) {
-            if ($day->status == 1) {
-                throw ValidationException::withMessages([
-                    'day_status' => 'This day is already completed and cannot be modified.',
-                ]);
-            }
+            throw ValidationException::withMessages([
+                'day_status' => 'This day is already completed and cannot be modified.',
+            ]);
         }
 
         $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? -1;
