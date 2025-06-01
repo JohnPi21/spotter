@@ -13,6 +13,11 @@ class DayExercise extends Model
 
     protected $guarded = [];
 
+    public function day()
+    {
+        return $this->belongsTo(MesoDay::class, 'meso_day_id');
+    }
+
     public function sets()
     {
         return $this->hasMany(ExerciseSet::class);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Validation\ValidationException;
 
 class MesoDay extends Model
 {
@@ -28,4 +29,13 @@ class MesoDay extends Model
     // {
     //     return $this->hasManyThrough(Exercise::class, DayExercise::class, 'meso_day_id', 'id', 'id', 'exercise_id');
     // }
+
+    public function ensureIsEditable(): void
+    {
+        if ((int) $this->status === 1) {
+            throw ValidationException::withMessages([
+                'day_status' => 'This day is already completed and cannot be modified.',
+            ]);
+        }
+    }
 }

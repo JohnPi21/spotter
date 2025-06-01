@@ -35,7 +35,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::controller(DayExerciseController::class)->group(function () {
-        Route::post('/day/{day}/exercises/', 'store');
+        Route::post('/day/{day}/exercises', 'store');
         Route::delete('day/{day}/exercises/{exercise}', 'destroy');
     });
 

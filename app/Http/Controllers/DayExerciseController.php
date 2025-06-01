@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DayExercise;
+use App\Models\ExerciseSet;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,9 @@ class DayExerciseController extends Controller
 {
     public function store(Request $request, MesoDay $day): RedirectResponse
     {
+
+        $day->ensureIsEditable();
+
         $validated = $request->validate([
             'exercise_id' => [
                 'required',
@@ -21,21 +25,41 @@ class DayExerciseController extends Controller
             ]
         ]);
 
-        if ((int) $day->status === 1) {
-            throw ValidationException::withMessages([
-                'day_status' => 'This day is already completed and cannot be modified.',
-            ]);
-        }
-
         $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? -1;
 
         // Maybe send the object back?
-        DayExercise::create([
+        $dayExercise = DayExercise::create([
             'meso_day_id' => $day->id,
             'exercise_id' => $validated['exercise_id'],
             'position'    => $lastPosition + 1,
         ]);
 
-        return redirect()->back();
+        ExerciseSet::create([
+            'day_exercise_id' => $dayExercise->id,
+            'status'          => 0
+        ]);
+
+        return redirect()->route('day.show', [
+            'mesocycle' => $day->mesocycle,
+            'day'       => $day,
+        ]);
+    }
+
+    public function destroy(MesoDay $day, DayExercise $exercise): RedirectResponse
+    {
+        if ($day->id !== $exercise->meso_day_id) {
+            abort(403);
+        }
+
+        $exercise->load('day.mesocycle');
+
+        $exercise->day->ensureIsEditable();
+
+        $exercise->delete();
+
+        return redirect()->route('day.show', [
+            'mesocycle' => $exercise->day->mesocycle,
+            'day'       => $exercise->day,
+        ]);
     }
 }
