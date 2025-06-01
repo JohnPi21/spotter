@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
         <UiBox class="flex flex-col">
 
-            <ModalsExercises v-model="exercisesModal"/>
+            <ModalsExercises v-model="exercisesModal" @select="addExercise" />
 
             <div class="flex justify-between items-center mb-2">
                 <div class="flex flex-col">
@@ -199,14 +199,12 @@
         router.patch(`/day/${dayID}`)
     }
 
-    async function addExercise() {
+    async function addExercise(exerciseID: number) {
+        router.post(`/day/${day.value.id}/exercises`, { exercise_id: exerciseID }, { preserveState: false, })
+    }
+
+    function addExerciseModal(): void {
         exercisesModal.value = true;
-        return;
-        router.post(`/day/${day.value.id}/exercises`, {
-            preserveState: false,
-            // @TODO: Make a modal to select exercises and replace also in mesocycle create
-            exercise_id: 46
-        })
     }
 
 
@@ -229,7 +227,7 @@
                 {
                     icon: "material-symbols:add",
                     label: "Add Exercise",
-                    action: () => addExercise()
+                    action: () => addExerciseModal()
                 },
                 { icon: "hugeicons:weight-scale", label: "Bodyweight", },
                 { icon: "carbon:reset", label: "Reset" },
