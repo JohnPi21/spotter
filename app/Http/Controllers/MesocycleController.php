@@ -10,11 +10,27 @@ use App\Models\ExerciseSet;
 use App\Models\MuscleGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
+use Illuminate\Routing\Controllers\Middleware;
 
-class MesocycleController extends Controller
+class MesocycleController extends Controller implements HasMiddleware
 {
+
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy']),
+            new Middleware('can:view,mesocycle', only: ['show']),
+            // new Middleware('can:create,' . Mesocycle::class, only: ['create']),
+        ];
+    }
+
+
     public function index(): \Inertia\Response
     {
         $mesocycles = Mesocycle::all();
@@ -40,6 +56,7 @@ class MesocycleController extends Controller
 
     public function create(): \Inertia\Response
     {
+        // @TODO: Remove this and replace in frontend with component functionality
         $muscleGroups = MuscleGroup::pluck('name', 'id')->toArray();
         $exercises = Exercise::all();
         $exerciseDropdown = [];
@@ -71,18 +88,16 @@ class MesocycleController extends Controller
             'days.*.exercises.*.exerciseId'     => ['integer', 'min:1', 'exists:exercises,id']
         ]);
 
-        $mesocycle = new Mesocycle();
-
         $validatedMeso = collect($validated['meso']);
 
-        $mesocycle->name            = $validatedMeso['name'];
-        $mesocycle->unit            = $validatedMeso['unit'];
-        $mesocycle->weeks_duration  = $validatedMeso['weeksDuration'];
-        $mesocycle->days_per_week   = count($validated['days']);
-        $mesocycle->user_id         = 1;
-        $mesocycle->status          = 0;
-
-        $mesocycle->save();
+        $mesocycle = Mesocycle::create([
+            'name'            => $validatedMeso->name,
+            'unit'            => $validatedMeso->unit,
+            'weeks_duration'  => $validatedMeso->weeksDuration,
+            'days_per_week'   => count($validated['days']),
+            'user_id'         => $request->user()->id,
+            'status'          => 0,
+        ]);
 
         for ($i = 1; $i <= $mesocycle['weeks_duration']; $i++) {
 
@@ -117,6 +132,7 @@ class MesocycleController extends Controller
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
     {
+
         Mesocycle::where('user_id', 1)->update(['status' => 0]);
 
         $mesocycle->status = 1;
@@ -132,9 +148,16 @@ class MesocycleController extends Controller
         return to_route('mesocycles');
     }
 
+
     public function currentActiveDay(): RedirectResponse
     {
         $mesocycle = Mesocycle::where('status', 1)->first();
+
+        if(is_null($mesocycle) || $mesocycle->isEmpty()){
+            return redirect()->route('mesocycles')->withErrors([
+                'mesocycle' => 'No active mesocycle found.',
+            ]);
+        }
 
         // $days = [16, 15, 14, 13, 12];
         // $day[13] has status 1 meaning i have to get $day[14] next;

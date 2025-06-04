@@ -4,6 +4,7 @@
 
         <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" url="/mesocycles/create" />
 
+        <UiErrors :errors="errors" />
         <UiBox v-if="props.mesocycles.length > 0">
             <ul>
                 <li v-for="(meso, idx) in mesocycles" :key="meso.id">
@@ -49,10 +50,12 @@
     import { Link, useForm } from '@inertiajs/vue3';
     import { Head } from '@inertiajs/vue3'
     import { onMounted } from 'vue';
+    import UiErrors from '@/Components/Ui/Errors.vue'
 
     const props = defineProps<{
         title: String,
         mesocycles: Array<Mesocycle>,
+        errors?: Object
     }>();
 
     const form = useForm({});

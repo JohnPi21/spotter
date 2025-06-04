@@ -8,12 +8,15 @@ use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class MesoDayController extends Controller
 {
 
     public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
+        Gate::authorize('view', $mesocycle);
+        
         $mesocycle->load('days:id,mesocycle_id,label,status');
 
         $day->load(['dayExercises' => ['exercise' => ['muscleGroup'], 'sets']]);
@@ -92,6 +95,7 @@ class MesoDayController extends Controller
 
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
+
 
     public function toggleDay(MesoDay $day): RedirectResponse
     {

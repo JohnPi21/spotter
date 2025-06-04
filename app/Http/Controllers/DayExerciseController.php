@@ -8,12 +8,16 @@ use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Gate;
+
 
 class DayExerciseController extends Controller
 {
     public function store(Request $request, MesoDay $day): RedirectResponse
     {
+
+        // Authorize
+        Gate::authorize('update', $day->mesocycle);
 
         $day->ensureIsEditable();
 
