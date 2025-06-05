@@ -57,6 +57,11 @@ class MesocyclePolicy
         return $user->id === $mesocycle->user_id;
     }
 
+    public function owns(User $user, Mesocycle $mesocycle): bool
+    {
+        return $user->id === $mesocycle->user_id;
+    }
+
     /**
      * Determine whether the user can permanently delete the model.
      */

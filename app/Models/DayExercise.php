@@ -27,4 +27,9 @@ class DayExercise extends Model
     {
         return $this->hasOne(Exercise::class, 'id', 'exercise_id');
     }
+
+    public function mesocycle(): Mesocycle|null
+    {
+        return $this?->day->mesocycle;
+    }
 }

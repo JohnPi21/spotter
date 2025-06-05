@@ -99,6 +99,8 @@ class MesoDayController extends Controller
 
     public function toggleDay(MesoDay $day): RedirectResponse
     {
+        Gate::authorize('owns', $day->mesocycle);
+
         $day->status = $day->status == 0 ? 1 : 0;
 
         $day->save();

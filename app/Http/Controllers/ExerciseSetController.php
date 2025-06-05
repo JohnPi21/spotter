@@ -2,43 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class ExerciseSetController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'day_exercise_id' => 'required|int|exists:day_exercises,id'
+        $dayExerciseID = $request->validate([
+            'day_exercise_id' => ['required', 'integer']
+        ])['day_exercise_id'];
+
+        $dayExercise = DayExercise::with('day.mesocycle:id,user_id,id')->findOrFail($dayExerciseID);
+
+        Gate::authorize('owns', $dayExercise->mesocycle);
+
+        ExerciseSet::create([
+            'day_exercise_id' => $dayExercise->id,
+            'status'          => 0,
         ]);
-
-        $dayExerciseID = $validated['day_exercise_id'];
-
-        $set = new ExerciseSet();
-
-        $set->day_exercise_id = $dayExerciseID;
-        $set->status          = 0;
-
-        $set->save();
 
         return redirect()->back();
     }
 
     public function update(Request $request, ExerciseSet $set)
     {
+        $set->load('dayExercise.day.mesocycle:id,user_id,id');
+
+        Gate::authorize('update', $set->dayExercise->mesocycle);
+
         $validated = $request->validate([
             'reps'      => ['required', 'integer'],
             'weight'    => ['required', 'integer'],
             'status'    => ['nullable', 'integer'],
         ]);
 
-        $set->reps   = $validated['reps'];
-        $set->weight = $validated['weight'];
-        $set->status = $validated['status'];
-
-        $set->save();
+        $set->update($validated);
 
         return response()->json([
             'set' => $set
@@ -49,6 +50,8 @@ class ExerciseSetController extends Controller
 
     public function destroy(ExerciseSet $set)
     {
+        Gate::authorize('update', $set->dayExercise->mesocycle);
+
         $set->delete();
 
         return redirect()->back();

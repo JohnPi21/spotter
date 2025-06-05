@@ -15,9 +15,8 @@ class DayExerciseController extends Controller
 {
     public function store(Request $request, MesoDay $day): RedirectResponse
     {
-
         // Authorize
-        Gate::authorize('update', $day->mesocycle);
+        Gate::authorize('owns', $day->mesocycle);
 
         $day->ensureIsEditable();
 
@@ -51,9 +50,7 @@ class DayExerciseController extends Controller
 
     public function destroy(MesoDay $day, DayExercise $exercise): RedirectResponse
     {
-        if ($day->id !== $exercise->meso_day_id) {
-            abort(403);
-        }
+        Gate::authorize('owns', $day->mesocycle);
 
         $exercise->load('day.mesocycle');
 
