@@ -7,7 +7,8 @@ use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExerciseController;
-
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
 
@@ -52,3 +53,10 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__ . '/auth.php';
+
+Route::fallback(function (Request $request) {
+    return Inertia::render('ErrorPage', [
+        'status' => 404,
+        'message' => "Page not found."
+    ])->toResponse($request)->setStatusCode(404);
+});

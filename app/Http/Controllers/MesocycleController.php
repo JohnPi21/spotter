@@ -8,6 +8,7 @@ use App\Models\MesoDay;
 use App\Models\Exercise;
 use App\Models\ExerciseSet;
 use App\Models\MuscleGroup;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -31,7 +32,7 @@ class MesocycleController extends Controller implements HasMiddleware
     }
 
 
-    public function index(): \Inertia\Response
+    public function index(Request $request): \Inertia\Response
     {
         $mesocycles = Mesocycle::all();
 
@@ -74,7 +75,6 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-
         $muscleGroups = MuscleGroup::pluck('id')->toArray();
 
         $validated = $request->validate([
@@ -153,10 +153,11 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         $mesocycle = Mesocycle::where('status', 1)->first();
 
-        if(is_null($mesocycle) || $mesocycle->isEmpty()){
-            return redirect()->route('mesocycles')->withErrors([
-                'mesocycle' => 'No active mesocycle found.',
-            ]);
+        if (is_null($mesocycle) || $mesocycle->isEmpty()) {
+            throw new \App\Exceptions\AppException("No active mesocycle", 404);
+            // return redirect()->route('mesocycles')->withErrors([
+            //     'mesocycle' => 'No active mesocycle found.',
+            // ]);
         }
 
         // $days = [16, 15, 14, 13, 12];
