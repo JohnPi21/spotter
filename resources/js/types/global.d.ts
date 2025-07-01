@@ -66,6 +66,7 @@ declare global {
         created_at: string;
         updated_at: string;
         day_exercises: DayExercise[];
+        exercises?: Exercise[];
     };
 
     type CalendarEntry = {
@@ -96,6 +97,15 @@ declare global {
         days: Day[];
         day: Day;
     };
+
+    type DropdownOption = {
+        value: string|number|null,
+        label: string|number|null
+    }
+
+    type MuscleGroups = {
+        [key: number]: DropdownOption[];
+    }
 }
 
 declare module 'vue' {

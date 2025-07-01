@@ -41,7 +41,7 @@
     const props = defineProps({
         label: { type: String, default: "" },
         options: { type: Array, default: [] },
-        selected: { type: [String, Number, Boolean, Object] }, 	// The default selected option
+        selected: { type: [String, Number, Boolean, Object, null] }, 	// The default selected option
         default: { type: String, default: "Select an option" }, // The text displayed before choosing an option	
         all: { type: Boolean, default: false },					// Returns the index of the option
         icon: { type: String }, 								// Expects the icon name from header

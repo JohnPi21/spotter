@@ -78,22 +78,23 @@ class MesocycleController extends Controller implements HasMiddleware
         $muscleGroups = MuscleGroup::pluck('id')->toArray();
 
         $validated = $request->validate([
-            'meso.name'                         => ['string'],
-            'meso.unit'                         => [Rule::in(['kg', 'lbs'])],
-            'meso.weeksDuration'                => ['integer', 'min:3', 'max:6'],
-            'days'                              => ['array'],
-            'days.*.label'                      => ['string'],
-            'days.*.exercises'                  => ['array'],
-            'days.*.exercises.*.muscleGroup'    => ['integer', 'min:1', Rule::in($muscleGroups)],
-            'days.*.exercises.*.exerciseId'     => ['integer', 'min:1', 'exists:exercises,id']
+            'meso'                              => ['required', 'array'],
+            'meso.name'                         => ['required', 'string'],
+            'meso.unit'                         => ['sometimes', Rule::in(['kg', 'lbs'])],
+            'meso.weeksDuration'                => ['required', 'integer', 'min:3', 'max:6'],
+            'days'                              => ['required', 'array'],
+            'days.*.label'                      => ['required', 'string'],
+            'days.*.exercises'                  => ['required', 'array'],
+            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', Rule::in($muscleGroups)],
+            'days.*.exercises.*.exerciseId'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
         ]);
 
         $validatedMeso = collect($validated['meso']);
 
         $mesocycle = Mesocycle::create([
-            'name'            => $validatedMeso->name,
-            'unit'            => $validatedMeso->unit,
-            'weeks_duration'  => $validatedMeso->weeksDuration,
+            'name'            => $validatedMeso->get('name'),
+            'unit'            => $validatedMeso->get('unit', 'kg'),
+            'weeks_duration'  => $validatedMeso->get('weeksDuration'),
             'days_per_week'   => count($validated['days']),
             'user_id'         => $request->user()->id,
             'status'          => 0,
