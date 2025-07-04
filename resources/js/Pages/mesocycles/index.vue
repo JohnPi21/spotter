@@ -1,5 +1,6 @@
 <template>
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
+
         <Head title="Mesocycles"></Head>
 
         <UiTitle title="Mesocycles" button="NEW" icon="ic:baseline-plus" url="/mesocycles/create" />
@@ -12,12 +13,10 @@
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col gap-1">
                                 <h3>{{ meso.name }}</h3>
-                                <div class="text-secondary text-sm">{{ meso.weeks_duration }} WEEKS - {{ meso.days_per_week }}
-                                    DAYS/WEEK</div>
+                                <div class="text-secondary text-sm">{{ meso.weeks_duration }} WEEKS - {{ meso.days_per_week }} DAYS/WEEK</div>
                             </div>
-                            <div class="flex align-end items-center gap-3">
-                                <div class="bg-blue rounded px-2 py-0.5 opacity-50" v-if="meso.status === 1">Current</div>
 
+                            <div class="flex align-end items-center gap-3"> <div class="bg-blue rounded px-2 py-0.5 opacity-50" v-if="meso.status === 1">Current</div>
                                 <UiDropdownMenu :idx="meso.id">
                                     <template #header>
                                         <div class="hover:cursor-pointer">
@@ -25,8 +24,8 @@
                                         </div>
                                     </template>
 
-                                    <template>
-                                        <li v-for="(item, i) in mesoDropdown" :key="i" :class="item.class" @click.stop="item.action(meso.id)">
+                                    <template v-slot="slotProps">
+                                        <li v-for="(item, i) in mesoDropdown" :key="i" :class="item.class" @click.prevent="item.action(meso.id); slotProps.toggle()">
                                             <Icon :icon="item.icon" /> {{ item.label }}
                                         </li>
                                     </template>
@@ -61,7 +60,7 @@
     const form = useForm({});
 
     function setActive(id: number) {
-        form.patch(`/mesocycles/${id}`)
+        form.patch(`/mesocycles/${id}`);
     }
 
     function destroy(id: number) {

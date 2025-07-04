@@ -50,7 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // ✅ For GET requests, show error page
-            return Inertia::render('error/page', [
+            return Inertia::render('ErrorPage', [
                 'status' => $status,
                 'message' => $message,
             ])->toResponse($request)->setStatusCode($status);

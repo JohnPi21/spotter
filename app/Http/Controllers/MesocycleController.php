@@ -15,6 +15,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class MesocycleController extends Controller implements HasMiddleware
 {
@@ -32,7 +33,7 @@ class MesocycleController extends Controller implements HasMiddleware
     }
 
 
-    public function index(Request $request): \Inertia\Response
+    public function index(): \Inertia\Response
     {
         $mesocycles = Mesocycle::all();
 
@@ -91,13 +92,15 @@ class MesocycleController extends Controller implements HasMiddleware
 
         $validatedMeso = collect($validated['meso']);
 
+        $activateMeso = ! Mesocycle::mine()->exists();
+
         $mesocycle = Mesocycle::create([
             'name'            => $validatedMeso->get('name'),
             'unit'            => $validatedMeso->get('unit', 'kg'),
             'weeks_duration'  => $validatedMeso->get('weeksDuration'),
             'days_per_week'   => count($validated['days']),
             'user_id'         => $request->user()->id,
-            'status'          => 0,
+            'status'          => $activateMeso
         ]);
 
         for ($i = 1; $i <= $mesocycle['weeks_duration']; $i++) {
@@ -133,18 +136,14 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
     {
-
-        Mesocycle::where('user_id', 1)->update(['status' => 0]);
-
-        $mesocycle->status = 1;
-        $mesocycle->save();
+        $mesocycle->update(['status' => Mesocycle::STATUS_ACTIVE]);
 
         return to_route('mesocycles');
     }
 
     public function destroy(Mesocycle $mesocycle): RedirectResponse
     {
-        $mesocycle->delete();
+        $mesocycle->forceDelete();
 
         return to_route('mesocycles');
     }
@@ -152,7 +151,7 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function currentActiveDay(): RedirectResponse
     {
-        $mesocycle = Mesocycle::where('status', 1)->first();
+        $mesocycle = Mesocycle::mine()->where('status', 1)->first();
 
         if (is_null($mesocycle) || $mesocycle->isEmpty()) {
             throw new \App\Exceptions\AppException("No active mesocycle", 404);

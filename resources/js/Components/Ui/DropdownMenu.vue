@@ -3,10 +3,11 @@
 
         <slot name="header"></slot>
 
-        <div class="absolute w-full h-full left-0 top-0 cursor-pointer z-40" ref="menuDropdown" :class="{ 'z-high': dropdown == idx }" @click.prevent.stop="toggleDropdown(idx)">
+        <div class="absolute w-full h-full left-0 top-0 cursor-pointer z-40" ref="menuDropdown"
+            :class="{ 'z-high': dropdown == idx }" @click.prevent="toggleDropdown(idx)">
             <div class="menu-dropdown list-none absolute left-0 w-full bg-layer-light border-b border-layer-border rounded shadow flex flex-col top-[115%] max-h-[300px] min-w-[150px] overflow-y-auto p-1 translate-x-[-50%] scrollbar z-40"
                 v-if="dropdown == idx" @click.prevent.stop="">
-                <slot></slot>
+                <slot :toggle="toggleDropdown"></slot>
             </div>
         </div>
     </div>
@@ -21,7 +22,7 @@
 
     const dropdown = ref(null);
 
-    function toggleDropdown(index) {
+    function toggleDropdown(index = props.idx) {
         if (dropdown.value == index) {
             dropdown.value = null;
             return

@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('meso_days', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Mesocycle::class);
+            $table->foreignIdFor(Mesocycle::class)->cascadeOnDelete();
             $table->unsignedTinyInteger('week');
             $table->unsignedTinyInteger('day_order');
             $table->unsignedSmallInteger('body_weight')->nullable();

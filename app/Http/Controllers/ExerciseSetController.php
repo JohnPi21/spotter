@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -30,8 +31,9 @@ class ExerciseSetController extends Controller
     public function update(Request $request, ExerciseSet $set)
     {
         $set->load('dayExercise.day.mesocycle:id,user_id,id');
+        dd($set);
 
-        Gate::authorize('update', $set->dayExercise->mesocycle);
+        Gate::authorize('update', $set->dayExercise->day->mesocycle);
 
         $validated = $request->validate([
             'reps'      => ['required', 'integer'],
@@ -41,9 +43,11 @@ class ExerciseSetController extends Controller
 
         $set->update($validated);
 
-        return response()->json([
-            'set' => $set
-        ]);
+        return to_route('day.show', [$set->dayExercise->day, $set->dayExercise->day->mesocycle]);
+        // return response()->json([
+        //     'set' => $set
+        // ]);
+
         // @TODO: check out how to pass back data for the updated $set (serach for partial reload in inertia )
         // return redirect()->back()->with('success', 'Exercise set updated successfully!')->with('set', $set);
     }

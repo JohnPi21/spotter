@@ -106,12 +106,11 @@
                 </div>
 
                 <div class="col-span-2">
-                    <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight"
-                        inputClass="text-center" />
+                    <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight" />
                 </div>
                 <div class="col-span-2">
                     <InputText :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
-                        v-model="set.reps" inputClass="text-center" />
+                        v-model="set.reps" />
                 </div>
                 <div class="flex items-center justify-end">
                     <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1"
@@ -126,7 +125,7 @@
     </div>
 </template>
 <script setup lang="ts">
-    import { ref, reactive, onMounted, computed } from 'vue';
+    import { ref, onMounted } from 'vue';
     import { Icon } from '@iconify/vue'
     import UiBox from '@/Components/Ui/Box.vue';
     import UiErrors from '@/Components/Ui/Errors.vue';
@@ -135,8 +134,7 @@
     import UiDropdownMenu from '@/Components/Ui/DropdownMenu.vue';
     import InputText from '@/Components/Input/text.vue'
     import { Link, router, useForm, usePage } from '@inertiajs/vue3';
-    import Checkbox from '@/Components/Checkbox.vue';
-    import axios from 'axios';
+    import Checkbox from '@/Components/Input/Checkbox.vue';
     import ModalsExercises from '@/Components/Modals/Exercises.vue';
 
     const props = defineProps<{
@@ -154,28 +152,20 @@
         return Number(url[length]) === dayID
     }
 
-    onMounted(() => {
-        console.log(props.mesocycle);
-    })
-
-    // TODO: straight up redirect in laravel to /show and that s it (reload the page)
-    async function updateSet(set: ExerciseSet) {
-        if (!set.status) {
-            return;
-        }
-
-        try {
-            const res = await axios.patch(`/sets/${set.id}`, { ...set })
-        } catch (error) {
-            console.log(error)
-            // Make an notificaiton error to handle these
-        }
-    }
-
+    onMounted(() => { })
 
     async function removeExercise(dayExerciseID: number) {
         router.delete(`/day/${day.value.id}/exercises/${dayExerciseID}`, {
-            preserveState: 'errors'
+            preserveState: 'errors',
+        })
+    }
+
+    async function updateSet(set: ExerciseSet) {
+        if (!set.status) return;
+
+        router.patch(`/sets/${set.id}`, { ...set }, {
+            preserveState: 'errors',
+            onError: () => set.status = false
         })
     }
 

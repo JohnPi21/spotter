@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/mesocycles/{mesocycle}', 'show');
         Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
         Route::put('/mesocycles/{id}', 'update');
-        Route::patch('/mesocycles/{mesocycle}', 'activate');
+        Route::patch('/mesocycles/{mesocycle}', 'activate')->name('mesocycles.activate');
         Route::delete('/mesocycles/{mesocycle}', 'destroy');
     });
 

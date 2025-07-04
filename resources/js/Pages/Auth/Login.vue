@@ -1,10 +1,12 @@
 <script setup lang="ts">
-    import Checkbox from '@/Components/Checkbox.vue';
+    import { ref } from 'vue';
+    import Checkbox from '@/Components/Input/Checkbox.vue';
     import GuestLayout from '@/Layouts/GuestLayout.vue';
-    import InputError from '@/Components/InputError.vue';
-    import InputLabel from '@/Components/InputLabel.vue';
+    import InputError from '@/Components/Input/InputError.vue';
+    import InputLabel from '@/Components/Input/InputLabel.vue';
     import ButtonPrimary from '@/Components/Button/Primary.vue';
-    import TextInput from '@/Components/TextInput.vue';
+    import InputText from '@/Components/Input/text.vue';
+    import InputPassword from '@/Components/Input/password.vue';
     import { Head, Link, useForm } from '@inertiajs/vue3';
 
     defineOptions({
@@ -21,6 +23,8 @@
         password: '',
         remember: false,
     });
+
+    const viewPassword = ref(false);
 
     const submit = () => {
         form.post(route('login'), {
@@ -43,7 +47,7 @@
         <div>
             <InputLabel for="email" value="Email" />
 
-            <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus
+            <InputText id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus
                 autocomplete="username" />
 
             <InputError class="mt-2" :message="form.errors.email" />
@@ -52,8 +56,9 @@
         <div class="mt-4">
             <InputLabel for="password" value="Password" />
 
-            <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required
-                autocomplete="current-password" />
+            <!-- <InputText id="password" :type="viewPassword ? 'text' : 'password'" class="mt-1 block w-full" v-model="form.password" required autocomplete="current-password" /> -->
+
+            <InputPassword v-model="form.password" autocomplete="current-password" id="password" placeholder="" />
 
             <InputError class="mt-2" :message="form.errors.password" />
         </div>
