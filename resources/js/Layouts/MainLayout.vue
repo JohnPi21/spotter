@@ -12,4 +12,13 @@
     import SideNav from '@/Components/SideNav.vue';
     import Modal from '@/Components/Modal.vue';
     import MobileNav from '@/Components/MobileNav.vue'
+    import { useExerciseStore } from '@/stores/exerciseStore';
+    import { onMounted } from 'vue';
+
+    const exerciseStore = useExerciseStore();
+
+    onMounted(async () => {
+        await exerciseStore.load();
+    })
+
 </script>

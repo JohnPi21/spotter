@@ -7,6 +7,7 @@ use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExerciseController;
+use App\Models\MuscleGroup;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -48,6 +49,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
+
+    // Get Globally available metadata once (init global data)
+    Route::get("/meta", function () {
+        return response()->json([
+            // 'exercisesByMuscle' => MuscleGroup::with('exercises')->get(),
+        ]);
     });
 });
 

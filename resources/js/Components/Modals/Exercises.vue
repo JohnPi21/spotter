@@ -6,7 +6,7 @@
             <TextInput class="w-full" placeholder="Search exercise" v-model="search" />
 
             <Collapsible class="border-b border-main-border" :title="muscle.name"
-                v-for="(muscle, mIdx) in filteredGroups" v-if="!props.only">
+                v-for="(muscle, mIdx) in filteredGroups" v-if="!props.onlyOneMuscleGroup">
                 <ul>
                     <li v-for="(exercise, eIdx) in muscle.exercises" :key="eIdx" @click="select(exercise.id)"
                         :class="[selected == exercise.id ? 'bg-layer-light text-primary' : 'text-secondary']"
@@ -56,15 +56,16 @@
     import Collapsible from '@/Components/Ui/Collapsible.vue'
     import TextInput from '@/Components/TextInput.vue';
     import ButtonPrimary from '@/Components/Button/Primary.vue';
+    import { useExerciseStore } from '@/stores/exerciseStore';
 
     const showModal = defineModel<boolean>();
 
     interface Props {
-        only?: string;
+        onlyOneMuscleGroup?: string;
     }
 
     const props = withDefaults(defineProps<Props>(), {
-        only: undefined
+        onlyOneMuscleGroup: undefined
     })
 
     const emit = defineEmits<{
@@ -77,13 +78,14 @@
     //   (e: 'confirm', data: Exercise[]): void;
     // }>();
 
+    const exercisesStore = useExerciseStore();
 
-    const muscleGroups = ref<MuscleGroup[]>([]);
+    const exercisesByMuscle = exercisesStore.exercisesByMuscle;
     const selected = ref<number>();
     const search = ref<string>('');
 
     const filteredGroups = computed(() => {
-        return groupsToFilter.value.map(mg => {
+        return groupsToFilter.value.map((mg: MuscleGroup) => {
             const hasExercises = mg.exercises?.filter(ex => ex.name.toLowerCase().includes(search.value.toLowerCase())) || [];
 
             if (hasExercises?.length > 0) {
@@ -95,20 +97,9 @@
     })
 
     const groupsToFilter = computed(() => {
-        const only = props.only;
+        const only = props.onlyOneMuscleGroup;
 
-        return only ? muscleGroups.value.filter(mg => mg.name.toLowerCase().includes(only.toLowerCase())) : muscleGroups.value;
-    })
-
-    onMounted(async () => {
-        try {
-            const response = await axios.get('/exercises');
-
-            muscleGroups.value = response.data;
-
-        } catch (error) {
-            console.error(error)
-        }
+        return only ? exercisesByMuscle.filter(mg => mg.name.toLowerCase().includes(only.toLowerCase())) : exercisesByMuscle;
     })
 
     function select(exerciseID: number): void {

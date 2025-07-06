@@ -1,7 +1,7 @@
-import { PageProps as InertiaPageProps } from '@inertiajs/core';
-import { AxiosInstance } from 'axios';
-import { route as ziggyRoute } from 'ziggy-js';
-import { PageProps as AppPageProps } from './';
+import { PageProps as InertiaPageProps } from "@inertiajs/core";
+import { AxiosInstance } from "axios";
+import { route as ziggyRoute } from "ziggy-js";
+import { PageProps as AppPageProps } from "./";
 
 declare global {
     interface Window {
@@ -39,7 +39,7 @@ declare global {
         deleted_at: string | null;
         created_at: string | null;
         updated_at: string | null;
-        muscle_group: MuscleGroup;
+        muscle_group_id: number;
     };
 
     type DayExercise = {
@@ -99,21 +99,21 @@ declare global {
     };
 
     type DropdownOption = {
-        value: string|number|null,
-        label: string|number|null
-    }
+        value: string | number | null;
+        label: string | number | null;
+    };
 
-    type MuscleGroups = {
+    type MuscleGroupsDropdown = {
         [key: number]: DropdownOption[];
-    }
+    };
 }
 
-declare module 'vue' {
+declare module "vue" {
     interface ComponentCustomProperties {
         route: typeof ziggyRoute;
     }
 }
 
-declare module '@inertiajs/core' {
+declare module "@inertiajs/core" {
     interface PageProps extends InertiaPageProps, AppPageProps {}
 }

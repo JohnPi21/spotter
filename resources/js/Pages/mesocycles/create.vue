@@ -22,15 +22,19 @@
             <template v-if="day.exercises.length > 0">
                 <UiBox class="bg-layer-light flex flex-col gap-2" v-for="(exercise, exerciseIdx) in day.exercises">
                     <div class="flex flex-center justify-between">
-                        <div class="bg-orange-700 px-2 rounded">{{ getMuscleGroup(exercise.muscleGroup) }}</div>
+                        <div class="bg-orange-700 px-2 rounded">{{
+                            exerciseStore.muscleGroups[exercise.muscleGroup]?.name
+                        }}
+                        </div>
                         <Icon icon="material-symbols-light:delete-outline" width="22px"
                             class="cursor-pointer hover:text-red transition"
                             @click="removeExercise(dayIdx, exerciseIdx)" />
                     </div>
 
-                    <ButtonSecondary @click="showExerciseModal = true">
+                    <ButtonSecondary @click="showExerciseModal = true"
+                        :class="{ 'bg-layer-light': exercise.exerciseId }">
                         <span v-if="!exercise.exerciseId">Select Exercise</span>
-                        <span v-else>{{ getMuscleList(exercise.muscleGroup) }}</span>
+                        <span v-else>{{ exerciseStore?.exercises[exercise.exerciseId]?.name }}</span>
                     </ButtonSecondary>
 
                     <ModalExercise v-model="showExerciseModal"
@@ -52,9 +56,9 @@
         <Modal :show="showMuscleModal" @close="showMuscleModal = false">
             <ModalHeader title="Choose muscle group" @close="showMuscleModal = false" />
             <ul>
-                <li v-for="(muscle, idx) in props.muscleGroups" :key="idx" @click="addMuscleGroup(idx)"
+                <li v-for="(muscle, idx) in exerciseStore.muscleGroups" :key="idx" @click="addMuscleGroup(idx)"
                     class="p-2 border-b border-main-border cursor-pointer text-secondary hover:text-primary transition hover:bg-layer-light last:border-b-0 flex items-center justify-between">
-                    {{ muscle }}
+                    {{ muscle.name }}
                 </li>
             </ul>
         </Modal>
@@ -80,12 +84,10 @@
     import { useForm } from '@inertiajs/vue3';
     import InputError from '@/Components/Input/InputError.vue';
     import ModalExercise from '@/Components/Modals/Exercises.vue'
+    import { useExerciseStore } from '@/stores/exerciseStore';
 
     const props = defineProps<{
         errors: { [key: string]: string },
-        exercises: Exercise[],
-        muscleGroups: Record<number, string>,
-        exerciseDropdown: MuscleGroups,
     }>();
 
     const meso = ref<MesoForm>({
@@ -94,16 +96,11 @@
         weeksDuration: 4
     });
 
+    const exerciseStore = useExerciseStore();
     const showMuscleModal = ref<boolean>(false);
     const showExerciseModal = ref<boolean>(false);
 
     const days: DayForm[] = reactive([])
-
-    function getMuscleGroup(id: number | null) {
-        if (id == null) return;
-
-        return props.muscleGroups[id]
-    }
 
     function addDay() {
         days.push({
@@ -128,7 +125,7 @@
     }
 
     function addMuscleGroup(muscleGroupId: number) {
-        days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseId: null });
+        days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseId: 0 });
         showMuscleModal.value = false;
     }
 
@@ -138,23 +135,17 @@
         mesoForm.post('/mesocycles')
     }
 
-    function getMuscleList(id: number | null) {
-        if (id === null || id === undefined) return [];
-
-        return props.exerciseDropdown[id];
-    }
 
     function setExerciseID(id: number, exercise: any) {
-        console.log(id);
         exercise.exerciseId = id;
-        console.log(exercise)
+        showExerciseModal.value = false;
     }
 
     type DayForm = {
         label: string,
         exercises: {
-            muscleGroup: number | null,
-            exerciseId: number | null,
+            muscleGroup: number,
+            exerciseId: number,
         }[];
     };
 
