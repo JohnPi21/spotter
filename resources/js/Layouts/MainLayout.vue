@@ -2,7 +2,7 @@
     <div class="flex min-h-screen">
         <SideNav class="hidden md:block" />
         <Modal />
-        <div class="container md:pl-[var(--sidenav-width)] px-3 mx-auto">
+        <div class="container md:pl-[var(--sidenav-width)] pb-[var(--mobilenav-height)] mb-5 px-3 mx-auto">
             <slot />
         </div>
         <MobileNav class="block md:hidden" />

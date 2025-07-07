@@ -39,7 +39,7 @@ declare global {
         deleted_at: string | null;
         created_at: string | null;
         updated_at: string | null;
-        muscle_group_id: number;
+        muscle_group: MuscleGroup;
     };
 
     type DayExercise = {

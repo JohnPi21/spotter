@@ -10,35 +10,38 @@
             <ul>
                 <li v-for="(meso, idx) in mesocycles" :key="meso.id">
                     <Link :href="`mesocycles/${meso.id}/day/1`">
-                        <div class="flex justify-between items-center">
-                            <div class="flex flex-col gap-1">
-                                <h3>{{ meso.name }}</h3>
-                                <div class="text-secondary text-sm">{{ meso.weeks_duration }} WEEKS - {{ meso.days_per_week }} DAYS/WEEK</div>
-                            </div>
-
-                            <div class="flex align-end items-center gap-3"> <div class="bg-blue rounded px-2 py-0.5 opacity-50" v-if="meso.status === 1">Current</div>
-                                <UiDropdownMenu :idx="meso.id">
-                                    <template #header>
-                                        <div class="hover:cursor-pointer">
-                                            <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
-                                        </div>
-                                    </template>
-
-                                    <template v-slot="slotProps">
-                                        <li v-for="(item, i) in mesoDropdown" :key="i" :class="item.class" @click.prevent="item.action(meso.id); slotProps.toggle()">
-                                            <Icon :icon="item.icon" /> {{ item.label }}
-                                        </li>
-                                    </template>
-                                </UiDropdownMenu>
-                            </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex flex-col gap-1">
+                            <h3>{{ meso.name }}</h3>
+                            <div class="text-secondary text-sm">{{ meso.weeks_duration }} WEEKS - {{ meso.days_per_week
+                            }} DAYS/WEEK</div>
                         </div>
-                    </Link>
-                </li>
-            </ul>
-        </UiBox>
 
-        <h2 class="text-xl text-center pt-3" v-else>No Mesocycles Created.</h2>
-    </div>
+                        <div class="flex align-end items-center gap-3">
+                            <div class="bg-blue rounded px-2 py-0.5 opacity-50" v-if="meso.status === 1">Current</div>
+                            <UiDropdownMenu :idx="meso.id" left="-50px">
+                                <template #header>
+                                    <div class="hover:cursor-pointer">
+                                        <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
+                                    </div>
+                                </template>
+
+                                <template v-slot="slotProps">
+                <li v-for="(item, i) in mesoDropdown" :key="i" :class="item.class"
+                    @click.prevent="item.action(meso.id); slotProps.toggle()">
+                    <Icon :icon="item.icon" /> {{ item.label }}
+                </li>
+</template>
+</UiDropdownMenu>
+</div>
+</div>
+</Link>
+</li>
+</ul>
+</UiBox>
+
+<h2 class="text-xl text-center pt-3" v-else>No Mesocycles Created.</h2>
+</div>
 </template>
 
 <script setup lang="ts">

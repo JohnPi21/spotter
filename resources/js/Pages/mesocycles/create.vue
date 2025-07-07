@@ -10,7 +10,8 @@
     <!-- <UiErrors :errors="errors" /> -->
     <InputError :message="errors['days']" />
     <div class="flex gap-2 flex-wrap">
-        <UiBox class="flex flex-col gap-2 h-fit" v-for="(day, dayIdx) in days" :key="dayIdx">
+
+        <UiBox class="flex flex-col gap-2 h-fit flex-1 lg:max-w-[350px]" v-for="(day, dayIdx) in days" :key="dayIdx">
             <div class="flex items-center justify-between gap-3">
                 <InputText v-model="day.label" />
 
@@ -37,10 +38,9 @@
                         <span v-else>{{ exerciseStore?.exercises[exercise.exerciseId]?.name }}</span>
                     </ButtonSecondary>
 
-                    <ModalExercise v-model="showExerciseModal"
+                    <ModalExercise v-model="showExerciseModal" :only-one-muscle-group="exercise.muscleGroup"
                         @select="(exerciseID: number) => setExerciseID(exerciseID, exercise)" />
-                    <!-- <InputDropdown :options="getMuscleList(exercise.muscleGroup)" v-model="exercise.exerciseId"
-                        :selected="exercise.exerciseId" :filter="true" /> -->
+
                     <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.exerciseId`]" />
                 </UiBox>
             </template>
@@ -62,10 +62,10 @@
                 </li>
             </ul>
         </Modal>
-        <ButtonSecondary class="h-fit min-w-44" @click="addDay()" v-if="days.length < 7">
+        <ButtonPrimary class="h-fit min-w-44 w-full" @click="addDay()" v-if="days.length < 7">
             <Icon icon="ic:baseline-plus" width="21px" />
             Add Day
-        </ButtonSecondary>
+        </ButtonPrimary>
 
     </div>
 

@@ -58,20 +58,7 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function create(): \Inertia\Response
     {
-        // @TODO: Remove this and replace in frontend with component functionality
-        $muscleGroups = MuscleGroup::pluck('name', 'id')->toArray();
-        $exercises = Exercise::all();
-        $exerciseDropdown = [];
-
-        foreach ($exercises as $option) {
-            $exerciseDropdown[$option->muscle_group_id][] = ['value' => $option->id, 'label' => $option->name];
-        }
-
-        return Inertia::render('mesocycles/create', [
-            'muscleGroups' => $muscleGroups,
-            'exercises' => $exercises,
-            'exerciseDropdown' => $exerciseDropdown,
-        ]);
+        return Inertia::render('mesocycles/create');
     }
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
@@ -153,7 +140,7 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         $mesocycle = Mesocycle::mine()->where('status', 1)->first();
 
-        if (is_null($mesocycle) || $mesocycle->isEmpty()) {
+        if (is_null($mesocycle)) {
             throw new \App\Exceptions\AppException("No active mesocycle", 404);
             // return redirect()->route('mesocycles')->withErrors([
             //     'mesocycle' => 'No active mesocycle found.',

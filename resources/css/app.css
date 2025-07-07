@@ -4,6 +4,7 @@
 
 :root {
     --sidenav-width: 250px;
+    --mobilenav-height: 50px;
 }
 
 body {

@@ -2,7 +2,8 @@
     <div class="flex flex-col gap-3 my-2 max-w-[768px] mx-auto">
         <UiBox class="flex flex-col">
 
-            <ModalsExercises v-model="exercisesModal" @select="addExercise" />
+            <ModalsExercises v-model="exercisesModal" :only-one-muscle-group="0"
+                @select="(exerciseID: number) => addExercise(exerciseID)" />
 
             <div class="flex justify-between items-center mb-2">
                 <div class="flex flex-col">
@@ -17,16 +18,17 @@
                     </div>
                     <Icon icon="quill:calendar" width="18px" />
 
-                    <UiDropdownMenu idx="1">
+                    <UiDropdownMenu idx="1" left="-50px">
                         <template #header>
                             <div class="hover:cursor-pointer">
                                 <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
                             </div>
                         </template>
 
-                        <template v-for="(section, index) in dropdownItems" :key="index">
+                        <template v-for="(section, index) in dropdownItems" :key="index" v-slot="slotProps">
                             <li class="flex !justify-center bg-layer">{{ section.section }}</li>
-                            <li v-for="(item, i) in section.items" :key="i" @click="item?.action ? item.action() : ''">
+                            <li v-for="(item, i) in section.items" :key="i"
+                                @click="item?.action ? item.action() : ''; slotProps.toggle">
                                 <Icon :icon="item.icon" /> {{ item.label }}
                             </li>
                         </template>
@@ -62,17 +64,19 @@
                 <div class="flex align-end items-center gap-4">
                     <Icon icon="line-md:youtube" width="20px" />
 
-                    <UiDropdownMenu :idx="exercise_idx">
+                    <UiDropdownMenu :idx="exercise_idx" left="-50px">
                         <template #header>
                             <div class="hover:cursor-pointer">
                                 <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
                             </div>
                         </template>
 
-                        <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class"
-                            @click="item.action(dayExercise.id)">
-                            <Icon :icon="item.icon" /> {{ item.label }}
-                        </li>
+                        <template v-slot="slotProps">
+                            <li v-for="(item, i) in exerciseDropdownItems" :key="i" :class="item.class"
+                                @click="item.action(dayExercise.id); slotProps.toggle()">
+                                <Icon :icon="item.icon" /> {{ item.label }}
+                            </li>
+                        </template>
                     </UiDropdownMenu>
                 </div>
             </div>
@@ -106,11 +110,12 @@
                 </div>
 
                 <div class="col-span-2">
-                    <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight" />
+                    <InputText :placeholder="set?.target_weight ?? mesocycle.unit" v-model="set.weight"
+                        class="w-full" />
                 </div>
                 <div class="col-span-2">
                     <InputText :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
-                        v-model="set.reps" />
+                        v-model="set.reps" class="w-full" />
                 </div>
                 <div class="flex items-center justify-end">
                     <Checkbox :checked="set.status == true" :value="set.status" v-model="set.status" true-value="1"
@@ -142,7 +147,7 @@
         errors?: Object,
     }>();
 
-    const day = ref(props.mesocycle.day);
+    const day = ref<Day>(props.mesocycle.day);
     const exercisesModal = ref<boolean>();
 
     function isActiveDay(dayID: Number) {
@@ -193,6 +198,38 @@
         router.post(`/day/${day.value.id}/exercises`, { exercise_id: exerciseID }, { preserveState: false, })
     }
 
+    function getPosition(dayExerciseID: number): number {
+        return day.value.day_exercises.findIndex((dayEx) => dayEx.id == dayExerciseID);
+    }
+
+    async function moveUp(dayExerciseID: number): Promise<void> {
+        const position = getPosition(dayExerciseID);
+
+        if (position === -1 || position === 0) return;
+
+        swap(day.value.day_exercises, position, position - 1);
+    }
+
+    async function moveDown(dayExerciseID: number) {
+        const position = getPosition(dayExerciseID);
+
+        if (position === -1 || position === (day.value.day_exercises.length - 1)) return;
+
+        swap(day.value.day_exercises, position, position + 1);
+
+        updateOrder();
+    }
+
+    function swap<T>(arr: T[], from: number, to: number) {
+        [arr[from], arr[to]] = [arr[to], arr[from]];
+    }
+
+    async function updateOrder() {
+        const order = day.value.day_exercises.map((ex) => ex.id);
+
+        router.patch(`/day/${day.value.id}/reorder`, { order });
+    }
+
     function addExerciseModal(): void {
         exercisesModal.value = true;
     }
@@ -235,12 +272,12 @@
         {
             icon: "mdi:arrow-up",
             label: "Move Up",
-            action: () => console.log("Move Up clicked"),
+            action: (dayExerciseID: number) => moveUp(dayExerciseID),
         },
         {
             icon: "mdi:arrow-down",
             label: "Move Down",
-            action: () => console.log("Move Down clicked"),
+            action: (dayExerciseID: number) => moveDown(dayExerciseID),
         },
         {
             icon: "ph:swap",

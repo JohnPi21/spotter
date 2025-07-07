@@ -48,6 +48,27 @@ class DayExerciseController extends Controller
         ]);
     }
 
+    public function updateOrder(Request $request, MesoDay $day): RedirectResponse
+    {
+        $day->load('mesocycle');
+
+        Gate::authorize('owns', $day->mesocycle);
+
+        $order = $request->validate([
+            'order' => ['required', 'array', 'distinct', 'list'],
+            'order.*' => ['required', 'integer'],
+        ])['order'];
+
+        foreach ($order as $position => $id) {
+            DayExercise::where('id', $id)->update(['position' => $position]);
+        }
+
+        return to_route('day.show', [
+            'mesocycle' => $day->mesocycle,
+            'day'       => $day,
+        ]);
+    }
+
     public function destroy(MesoDay $day, DayExercise $exercise): RedirectResponse
     {
         Gate::authorize('owns', $day->mesocycle);

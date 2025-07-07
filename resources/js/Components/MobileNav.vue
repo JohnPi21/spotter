@@ -5,8 +5,8 @@
                 <ul class="list-none flex justify-between flex-auto gap-2">
                     <li class="p-1 hover:bg-accent rounded" v-for="(link, idx) in links" :key="idx">
                         <Link :href="link.path" class="flex items-center gap-2">
-                            <Icon :icon="link.icon" width="25px" />
-                            <!-- <span class="leading-7">{{ link.name }}</span> -->
+                        <Icon :icon="link.icon" width="25px" />
+                        <!-- <span class="leading-7">{{ link.name }}</span> -->
                         </Link>
                     </li>
                 </ul>
@@ -19,9 +19,9 @@
     import { Icon } from '@iconify/vue';
 
     const links = [
-        { name: 'Current Workout', path: '/mesocycles/current-day', icon: 'tabler:barbell' },
-        { name: 'Mesocycles', path: '/mesocycles', icon: 'entypo:cycle' },
         { name: 'Account', path: '/profile', icon: 'codicon:account' },
+        { name: 'Mesocycles', path: '/', icon: 'icon-park-outline:cycle-one' },
+        { name: 'Current Workout', path: '/mesocycles/current-day', icon: 'tabler:barbell' },
     ]
 </script>
 <style lang="scss" scoped></style>

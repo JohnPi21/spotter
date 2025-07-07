@@ -18,7 +18,7 @@ class ExerciseSetController extends Controller
 
         $dayExercise = DayExercise::with('day.mesocycle:id,user_id,id')->findOrFail($dayExerciseID);
 
-        Gate::authorize('owns', $dayExercise->mesocycle);
+        Gate::authorize('owns', $dayExercise->day->mesocycle);
 
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
@@ -28,10 +28,9 @@ class ExerciseSetController extends Controller
         return redirect()->back();
     }
 
-    public function update(Request $request, ExerciseSet $set)
+    public function update(Request $request, ExerciseSet $set): RedirectResponse
     {
         $set->load('dayExercise.day.mesocycle:id,user_id,id');
-        dd($set);
 
         Gate::authorize('update', $set->dayExercise->day->mesocycle);
 
@@ -54,7 +53,7 @@ class ExerciseSetController extends Controller
 
     public function destroy(ExerciseSet $set)
     {
-        Gate::authorize('update', $set->dayExercise->mesocycle);
+        Gate::authorize('update', $set->dayExercise->day->mesocycle);
 
         $set->delete();
 
