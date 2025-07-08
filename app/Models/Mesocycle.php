@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 
 class Mesocycle extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     public const STATUS_ACTIVE = 1;
     public const STATUS_INACTIVE = 0;

@@ -9,6 +9,7 @@
 
     <!-- <UiErrors :errors="errors" /> -->
     <InputError :message="errors['days']" />
+
     <div class="flex gap-2 flex-wrap">
 
         <UiBox class="flex flex-col gap-2 h-fit flex-1 lg:max-w-[350px]" v-for="(day, dayIdx) in days" :key="dayIdx">
@@ -25,7 +26,7 @@
                     <div class="flex flex-center justify-between">
                         <div class="bg-orange-700 px-2 rounded">{{
                             exerciseStore.muscleGroups[exercise.muscleGroup]?.name
-                        }}
+                            }}
                         </div>
                         <Icon icon="material-symbols-light:delete-outline" width="22px"
                             class="cursor-pointer hover:text-red transition"
@@ -62,11 +63,19 @@
                 </li>
             </ul>
         </Modal>
+    </div>
+
+    <div class="flex flex-col gap-2 mt-2">
+        <div class="flex flex-col w-full md:w-fit">
+            <InputLabel value="Number of Weeks" />
+            <InputText v-model="meso.weeksDuration" placeholder="Weeks Duration" />
+            <InputError :message="errors['meso.weeksDuration']" />
+        </div>
+
         <ButtonPrimary class="h-fit min-w-44 w-full" @click="addDay()" v-if="days.length < 7">
             <Icon icon="ic:baseline-plus" width="21px" />
             Add Day
         </ButtonPrimary>
-
     </div>
 
 </template>
@@ -85,6 +94,7 @@
     import InputError from '@/Components/Input/InputError.vue';
     import ModalExercise from '@/Components/Modals/Exercises.vue'
     import { useExerciseStore } from '@/stores/exerciseStore';
+    import InputLabel from '@/Components/Input/InputLabel.vue';
 
     const props = defineProps<{
         errors: { [key: string]: string },

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('unit', 4);
             $table->unsignedTinyInteger('days_per_week');
             $table->unsignedTinyInteger('weeks_duration');
-            $table->foreignIdFor(User::class);
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->json('notes')->nullable();
             $table->unsignedTinyInteger('status');
             $table->foreignIdFor(MesoTemplate::class)->nullable();

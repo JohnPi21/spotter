@@ -69,7 +69,7 @@ class MesocycleController extends Controller implements HasMiddleware
             'meso'                              => ['required', 'array'],
             'meso.name'                         => ['required', 'string'],
             'meso.unit'                         => ['sometimes', Rule::in(['kg', 'lbs'])],
-            'meso.weeksDuration'                => ['required', 'integer', 'min:3', 'max:6'],
+            'meso.weeksDuration'                => ['required', 'integer', 'min:3', 'max:12'],
             'days'                              => ['required', 'array'],
             'days.*.label'                      => ['required', 'string'],
             'days.*.exercises'                  => ['required', 'array'],
@@ -123,6 +123,12 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
     {
+        $oldMeso = Mesocycle::mine()->active()->first();
+
+        if (! is_null($oldMeso)) {
+            $oldMeso->update(['status' => Mesocycle::STATUS_INACTIVE]);
+        }
+
         $mesocycle->update(['status' => Mesocycle::STATUS_ACTIVE]);
 
         return to_route('mesocycles');
@@ -130,7 +136,7 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function destroy(Mesocycle $mesocycle): RedirectResponse
     {
-        $mesocycle->forceDelete();
+        $mesocycle->delete();
 
         return to_route('mesocycles');
     }

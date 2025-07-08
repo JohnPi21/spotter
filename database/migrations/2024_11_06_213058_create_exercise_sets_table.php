@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DayExercise;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('exercise_sets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('day_exercise_id');
+            $table->foreignIdFor(DayExercise::class)->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('reps')->nullable();
             $table->unsignedInteger('weight')->nullable();
             $table->unsignedTinyInteger('status');

@@ -16,8 +16,8 @@ return new class extends Migration
     {
         Schema::create('day_exercises', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(MesoDay::class);
-            $table->foreignIdFor(Exercise::class);
+            $table->foreignIdFor(MesoDay::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Exercise::class)->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('position');
             // $table->foreignIdFor(ExerciseSet::class)->nullable();
             $table->timestamps();
