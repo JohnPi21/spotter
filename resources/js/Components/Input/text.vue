@@ -21,5 +21,13 @@
 
 <template>
     <input :type="type ?? 'text'" v-model="model" ref="input"
-        class="rounded-md border-input-border shadow-sm focus:border-accent focus:ring-indigo-500 dark:bg-layer-light dark:text-gray-300 dark:focus:border-accent dark:focus:ring-accent" />
+        class="rounded-md border-input-border shadow-sm bg-layer-light text-gray-300 focus:border-accent focus:ring-accent" />
 </template>
+<style lang="css">
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #1f2937 inset !important;
+    /* Use your color */
+    -webkit-text-fill-color: #ffffff !important;
+    /* Text color if needed */
+}
+</style>

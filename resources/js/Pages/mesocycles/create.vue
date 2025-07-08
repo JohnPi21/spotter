@@ -22,29 +22,29 @@
             <InputError :message="errors[`days.${dayIdx}.label`]" />
 
             <template v-if="day.exercises.length > 0">
-                <UiBox class="bg-layer-light flex flex-col gap-2" v-for="(exercise, exerciseIdx) in day.exercises">
+                <UiBox class="bg-layer-light flex flex-col gap-2" v-for="(exercise, exerciseIDx) in day.exercises"
+                    :key="exerciseIDx">
                     <div class="flex flex-center justify-between">
                         <div class="bg-orange-700 px-2 rounded">{{
-                            exerciseStore.muscleGroups[exercise.muscleGroup]?.name
-                            }}
-                        </div>
+                            exerciseStore.muscleGroups[exercise.muscleGroup]?.name }} </div>
                         <Icon icon="material-symbols-light:delete-outline" width="22px"
                             class="cursor-pointer hover:text-red transition"
-                            @click="removeExercise(dayIdx, exerciseIdx)" />
+                            @click="removeExercise(dayIdx, exerciseIDx)" />
                     </div>
 
-                    <ButtonSecondary @click="showExerciseModal = true"
-                        :class="{ 'bg-layer-light': exercise.exerciseId }">
-                        <span v-if="!exercise.exerciseId">Select Exercise</span>
-                        <span v-else>{{ exerciseStore?.exercises[exercise.exerciseId]?.name }}</span>
+                    <ButtonSecondary @click="openExerciseModal(exercise)"
+                        :class="{ 'bg-layer-light': exercise.exerciseID }">
+                        <span v-if="!exercise.exerciseID">Select Exercise</span>
+                        <span v-else>{{ exerciseStore?.exercises[exercise.exerciseID]?.name }}</span>
                     </ButtonSecondary>
 
-                    <ModalExercise v-model="showExerciseModal" :only-one-muscle-group="exercise.muscleGroup"
-                        @select="(exerciseID: number) => setExerciseID(exerciseID, exercise)" />
-
-                    <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.exerciseId`]" />
+                    <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIDx}.exerciseID`]" />
                 </UiBox>
             </template>
+
+            <ModalExercise v-model="exerciseModal.show" :only-one-muscle-group="exerciseModal?.exercise?.muscleGroup"
+                @select="(exerciseID: number) => setExerciseID(exerciseID)" />
+
 
             <ButtonSecondary @click="selectMuscleGroupDay(dayIdx)">
                 <Icon icon="ic:baseline-plus" width="21px" />
@@ -82,9 +82,7 @@
 <script setup lang="ts">
     import { ref, reactive } from 'vue';
     import InputText from '@/Components/Input/text.vue';
-    import InputDropdown from "@/Components/Input/Dropdown.vue"
     import UiBox from '@/Components/Ui/Box.vue';
-    import UiErrors from '@/Components/Ui/Errors.vue';
     import ButtonPrimary from '@/Components/Button/Primary.vue';
     import ButtonSecondary from '@/Components/Button/Secondary.vue';
     import { Icon } from '@iconify/vue';
@@ -96,9 +94,7 @@
     import { useExerciseStore } from '@/stores/exerciseStore';
     import InputLabel from '@/Components/Input/InputLabel.vue';
 
-    const props = defineProps<{
-        errors: { [key: string]: string },
-    }>();
+    defineProps<{ errors: { [key: string]: string }, }>();
 
     const meso = ref<MesoForm>({
         name: '',
@@ -108,7 +104,16 @@
 
     const exerciseStore = useExerciseStore();
     const showMuscleModal = ref<boolean>(false);
-    const showExerciseModal = ref<boolean>(false);
+    const exerciseModal = ref<{
+        show: boolean,
+        exercise: ExerciseForm
+    }>({
+        show: false,
+        exercise: {
+            exerciseID: 0,
+            muscleGroup: 0
+        }
+    });
 
     const days: DayForm[] = reactive([])
 
@@ -123,8 +128,8 @@
         days.splice(dayId, 1);
     }
 
-    function removeExercise(dayId: number, exerciseId: number) {
-        days[dayId].exercises.splice(exerciseId, 1);
+    function removeExercise(dayId: number, exerciseID: number) {
+        days[dayId].exercises.splice(exerciseID, 1);
     }
 
     const selectedDay = ref<number>(0);
@@ -135,7 +140,7 @@
     }
 
     function addMuscleGroup(muscleGroupId: number) {
-        days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseId: 0 });
+        days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseID: 0 });
         showMuscleModal.value = false;
     }
 
@@ -146,16 +151,21 @@
     }
 
 
-    function setExerciseID(id: number, exercise: any) {
-        exercise.exerciseId = id;
-        showExerciseModal.value = false;
+    function setExerciseID(id: number) {
+        exerciseModal.value.exercise.exerciseID = id;
+        exerciseModal.value.show = false;
+    }
+
+    function openExerciseModal(exercise: ExerciseForm) {
+        exerciseModal.value.exercise = exercise;
+        exerciseModal.value.show = true;
     }
 
     type DayForm = {
         label: string,
         exercises: {
             muscleGroup: number,
-            exerciseId: number,
+            exerciseID: number,
         }[];
     };
 
@@ -164,4 +174,9 @@
         unit: string,
         weeksDuration: number,
     }
+
+    type ExerciseForm = {
+        muscleGroup: MuscleGroup["id"],
+        exerciseID: Exercise["id"]
+    };
 </script>

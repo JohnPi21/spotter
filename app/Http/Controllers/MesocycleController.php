@@ -16,6 +16,7 @@ use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MesocycleController extends Controller implements HasMiddleware
 {
@@ -74,7 +75,7 @@ class MesocycleController extends Controller implements HasMiddleware
             'days.*.label'                      => ['required', 'string'],
             'days.*.exercises'                  => ['required', 'array'],
             'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', Rule::in($muscleGroups)],
-            'days.*.exercises.*.exerciseId'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
+            'days.*.exercises.*.exerciseID'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
         ]);
 
         $validatedMeso = collect($validated['meso']);
@@ -105,7 +106,7 @@ class MesocycleController extends Controller implements HasMiddleware
                 foreach ($day['exercises'] as $position => $exercise) {
                     $exerciseDay = DayExercise::create([
                         "meso_day_id" => $createdDay->id,
-                        "exercise_id" => $exercise['exerciseId'],
+                        "exercise_id" => $exercise['exerciseID'],
                         "position"    => (int)$position,
                     ]);
 

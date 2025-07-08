@@ -22,16 +22,28 @@
     import { Link } from '@inertiajs/vue3';
     import { Icon } from '@iconify/vue';
     import { usePage } from '@inertiajs/vue3';
+    import { computed } from 'vue';
 
     const page = usePage();
 
-    const links = [
-        { name: 'Current Workout', path: '/mesocycles/current-day', icon: 'tabler:barbell', show: page.props.auth.flags.hasActiveMeso },
-        { name: 'Mesocycles', path: '/', icon: 'entypo:cycle' },
-        { name: 'Account', path: '/profile', icon: 'codicon:account' },
-        // { name: 'Execises', path: '/', icon: 'solar:bill-list-linear' },
-        // { name: 'Templates', path: '/', icon: 'carbon:template' },
-    ]
+    const links = computed(() => [
+        {
+            name: 'Current Workout',
+            path: '/mesocycles/current-day',
+            icon: 'tabler:barbell',
+            show: page.props.auth.flags.hasActiveMeso
+        },
+        {
+            name: 'Mesocycles',
+            path: '/',
+            icon: 'entypo:cycle'
+        },
+        {
+            name: 'Account',
+            path: '/profile',
+            icon: 'codicon:account'
+        },
+    ]);
 
     function showLink(listLink) {
         if (!listLink.hasOwnProperty('show')) return true;

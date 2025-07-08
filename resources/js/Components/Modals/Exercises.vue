@@ -3,7 +3,7 @@
         <ModalsHeader title="Exercises" class="p-2 border-b border-layer-border" @close="showModal = false" />
 
         <div class="flex flex-col p-2">
-            <TextInput class="w-full" placeholder="Search exercise" v-model="search" />
+            <InputText class="w-full" placeholder="Search exercise" v-model="search" />
 
             <div class="flex flex-col overflow-y-scroll max-h-[68vh] scrollbar">
 
@@ -28,7 +28,7 @@
                 </Collapsible>
 
                 <ul v-else>
-                    <li v-for="(exercise, eIdx) in groupsToFilter[0].exercises" :key="eIdx" @click="select(exercise.id)"
+                    <li v-for="(exercise, eIdx) in filteredExercises" :key="eIdx" @click="select(exercise.id)"
                         :class="[selected == exercise.id ? 'bg-layer-light text-primary' : 'text-secondary']"
                         class="p-2 border-b border-main-border cursor-pointer hover:text-primary transition hover:bg-layer-light last:border-b-0 flex items-center justify-between">
                         <div class="flex-col flex gap-1">
@@ -55,18 +55,14 @@
     import ModalsHeader from '@/Components/Modals/Header.vue'
     import Modal from '@/Components/Modal.vue';
     import Collapsible from '@/Components/Ui/Collapsible.vue'
-    import TextInput from '@/Components/TextInput.vue';
+    import InputText from '@/Components/Input/text.vue';
     import ButtonPrimary from '@/Components/Button/Primary.vue';
     import { useExerciseStore } from '@/stores/exerciseStore';
 
     const showModal = defineModel<boolean>();
 
-    interface Props {
-        onlyOneMuscleGroup?: number;
-    }
-
     const props = defineProps<{
-        onlyOneMuscleGroup: number | string,
+        onlyOneMuscleGroup: number | string | undefined,
     }>();
 
     const emit = defineEmits<{
@@ -81,7 +77,7 @@
     const search = ref<string>('');
 
     const filteredGroups = computed(() => {
-        return groupsToFilter.value.map((mg: MuscleGroup) => {
+        return exercisesByMuscle.map((mg: MuscleGroup) => {
             const hasExercises = mg.exercises?.filter(ex => ex.name.toLowerCase().includes(search.value.toLowerCase())) || [];
 
             if (hasExercises?.length > 0) {
@@ -92,11 +88,12 @@
         }).filter((mg) => mg !== null)
     })
 
-    const groupsToFilter = computed(() => {
-        const only = props.onlyOneMuscleGroup;
+    const filteredExercises = computed(() => {
+        const exercises = exercisesByMuscle.find(mg => mg.id == props.onlyOneMuscleGroup);
 
-        return only ? exercisesByMuscle.filter(mg => mg.id == only) : exercisesByMuscle;
+        return (exercises?.exercises || []).filter(ex => ex.name.toLowerCase().includes(search.value));
     })
+
 
     function select(exerciseID: number): void {
         selected.value = exerciseID;
@@ -104,6 +101,7 @@
         emit('select', exerciseID);
 
         showModal.value = false;
+        search.value = '';
     }
 
     function capitalize(string: string): string {
