@@ -13,8 +13,12 @@ use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
 
+    Route::get('/', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
     Route::controller(MesocycleController::class)->group(function () {
-        Route::get('/', 'index')->name('mesocycles');
+        Route::get('/mesocycles', 'index')->name('mesocycles');
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
         Route::get('/mesocycles/current-day', 'currentActiveDay')->name('mesocycles.current');
         Route::post('/mesocycles', 'store');
