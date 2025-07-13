@@ -1,8 +1,8 @@
 <template>
-    <button class="bg-orange-hover hover:bg-orange border border-layer text-primary rounded gap-1 inline-flex items-center justify-center h-fit font-normal py-2 px-3 shadow-md transition duration-300 ease-in-out
-         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:dark:hover:bg-gray-200">
+    <button
+        class="inline-flex h-fit items-center justify-center gap-1 rounded border border-layer bg-orange-hover px-3 py-2 font-normal text-primary shadow-md transition duration-300 ease-in-out hover:bg-orange disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-800 disabled:dark:hover:bg-gray-200"
+    >
         <slot></slot>
     </button>
 </template>
-<script setup>
-</script>
+<script setup></script>

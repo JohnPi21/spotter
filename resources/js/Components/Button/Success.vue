@@ -1,6 +1,7 @@
 <template>
     <button
-        class="bg-green hover:bg-green-hover border border-green text-primary rounded p-1 gap-1 inline-flex items-center justify-center h-fit font-normal cursor-pointer shadow-md transition duration-300 ease-in-out">
+        class="inline-flex h-fit cursor-pointer items-center justify-center gap-1 rounded border border-green bg-green p-1 font-normal text-primary shadow-md transition duration-300 ease-in-out hover:bg-green-hover"
+    >
         <slot></slot>
     </button>
 </template>

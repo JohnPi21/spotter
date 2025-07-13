@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useModalStore = defineStore('modal', {
+export const useModalStore = defineStore("modal", {
     state: () => ({
         currentModal: null,
         data: null,
@@ -29,12 +29,11 @@ export const useModalStore = defineStore('modal', {
         },
 
         confirmClose(callbackParam) {
-            if (typeof this.callback === 'function') {
+            if (typeof this.callback === "function") {
                 this.callback(callbackParam);
             }
 
             this.closeModal();
-        }
-
-    }
-})
+        },
+    },
+});

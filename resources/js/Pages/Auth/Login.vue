@@ -1,45 +1,41 @@
 <script setup lang="ts">
-    import { ref } from 'vue';
-    import Checkbox from '@/Components/Input/Checkbox.vue';
-    import GuestLayout from '@/Layouts/GuestLayout.vue';
-    import InputError from '@/Components/Input/InputError.vue';
-    import InputLabel from '@/Components/Input/InputLabel.vue';
-    import ButtonPrimary from '@/Components/Button/Primary.vue';
-    import InputText from '@/Components/Input/text.vue';
-    import InputPassword from '@/Components/Input/password.vue';
-    import { Head, Link, useForm } from '@inertiajs/vue3';
+import ButtonPrimary from "@/Components/Button/Primary.vue";
+import Checkbox from "@/Components/Input/Checkbox.vue";
+import InputError from "@/Components/Input/InputError.vue";
+import InputLabel from "@/Components/Input/InputLabel.vue";
+import InputPassword from "@/Components/Input/password.vue";
+import InputText from "@/Components/Input/text.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 
-    defineOptions({
-        layout: GuestLayout
-    })
+defineOptions({
+    layout: GuestLayout,
+});
 
-    defineProps<{
-        canResetPassword?: boolean;
-        status?: string;
-    }>();
+defineProps<{
+    canResetPassword?: boolean;
+    status?: string;
+}>();
 
-    const form = useForm({
-        email: '',
-        password: '',
-        remember: false,
+const form = useForm({
+    email: "",
+    password: "",
+    remember: false,
+});
+
+const submit = () => {
+    form.post(route("login"), {
+        onFinish: () => {
+            form.reset("password");
+        },
     });
-
-    const viewPassword = ref(false);
-
-    const submit = () => {
-        form.post(route('login'), {
-            onFinish: () => {
-                form.reset('password');
-            },
-        });
-    };
+};
 </script>
 
 <template>
-
     <Head title="Log in" />
 
-    <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+    <div v-if="status" class="text-green-600 mb-4 text-sm font-medium">
         {{ status }}
     </div>
 
@@ -47,8 +43,15 @@
         <div>
             <InputLabel for="email" value="Email" />
 
-            <InputText id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus
-                autocomplete="username" />
+            <InputText
+                id="email"
+                type="email"
+                class="mt-1 block w-full"
+                v-model="form.email"
+                required
+                autofocus
+                autocomplete="username"
+            />
 
             <InputError class="mt-2" :message="form.errors.email" />
         </div>
@@ -63,37 +66,42 @@
             <InputError class="mt-2" :message="form.errors.password" />
         </div>
 
-        <div class="mt-4 flex justify-between ">
+        <div class="mt-4 flex justify-between">
             <label class="flex items-center">
                 <Checkbox name="remember" :true-value="true" :false-value="false" v-model="form.remember" />
                 <span class="ms-2 text-sm dark:text-gray-400">Remember me</span>
             </label>
 
-            <Link v-if="canResetPassword" :href="route('password.request')"
-                class="rounded-md text-sm underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-gray-400 hover:text-gray-100 dark:focus:ring-offset-gray-800">
-            Forgot your password?
+            <Link
+                v-if="canResetPassword"
+                :href="route('password.request')"
+                class="rounded-md text-sm text-gray-400 underline hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            >
+                Forgot your password?
             </Link>
         </div>
 
         <div class="mt-4 flex justify-center">
-
-            <ButtonPrimary class="flex-1 justify-center" :class="{ 'opacity-25': form.processing }"
-                :disabled="form.processing">
+            <ButtonPrimary
+                class="flex-1 justify-center"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
                 Log in
             </ButtonPrimary>
         </div>
 
         <div class="flex-column mt-5">
-            <div class="flex items-center justify-center w-full">
-
+            <div class="flex w-full items-center justify-center">
                 <p class="mr-1">Don't have an account?</p>
 
-                <Link :href="route('register')"
-                    class="rounded-md text-sm underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-gray-400 hover:text-gray-100 focus:ring-offset-gray-800">
-                Register
+                <Link
+                    :href="route('register')"
+                    class="rounded-md text-sm text-gray-400 underline hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-gray-800"
+                >
+                    Register
                 </Link>
             </div>
-
         </div>
     </form>
 </template>

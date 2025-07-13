@@ -17,16 +17,12 @@ export const useExerciseStore = defineStore("exercise", () => {
 
             muscleGroups.value = response.data.muscleGroups;
 
-            exercisesByMuscle.value = Object.values(muscleGroups.value).map(
-                (mg: MuscleGroup) => {
-                    return {
-                        ...mg,
-                        exercises: Object.values(exercises.value).filter(
-                            (ex: Exercise) => ex.muscle_group_id === mg.id
-                        ),
-                    };
-                }
-            );
+            exercisesByMuscle.value = Object.values(muscleGroups.value).map((mg: MuscleGroup) => {
+                return {
+                    ...mg,
+                    exercises: Object.values(exercises.value).filter((ex: Exercise) => ex.muscle_group_id === mg.id),
+                };
+            });
         } catch (error) {
             console.error(error);
         }

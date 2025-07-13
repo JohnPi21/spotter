@@ -1,4 +1,4 @@
-import {ref, onMounted, onBeforeUnmount} from 'vue';
+import { onBeforeUnmount, onMounted } from "vue";
 
 function onClickOutside(refElement, callback, excludes = []) {
     if (!refElement) return;
@@ -16,14 +16,14 @@ function onClickOutside(refElement, callback, excludes = []) {
                 if (excludes.indexOf(target.className) !== -1) return;
             }
 
-            if (typeof callback === 'function') {
+            if (typeof callback === "function") {
                 callback();
             }
 
             // Check if refElement is an array of HTML elements (v-for case)
         } else if (Array.isArray(refElement.value)) {
             if (!refElement.value.some((el) => el.contains(target))) {
-                if (typeof callback === 'function') {
+                if (typeof callback === "function") {
                     callback();
                 }
             }
@@ -31,16 +31,16 @@ function onClickOutside(refElement, callback, excludes = []) {
     };
 
     onMounted(() => {
-        window.addEventListener('click', handleClickOutside);
-        window.addEventListener('touchstart', handleClickOutside);
+        window.addEventListener("click", handleClickOutside);
+        window.addEventListener("touchstart", handleClickOutside);
     });
 
     onBeforeUnmount(() => {
-        window.removeEventListener('click', handleClickOutside);
-        window.removeEventListener('touchstart', handleClickOutside);
+        window.removeEventListener("click", handleClickOutside);
+        window.removeEventListener("touchstart", handleClickOutside);
     });
 }
 
 export const useUtils = {
     onClickOutside,
-}
+};

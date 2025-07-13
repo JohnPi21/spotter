@@ -1,42 +1,47 @@
 <script setup lang="ts">
-    import GuestLayout from '@/Layouts/GuestLayout.vue';
-    import InputError from '@/Components/Input/InputError.vue';
-    import InputLabel from '@/Components/Input/InputLabel.vue';
-    import PrimaryButton from '@/Components/PrimaryButton.vue';
-    import TextInput from '@/Components/TextInput.vue';
-    import { Head, useForm } from '@inertiajs/vue3';
+import InputError from "@/Components/Input/InputError.vue";
+import InputLabel from "@/Components/Input/InputLabel.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import TextInput from "@/Components/TextInput.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import { Head, useForm } from "@inertiajs/vue3";
 
-    defineOptions({
-        layout: GuestLayout
+defineOptions({
+    layout: GuestLayout,
+});
+
+const form = useForm({
+    password: "",
+});
+
+const submit = () => {
+    form.post(route("password.confirm"), {
+        onFinish: () => {
+            form.reset();
+        },
     });
-
-    const form = useForm({
-        password: '',
-    });
-
-    const submit = () => {
-        form.post(route('password.confirm'), {
-            onFinish: () => {
-                form.reset();
-            },
-        });
-    };
+};
 </script>
 
 <template>
-
     <Head title="Confirm Password" />
 
     <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        This is a secure area of the application. Please confirm your
-        password before continuing.
+        This is a secure area of the application. Please confirm your password before continuing.
     </div>
 
     <form @submit.prevent="submit">
         <div>
             <InputLabel for="password" value="Password" />
-            <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required
-                autocomplete="current-password" autofocus />
+            <TextInput
+                id="password"
+                type="password"
+                class="mt-1 block w-full"
+                v-model="form.password"
+                required
+                autocomplete="current-password"
+                autofocus
+            />
             <InputError class="mt-2" :message="form.errors.password" />
         </div>
 

@@ -5,23 +5,33 @@
         </div>
 
         <div class="dropdown text-secondary" ref="inputDropdown">
-            <div class="dropdown-header bg-input border border-layer active:bg-layer-light hover:bg-layer-light transition"
-                @click="toggleDropdown" :class="{ active: isOpen, selected: selectedOption.value }">
+            <div
+                class="dropdown-header border border-layer bg-input transition hover:bg-layer-light active:bg-layer-light"
+                @click="toggleDropdown"
+                :class="{ active: isOpen, selected: selectedOption.value }"
+            >
                 <Icon :icon="icon" width="25px" v-if="icon" />
                 {{ selectedOption.label }}
             </div>
-            <div v-show="isOpen" class="dropdown-list bg-layer scrollbar">
-                <div class="filter input-group bg-layer" v-if="filter">
+            <div v-show="isOpen" class="dropdown-list scrollbar bg-layer">
+                <div class="input-group bg-layer filter" v-if="filter">
                     <!-- <input type="text" v-model="filter_by" placeholder="Filter" @input="emitFilter" /> -->
 
                     <InputText v-model="filter_by" placeholder="Filter" @input="emitFilter" />
                 </div>
-                <slot name="options" class="dropdown-list bg-layer" :selectOption="selectOption"
-                    :selectedOption="selectedOption">
+                <slot
+                    name="options"
+                    class="dropdown-list bg-layer"
+                    :selectOption="selectOption"
+                    :selectedOption="selectedOption"
+                >
                     <!-- This is fallback content in case we don t use slot-->
-                    <div v-for="(option, index) in filteredOptions" :key="index"
-                        class="p-2 hover:bg-layer-light hover:text-primary cursor-pointer bg-layer"
-                        @click="selectOption(option)">
+                    <div
+                        v-for="(option, index) in filteredOptions"
+                        :key="index"
+                        class="cursor-pointer bg-layer p-2 hover:bg-layer-light hover:text-primary"
+                        @click="selectOption(option)"
+                    >
                         {{ option.label }}
                     </div>
                 </slot>
@@ -31,93 +41,93 @@
 </template>
 
 <script setup>
-    import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
-    import { useUtils } from '@composables/utils.js'
-    import InputText from '@components/Input/text.vue'
-    import { Icon } from '@iconify/vue';
+import InputText from "@components/Input/text.vue";
+import { useUtils } from "@composables/utils.js";
+import { Icon } from "@iconify/vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 
-    const emit = defineEmits(["update:modelValue", "updateFilter", "change"]);
+const emit = defineEmits(["update:modelValue", "updateFilter", "change"]);
 
-    const props = defineProps({
-        label: { type: String, default: "" },
-        options: { type: Array, default: [] },
-        selected: { type: [String, Number, Boolean, Object, null] }, 	// The default selected option
-        default: { type: String, default: "Select an option" }, // The text displayed before choosing an option	
-        all: { type: Boolean, default: false },					// Returns the index of the option
-        icon: { type: String }, 								// Expects the icon name from header
-        filter: { type: Boolean, default: false }, 		// Specifies if it should include filter
-        value_key: { type: [String, Number, Boolean], default: 'value' } // Changes the emit value key {label: First, value_key: 1}
-    });
+const props = defineProps({
+    label: { type: String, default: "" },
+    options: { type: Array, default: [] },
+    selected: { type: [String, Number, Boolean, Object, null] }, // The default selected option
+    default: { type: String, default: "Select an option" }, // The text displayed before choosing an option
+    all: { type: Boolean, default: false }, // Returns the index of the option
+    icon: { type: String }, // Expects the icon name from header
+    filter: { type: Boolean, default: false }, // Specifies if it should include filter
+    value_key: { type: [String, Number, Boolean], default: "value" }, // Changes the emit value key {label: First, value_key: 1}
+});
 
-    const isOpen = ref(false);
+const isOpen = ref(false);
 
-    const selectedOption = reactive({ label: props.default, value: "" });
+const selectedOption = reactive({ label: props.default, value: "" });
 
-    const toggleDropdown = () => {
-        isOpen.value = !isOpen.value;
-    };
+const toggleDropdown = () => {
+    isOpen.value = !isOpen.value;
+};
 
-    const selectOption = (option) => {
-        selectedOption.label = option.label;
-        selectedOption[props.value_key] = option[props.value_key];
-        emit("update:modelValue", props.all ? option : selectedOption[props.value_key]);
-        emit("change", selectedOption[props.value_key]);
-        isOpen.value = false;
-    };
+const selectOption = (option) => {
+    selectedOption.label = option.label;
+    selectedOption[props.value_key] = option[props.value_key];
+    emit("update:modelValue", props.all ? option : selectedOption[props.value_key]);
+    emit("change", selectedOption[props.value_key]);
+    isOpen.value = false;
+};
 
-    const filter_by = ref("");
-    const filteredOptions = computed(() => {
-        if (props.options.length == 0 || Object.keys(props.options[0]).length == 0) {
-            return props.options;
+const filter_by = ref("");
+const filteredOptions = computed(() => {
+    if (props.options.length == 0 || Object.keys(props.options[0]).length == 0) {
+        return props.options;
+    }
+    return props.options.filter((option) => option.label.toLowerCase().includes(filter_by.value.toLowerCase()));
+});
+
+function emitFilter() {
+    emit("updateFilter", filter_by.value);
+}
+
+const watcher = watch(
+    () => props.selected,
+    () => {
+        if (!props.options) {
+            return;
         }
-        return props.options.filter((option) => option.label.toLowerCase().includes(filter_by.value.toLowerCase()));
-    });
+        for (let i = 0; i < props?.options.length; i++) {
+            if (props.options[i].value == props.selected) {
+                selectOption(props.options[i]);
+            }
+        }
+    },
+    {
+        immediate: true,
+        deep: true,
+    }
+);
 
-    function emitFilter() {
-        emit("updateFilter", filter_by.value);
+onMounted(() => {
+    if (props.selected) {
+        for (let i = 0; i < props.options.length; i++) {
+            if (props.options[i].value == props.selected) {
+                selectOption(props.options[i]);
+            }
+        }
     }
 
-    const watcher = watch(
-        () => props.selected,
-        (newVal) => {
-            if (!props.options) {
-                return;
-            }
-            for (let i = 0; i < props?.options.length; i++) {
-                if (props.options[i].value == props.selected) {
-                    selectOption(props.options[i]);
-                }
-            }
-        },
-        {
-            immediate: true,
-            deep: true,
-        }
-    );
+    if (props.filter) {
+        emitFilter();
+    }
+});
 
-    onMounted(() => {
-        if (props.selected) {
-            for (let i = 0; i < props.options.length; i++) {
-                if (props.options[i].value == props.selected) {
-                    selectOption(props.options[i]);
-                }
-            }
-        }
+onUnmounted(() => {
+    watcher();
+});
 
-        if (props.filter) {
-            emitFilter();
-        }
-    });
+const inputDropdown = ref();
 
-    onUnmounted(() => {
-        watcher();
-    });
-
-    const inputDropdown = ref();
-
-    useUtils.onClickOutside(inputDropdown, () => {
-        isOpen.value = false;
-    })
+useUtils.onClickOutside(inputDropdown, () => {
+    isOpen.value = false;
+});
 </script>
 
 <style scoped>
@@ -141,7 +151,6 @@
     font-size: 14px;
     line-height: 35px;
     gap: 5px;
-
 }
 
 .dropdown-header:hover {

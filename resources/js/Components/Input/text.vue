@@ -1,27 +1,31 @@
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+import { onMounted, ref } from "vue";
 
-    const model = defineModel<string | number | null | undefined>({ required: true });
+const model = defineModel<string | number | null | undefined>({ required: true });
 
-    const input = ref<HTMLInputElement | null>(null);
+const input = ref<HTMLInputElement | null>(null);
 
-    defineProps<{
-        type?: string
-    }>();
+defineProps<{
+    type?: string;
+}>();
 
-    onMounted(() => {
-        if (input.value?.hasAttribute('autofocus')) {
-            input.value?.focus();
-        }
-    });
+onMounted(() => {
+    if (input.value?.hasAttribute("autofocus")) {
+        input.value?.focus();
+    }
+});
 
-    // Expose focus method
-    defineExpose({ focus: () => input.value?.focus() });
+// Expose focus method
+defineExpose({ focus: () => input.value?.focus() });
 </script>
 
 <template>
-    <input :type="type ?? 'text'" v-model="model" ref="input"
-        class="rounded-md border-input-border shadow-sm bg-layer-light text-gray-300 focus:border-accent focus:ring-accent" />
+    <input
+        :type="type ?? 'text'"
+        v-model="model"
+        ref="input"
+        class="rounded-md border-input-border bg-layer-light text-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+    />
 </template>
 <style lang="css">
 input:-webkit-autofill {

@@ -1,25 +1,22 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import vue from '@vitejs/plugin-vue';
-import path from 'path';
+import vue from "@vitejs/plugin-vue";
+import laravel from "laravel-vite-plugin";
+import path from "path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
     plugins: [
         vue(),
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.ts'],
+            input: ["resources/css/app.css", "resources/js/app.ts"],
             refresh: true,
         }),
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js'),
-            '@components': path.resolve(__dirname, './resources/js/Components'),
-            '@composables': path.resolve(
-                __dirname,
-                './resources/js/Composables'
-            ),
-            '@stores': path.resolve(__dirname, './resources/js/stores'),
+            "@": path.resolve(__dirname, "./resources/js"),
+            "@components": path.resolve(__dirname, "./resources/js/Components"),
+            "@composables": path.resolve(__dirname, "./resources/js/Composables"),
+            "@stores": path.resolve(__dirname, "./resources/js/stores"),
         },
     },
 });

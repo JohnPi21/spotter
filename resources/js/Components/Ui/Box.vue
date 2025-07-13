@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-layer border border-layer-border p-2 rounded shadow-sm">
+    <div class="rounded border border-layer-border bg-layer p-2 shadow-sm">
         <slot></slot>
     </div>
 </template>
@@ -12,6 +12,6 @@
 }
 
 :slotted(ul li) {
-    @apply py-3 border-b border-layer-border last:border-none last:pb-0 first:pt-0;
+    @apply border-b border-layer-border py-3 first:pt-0 last:border-none last:pb-0;
 }
 </style>

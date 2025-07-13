@@ -1,14 +1,16 @@
 <script setup lang="ts">
-    import { Link } from '@inertiajs/vue3';
+import { Link } from "@inertiajs/vue3";
 
-    defineProps<{
-        href: string;
-    }>();
+defineProps<{
+    href: string;
+}>();
 </script>
 
 <template>
-    <Link :href="href"
-        class="block w-full px-4 py-2 text-start text-sm leading-5 transition duration-150 ease-in-out focus:outline-none bg-layer-light text-gray-300 hover:bg-input focus:bg-gray-800">
-    <slot />
+    <Link
+        :href="href"
+        class="block w-full bg-layer-light px-4 py-2 text-start text-sm leading-5 text-gray-300 transition duration-150 ease-in-out hover:bg-input focus:bg-gray-800 focus:outline-none"
+    >
+        <slot />
     </Link>
 </template>

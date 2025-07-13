@@ -42,7 +42,7 @@ class ExerciseSetController extends Controller
 
         $set->update($validated);
 
-        return to_route('day.show', [$set->dayExercise->day, $set->dayExercise->day->mesocycle]);
+        return to_route('day.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day]);
         // return response()->json([
         //     'set' => $set
         // ]);
