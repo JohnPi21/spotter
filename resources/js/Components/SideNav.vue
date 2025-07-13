@@ -28,6 +28,12 @@
 
     const links = computed(() => [
         {
+            name: 'Dashboard',
+            path: '/',
+            icon: 'material-symbols:dashboard-outline',
+            show: page.props.auth.flags.hasActiveMeso
+        },
+        {
             name: 'Current Workout',
             path: '/mesocycles/current-day',
             icon: 'tabler:barbell',
@@ -35,7 +41,7 @@
         },
         {
             name: 'Mesocycles',
-            path: '/',
+            path: '/mesocycles',
             icon: 'entypo:cycle'
         },
         {

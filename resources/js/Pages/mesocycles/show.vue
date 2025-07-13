@@ -62,7 +62,9 @@
                 <div class="bg-orange-700 px-2 rounded">{{ dayExercise.exercise.muscle_group.name }}</div>
 
                 <div class="flex align-end items-center gap-4">
-                    <Icon icon="line-md:youtube" width="20px" />
+                    <a target="_blank" :href="`https://www.youtube.com/watch?v=${dayExercise.exercise.youtube_id}`">
+                        <Icon icon="line-md:youtube" width="20px" />
+                    </a>
 
                     <UiDropdownMenu :idx="exercise_idx" left="-50px">
                         <template #header>
