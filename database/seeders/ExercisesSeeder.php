@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ExercisesSeeder extends Seeder
 {
@@ -14,10 +15,15 @@ class ExercisesSeeder extends Seeder
      */
     public function run(): void
     {
-        $exercises = [];
 
-        foreach(Storage::json('exercises.json') as $exercise){
-            $exercises[] = [
+        $exercises_file = File::get(database_path('seeders/exercises.json'));
+
+        $exercises = json_decode($exercises_file, true);
+
+        $payload = [];
+
+        foreach ($exercises as $exercise) {
+            $payload[] = [
                 'name' => $exercise['name'],
                 'muscle_group_id' => $exercise['muscleGroupId'],
                 'exercise_type' => $exercise['exerciseType'],
@@ -25,7 +31,6 @@ class ExercisesSeeder extends Seeder
             ];
         };
 
-        DB::table('exercises')->insert($exercises);
-            
+        DB::table('exercises')->insert($payload);
     }
 }
