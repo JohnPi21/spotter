@@ -148,6 +148,7 @@
                         :placeholder="set?.target_weight ?? mesocycle.unit"
                         v-model="set.weight"
                         class="w-full"
+                        :id="exercise_idx + '-' + set_idx + '-weight'"
                     />
                 </div>
                 <div class="col-span-2">
@@ -155,6 +156,7 @@
                         :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
                         v-model="set.reps"
                         class="w-full"
+                        :id="exercise_idx + '-' + set_idx + '-reps'"
                     />
                 </div>
                 <div class="flex items-center justify-end">
@@ -166,6 +168,7 @@
                         false-value="0"
                         @change="updateSet(set)"
                         class="mr-2"
+                        :id="exercise_idx + '-' + set_idx + '-status'"
                     />
                 </div>
             </div>
