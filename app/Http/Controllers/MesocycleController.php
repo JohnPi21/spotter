@@ -28,7 +28,7 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy']),
-            new Middleware('can:view,mesocycle', only: ['show']),
+            // new Middleware('can:view,mesocycle', only: ['show']),
             // new Middleware('can:create,' . Mesocycle::class, only: ['create']),
         ];
     }
@@ -36,7 +36,13 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function index(): \Inertia\Response
     {
-        $mesocycles = Mesocycle::all();
+        $mesocycles = Mesocycle::mine()->with(['days:id,status,mesocycle_id'])->get();
+
+        $mesocycles->each(function ($mesocycle) {
+            $mesocycle->lastDay = $mesocycle->days->first(function ($day) {
+                return $day->status == 0;
+            })?->id;
+        });
 
         return Inertia::render('mesocycles/index', [
             'title'     => 'Mesocycles',
@@ -44,11 +50,12 @@ class MesocycleController extends Controller implements HasMiddleware
         ]);
     }
 
+    // CANCEL THIS ROUTE
     public function show(Mesocycle $mesocycle): \Inertia\Response
     {
-        $mesocycle = Mesocycle::with([
-            'days.exercises' => ['muscleGroup', 'sets']
-        ])->find($mesocycle->id);
+        $mesocycle->load([
+            'days.dayExercises' => ['exercise.muscleGroup', 'sets']
+        ]);
 
         return Inertia::render('mesocycles/show', [
             'title'     => 'Mesocycle',
@@ -64,17 +71,17 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $muscleGroups = MuscleGroup::pluck('id')->toArray();
+        // $muscleGroups = MuscleGroup::pluck('id')->toArray();
 
         $validated = $request->validate([
             'meso'                              => ['required', 'array'],
             'meso.name'                         => ['required', 'string'],
             'meso.unit'                         => ['sometimes', Rule::in(['kg', 'lbs'])],
             'meso.weeksDuration'                => ['required', 'integer', 'min:3', 'max:12'],
-            'days'                              => ['required', 'array'],
-            'days.*.label'                      => ['required', 'string'],
-            'days.*.exercises'                  => ['required', 'array'],
-            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', Rule::in($muscleGroups)],
+            'days'                              => ['required', 'array', 'min:1', 'max:7'],
+            'days.*.label'                      => ['required', 'string', 'min:1', 'max:64'],
+            'days.*.exercises'                  => ['required', 'array', 'min:1', 'max:32'],
+            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', 'exists:muscle_groups,id'],
             'days.*.exercises.*.exerciseID'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
         ]);
 
@@ -118,8 +125,7 @@ class MesocycleController extends Controller implements HasMiddleware
             }
         }
 
-
-        return to_route('mesocycles');
+        return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
@@ -170,6 +176,6 @@ class MesocycleController extends Controller implements HasMiddleware
             $currentDay = $days->last();
         }
 
-        return to_route("day.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay->id]);
+        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay->id]);
     }
 }

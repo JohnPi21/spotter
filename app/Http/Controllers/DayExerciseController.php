@@ -42,7 +42,7 @@ class DayExerciseController extends Controller
             'status'          => 0
         ]);
 
-        return redirect()->route('day.show', [
+        return redirect()->route('days.show', [
             'mesocycle' => $day->mesocycle,
             'day'       => $day,
         ]);
@@ -63,7 +63,7 @@ class DayExerciseController extends Controller
             DayExercise::where('id', $id)->update(['position' => $position]);
         }
 
-        return to_route('day.show', [
+        return to_route('days.show', [
             'mesocycle' => $day->mesocycle,
             'day'       => $day,
         ]);
@@ -79,7 +79,7 @@ class DayExerciseController extends Controller
 
         $exercise->delete();
 
-        return redirect()->route('day.show', [
+        return redirect()->route('days.show', [
             'mesocycle' => $exercise->day->mesocycle,
             'day'       => $exercise->day,
         ]);

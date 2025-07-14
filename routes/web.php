@@ -21,29 +21,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/mesocycles', 'index')->name('mesocycles');
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
         Route::get('/mesocycles/current-day', 'currentActiveDay')->name('mesocycles.current');
-        Route::post('/mesocycles', 'store');
-        Route::get('/mesocycles/{mesocycle}', 'show');
-        Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.create');
-        Route::put('/mesocycles/{id}', 'update');
+        Route::post('/mesocycles', 'store')->name('mesocycles.store');
+        Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.edit');
+        Route::put('/mesocycles/{id}', 'update')->name('mesocycles.update');
         Route::patch('/mesocycles/{mesocycle}', 'activate')->name('mesocycles.activate');
-        Route::delete('/mesocycles/{mesocycle}', 'destroy');
+        Route::delete('/mesocycles/{mesocycle}', 'destroy')->name('mesocycles.destroy');
     });
 
     Route::controller(MesoDayController::class)->group(function () {
-        Route::get('/mesocycles/{mesocycle}/day/{day}', 'show')->name('day.show');
-        Route::patch('/day/{day}', 'toggleDay');
+        Route::get('/mesocycles/{mesocycle}/days/{day}', 'show')->name('days.show');
+        Route::patch('/day/{day}', 'toggleDay')->name('days.toggle');
     });
 
     Route::controller(ExerciseSetController::class)->group(function () {
-        Route::post('/sets', 'store');
-        Route::patch('/sets/{set}', 'update');
-        Route::delete('/sets/{set}', 'destroy');
+        Route::post('/sets', 'store')->name('sets.store');
+        Route::patch('/sets/{set}', 'update')->name('sets.update');
+        Route::delete('/sets/{set}', 'destroy')->name('sets.destroy');
     });
 
     Route::controller(DayExerciseController::class)->group(function () {
-        Route::post('/day/{day}/exercises', 'store');
-        Route::patch('/day/{day}/reorder', 'updateOrder');
-        Route::delete('day/{day}/exercises/{exercise}', 'destroy');
+        Route::post('/day/{day}/exercises', 'store')->name('dayExercises.store');
+        Route::patch('/day/{day}/reorder', 'updateOrder')->name('dayExercises.reorder');
+        Route::delete('day/{day}/exercises/{exercise}', 'destroy')->name('dayExercise.destroy');
     });
 
     Route::controller(ExerciseController::class)->group(function () {

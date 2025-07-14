@@ -4,7 +4,7 @@
             <InputText v-model="meso.name" placeholder="Untitled Meso" />
             <InputError :message="errors['meso.name']" />
         </div>
-        <ButtonPrimary @click="submit">Create Meso</ButtonPrimary>
+        <ButtonPrimary :disabled="loading" @click="submit">Create Meso</ButtonPrimary>
     </div>
 
     <!-- <UiErrors :errors="errors" /> -->
@@ -120,6 +120,7 @@ const meso = ref<MesoForm>({
 
 const exerciseStore = useExerciseStore();
 const showMuscleModal = ref<boolean>(false);
+const loading = ref<boolean>(false);
 const exerciseModal = ref<{
     show: boolean;
     exercise: ExerciseForm;
@@ -163,7 +164,10 @@ function addMuscleGroup(muscleGroupId: number) {
 function submit() {
     const mesoForm = useForm({ days: [...days], meso: { ...meso.value } });
 
-    mesoForm.post("/mesocycles");
+    mesoForm.post("/mesocycles", {
+        onStart: () => (loading.value = true),
+        onFinish: () => (loading.value = false),
+    });
 }
 
 function setExerciseID(id: number) {

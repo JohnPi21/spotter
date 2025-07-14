@@ -19,10 +19,13 @@ class MesocyclePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Mesocycle $mesocycle): bool
+    public function view(User $user, Mesocycle $mesocycle, Mesocycle $dayMesocycle): bool
     {
-        // @TODO: Also add friends of user (with a pivot table)
-        return $user->id === $mesocycle->user_id;
+        if ($mesocycle->user_id === $user->id && $dayMesocycle->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -67,6 +70,6 @@ class MesocyclePolicy
      */
     // public function forceDelete(User $user, Mesocycle $mesocycle): bool
     // {
-        //
+    //
     // }
 }

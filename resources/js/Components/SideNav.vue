@@ -30,23 +30,23 @@ const page = usePage();
 const links = computed(() => [
     {
         name: "Dashboard",
-        path: "/",
+        path: route("dashboard"),
         icon: "material-symbols:dashboard-outline",
     },
     {
         name: "Current Workout",
-        path: "/mesocycles/current-day",
+        path: route("mesocycles.current"),
         icon: "tabler:barbell",
         show: page.props.auth.flags.hasActiveMeso,
     },
     {
         name: "Mesocycles",
-        path: "/mesocycles",
+        path: route("mesocycles"),
         icon: "entypo:cycle",
     },
     {
         name: "Account",
-        path: "/profile",
+        path: route("profile.edit"),
         icon: "codicon:account",
     },
 ]);

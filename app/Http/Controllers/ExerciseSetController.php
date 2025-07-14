@@ -13,7 +13,7 @@ class ExerciseSetController extends Controller
     public function store(Request $request)
     {
         $dayExerciseID = $request->validate([
-            'day_exercise_id' => ['required', 'integer']
+            'day_exercise_id' => ['required', 'integer', 'exists:exercises,id']
         ])['day_exercise_id'];
 
         $dayExercise = DayExercise::with('day.mesocycle:id,user_id,id')->findOrFail($dayExerciseID);
@@ -35,14 +35,14 @@ class ExerciseSetController extends Controller
         Gate::authorize('update', $set->dayExercise->day->mesocycle);
 
         $validated = $request->validate([
-            'reps'      => ['required', 'integer'],
-            'weight'    => ['required', 'integer'],
-            'status'    => ['nullable', 'integer'],
+            'reps'      => ['required', 'integer', 'max:64'],
+            'weight'    => ['required', 'integer', 'max:1024'],
+            'status'    => ['nullable', 'integer', 'in:0,1'],
         ]);
 
         $set->update($validated);
 
-        return to_route('day.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day]);
+        return to_route('days.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day])->with('success', 'Set has been updated!');
         // return response()->json([
         //     'set' => $set
         // ]);

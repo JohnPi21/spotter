@@ -9,7 +9,7 @@
         <UiBox v-if="props.mesocycles.length > 0">
             <ul>
                 <li v-for="(meso, idx) in mesocycles" :key="meso.id">
-                    <Link :href="`mesocycles/${meso.id}/day/1`">
+                    <Link :href="route('days.show', { mesocycle: meso.id, day: meso.lastDay })">
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col gap-1">
                                 <h3>{{ meso.name }}</h3>
@@ -73,13 +73,13 @@ const props = defineProps<{
 const form = useForm({});
 
 function setActive(id: number) {
-    form.patch(`/mesocycles/${id}`);
+    form.patch(route("mesocycles.activate", { mesocycle: id }));
 }
 
 function destroy(id: number) {
     if (!confirm("Are you sure you want to delete mesocycle?")) return;
 
-    form.delete(`/mesocycles/${id}`);
+    form.delete(route("mesocycles.destroy", { mesocycle: id }));
 }
 
 const mesoDropdown = [

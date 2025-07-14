@@ -15,13 +15,13 @@ class MesoDayController extends Controller
 
     public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
-        Gate::authorize('view', $mesocycle);
-
         $mesocycle->load('days:id,mesocycle_id,label,status');
 
         $day->load(['dayExercises' => function ($query) {
             $query->orderBy('position');
         }, 'dayExercises.exercise.muscleGroup', 'dayExercises.sets']);
+
+        Gate::authorize('view', [$mesocycle, $day->mesocycle]);
 
         $exerciseIds = $day->dayExercises()->pluck('exercise_id');
         $daysIds = $mesocycle->days->pluck('id');

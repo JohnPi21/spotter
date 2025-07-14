@@ -50,7 +50,7 @@
                 <div class="flex flex-1 flex-col items-center gap-1" v-for="(week, idx) in mesocycle.calendar">
                     <p>WEEK {{ idx }}</p>
                     <Link
-                        :href="`/mesocycles/${mesocycle.id}/day/${weekDay.id}`"
+                        :href="route('days.show', { mesocycle: mesocycle.id, day: weekDay.id })"
                         class="flex w-full items-center justify-center gap-1 rounded-sm bg-main px-2 py-1 text-center"
                         v-for="weekDay in week"
                         :class="[
@@ -111,7 +111,12 @@
             </div>
 
             <div class="grid grid-cols-6 gap-5">
-                <div></div>
+                <div
+                    class="flex h-fit w-fit cursor-pointer items-center self-center rounded-full bg-input p-1"
+                    @click="addSet(dayExercise.id)"
+                >
+                    <Icon icon="material-symbols:add" size="1rem" />
+                </div>
                 <div class="col-span-2 text-center">WEIGHT</div>
                 <div class="col-span-2 text-center">REPS</div>
                 <div class="justify-self-end">LOG</div>
@@ -201,7 +206,7 @@ function isActiveDay(dayID: number) {
 onMounted(() => {});
 
 async function removeExercise(dayExerciseID: number) {
-    router.delete(`/day/${day.value.id}/exercises/${dayExerciseID}`, {
+    router.delete(route("dayExercise.destroy", { day: day.value.id, exercise: dayExerciseID }), {
         preserveState: "errors",
     });
 }
@@ -210,10 +215,10 @@ async function updateSet(set: ExerciseSet) {
     if (!set.status) return;
 
     router.patch(
-        `/sets/${set.id}`,
+        route("sets.update", { set: set.id }),
         { ...set },
         {
-            preserveState: "errors",
+            preserveState: true,
             onError: () => (set.status = false),
         }
     );
@@ -221,7 +226,7 @@ async function updateSet(set: ExerciseSet) {
 
 async function addSet(dayExerciseID: number) {
     router.post(
-        "/sets",
+        route("sets.store"),
         { day_exercise_id: dayExerciseID },
         {
             preserveState: false,
@@ -230,7 +235,7 @@ async function addSet(dayExerciseID: number) {
 }
 
 async function removeSet(setID: number) {
-    router.delete(`/sets/${setID}`, {
+    router.delete(route("sets.destroy", { set: setID }), {
         preserveState: false,
     });
 }
@@ -240,11 +245,15 @@ async function removeSet(setID: number) {
 // }
 
 async function toggleDay(dayID: number) {
-    router.patch(`/day/${dayID}`);
+    router.patch(route("days.toggle", { day: dayID }));
 }
 
 async function addExercise(exerciseID: number) {
-    router.post(`/day/${day.value.id}/exercises`, { exercise_id: exerciseID }, { preserveState: false });
+    router.post(
+        route("dayExercises.store", { day: day.value.id }),
+        { exercise_id: exerciseID },
+        { preserveState: false }
+    );
 }
 
 function getPosition(dayExerciseID: number): number {
@@ -276,7 +285,7 @@ function swap<T>(arr: T[], from: number, to: number) {
 async function updateOrder() {
     const order = day.value.day_exercises.map((ex) => ex.id);
 
-    router.patch(`/day/${day.value.id}/reorder`, { order });
+    router.patch(route("dayExercises.reorder", { day: day.value.id }), { order });
 }
 
 function addExerciseModal(): void {
