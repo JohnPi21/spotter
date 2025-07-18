@@ -9,7 +9,11 @@
 .env
 .env.prod
 .env.backup
+<<<<<<< HEAD
 .env.key
+=======
+.env.prod
+>>>>>>> e2fc6e7 (Update gitignore)
 .env.production
 .phpactor.json
 .phpunit.result.cache
