@@ -22,7 +22,6 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
-RUN ls -la
 
 # ===============================
 # 2. PHP + Laravel stage
@@ -40,8 +39,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy app and build assets
 COPY --from=php-deps /app /var/www/html
-# COPY --from=build-assets /app/public/build /var/www/html/public/build
-# COPY --from=build-assets /app/public/manifest.json /var/www/html/public/manifest.json
+COPY --from=build-assets /app/public/build /var/www/html/public/build
+COPY --from=build-assets /app/public/build/manifest.json /var/www/html/public/build/manifest.json
 
 # Ensure proper permissions
 RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache

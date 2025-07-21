@@ -18,5 +18,5 @@ export default defineConfig({
             "@composables": path.resolve(__dirname, "./resources/js/Composables"),
             "@stores": path.resolve(__dirname, "./resources/js/stores"),
         },
-    },
+    }
 });
