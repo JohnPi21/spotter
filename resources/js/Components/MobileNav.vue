@@ -39,7 +39,7 @@ const links = computed(() => [
         name: "Current Workout",
         path: route("mesocycles.current"),
         icon: "tabler:barbell",
-        show: page.props.auth.flags.hasActiveMeso,
+        show: page.props?.auth?.flags?.hasActiveMeso,
     },
     {
         name: "Mesocycles",
