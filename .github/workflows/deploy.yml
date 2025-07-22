@@ -15,6 +15,15 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
+            - name: Check if .env.ci exists
+              run: |
+                  if [ -f docker/ci/.env.ci ]; then
+                    echo ".env.ci exists ✅"
+                  else
+                    echo "❌ .env.ci is missing!"
+                    exit 1
+                  fi
+
             - name: Build and start services
               run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
               working-directory: ${{ github.workspace }}
