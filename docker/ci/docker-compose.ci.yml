@@ -27,8 +27,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: testing
-      MYSQL_USER: root
-      MYSQL_PASSWORD: secret
     networks:
       - ci_net
 
