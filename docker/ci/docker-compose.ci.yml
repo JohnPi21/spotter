@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ../../
-      dockerfile: Dockerfile
+      dockerfile: ./docker/ci/Dockerfile.ci
     image: spotter-ci
     env_file:
       - .env.ci
