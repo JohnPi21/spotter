@@ -34,6 +34,9 @@ jobs:
               run: |
                   docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "test -f /var/www/html/.env && echo '.env exists ✅' && cat /var/www/html/.env || (echo '❌ .env is missing inside container' && exit 1)"
 
+            - name: Show current working dir in container
+              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app pwd
+
             - name: Wait for MySQL container to be healthy
               run: |
                   echo "Waiting for MySQL to be healthy..."
@@ -48,19 +51,6 @@ jobs:
                   done
                   echo "❌ MySQL did not become healthy in time"
                   docker compose -f docker/ci/docker-compose.ci.yml logs mysql
-                  exit 1
-
-            - name: Wait for MySQL port 3306 to be open
-              run: |
-                  echo "Waiting for MySQL port 3306 to be open..."
-                  for i in {1..30}; do
-                    if (echo > /dev/tcp/localhost/3306) >/dev/null 2>&1; then
-                      echo "✅ MySQL port 3306 is open!"
-                      exit 0
-                    fi
-                    sleep 1
-                  done
-                  echo "❌ MySQL port 3306 never opened!"
                   exit 1
 
             - name: Show MySQL logs
