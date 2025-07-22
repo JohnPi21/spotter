@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen" v-if="$page.props.auth">
         <SideNav class="hidden md:block" />
         <Modal />
         <div class="container mx-auto mb-5 px-3 pb-[var(--mobilenav-height)] md:pl-[var(--sidenav-width)]">
