@@ -9,6 +9,7 @@
 /certbot/letsencrypt/
 .env
 .env.prod
+.env.dev
 .env.backup
 .env.key
 .phpactor.json

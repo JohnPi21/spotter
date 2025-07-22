@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: ../../Dockerfile
+    image: spotter-ci
+    environment:
+      APP_ENV: testing
+      APP_KEY: base64:SomeFakeTestKey
+      APP_DEBUG: true
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    env_file:
+      - .env.ci
+    volumes:
+      - ../../storage:/var/www/html/storage
+    depends_on:
+      - mysql
+    networks:
+      - ci_net
+
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: testing
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+    networks:
+      - ci_net
+
+networks:
+  ci_net:

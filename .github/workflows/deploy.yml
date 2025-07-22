@@ -1,54 +1,57 @@
-name: Deploy to EC2
+name: CI/CD Pipeline
 
 on:
     push:
-        branches:
-            - prod
+        branches: [prod]
 
 jobs:
     test:
+        name: Run Tests
         runs-on: ubuntu-latest
-
         steps:
-            - name: Checkout repo
+            - name: Checkout Code
               uses: actions/checkout@v3
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Set up environment variables
+            - name: Create CI .env
               run: |
-                  echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
-                  echo "DB_DATABASE=testing" >> .env
-                  echo "DB_USERNAME=root" >> .env
-                  echo "DB_PASSWORD=secret" >> .env
-                  echo "APP_ENV=testing" >> .env
-                  echo "APP_DEBUG=true" >> .env
+                  echo "APP_KEY=base64:CI_TEST_KEY" >> docker/ci/.env.ci
+                  echo "APP_ENV=testing" >> docker/ci/.env.ci
+                  echo "DB_DATABASE=testing" >> docker/ci/.env.ci
+                  echo "DB_USERNAME=root" >> docker/ci/.env.ci
+                  echo "DB_PASSWORD=secret" >> docker/ci/.env.ci
 
-            - name: Build and start services
+            - name: Start Test Stack
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
+
+            - name: Wait for MySQL
               run: |
-                  docker compose -f docker-compose.yml up -d --build
+                  until docker compose -f docker/ci/docker-compose.ci.yml exec -T mysql \
+                    mysqladmin ping -uroot -psecret --silent; do sleep 1; done
 
-            - name: Run migrations
-              run: |
-                  docker compose exec -T app php artisan migrate:fresh --seed --force
+            - name: Run Migrations
+              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
 
-            - name: Run Laravel tests
-              run: |
-                  docker compose exec -T app php artisan test
+            - name: Run PHPUnit Tests
+              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
 
-            - name: Shut down containers
-              run: docker compose down
+            - name: Tear Down
+              run: docker compose -f docker/ci/docker-compose.ci.yml down
 
     deploy:
+        name: Deploy to Production
         needs: test
         runs-on: ubuntu-latest
-
+        environment:
+            name: production
+            url: https://spotacus.app
         steps:
-            - name: Checkout repo
+            - name: Checkout Code
               uses: actions/checkout@v3
 
-            - name: Deploy over SSH
+            - name: Deploy via SSH
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.EC2_HOST }}
@@ -60,8 +63,8 @@ jobs:
                       git fetch origin
                       git reset --hard origin/prod
 
-                      docker compose down --remove-orphans
-                      docker compose up -d --build
+                      docker compose -f docker/prod/docker-compose.yml down --remove-orphans
+                      docker compose -f docker/prod/docker-compose.yml up -d --build
 
                       chmod +x scripts/post_deploy.sh
                       ./scripts/post_deploy.sh

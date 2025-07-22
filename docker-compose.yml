@@ -14,8 +14,6 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-    env_file:
-      - .env.ci
     volumes:
       - ./storage:/var/www/html/storage
       - public-build:/var/www/html/public
