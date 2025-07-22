@@ -60,8 +60,12 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v3
 
-            - name: Add GitHub to known_hosts
-              run: ssh-keyscan github.com >> ~/.ssh/known_hosts
+            - name: Prepare SSH known_hosts
+              run: |
+                  mkdir -p ~/.ssh
+                  ssh-keyscan github.com >> ~/.ssh/known_hosts
+                  chmod 700 ~/.ssh
+                  chmod 644 ~/.ssh/known_hosts
 
             - name: Deploy via SSH
               uses: appleboy/ssh-action@v1.0.3
