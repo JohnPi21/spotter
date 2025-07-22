@@ -13,20 +13,20 @@ services:
     networks:
       - ci_net
 
-mysql:
-  image: mysql:8
-  environment:
-    MYSQL_ROOT_PASSWORD: secret
-    MYSQL_DATABASE: testing
-    MYSQL_USER: ci_user
-    MYSQL_PASSWORD: ci_pass
-  healthcheck:
-    test: ["CMD", "mysqladmin", "ping", "-uci_user", "-pci_pass"]
-    interval: 5s
-    timeout: 3s
-    retries: 10
-  networks:
-    - ci_net
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: testing
+      MYSQL_USER: ci_user
+      MYSQL_PASSWORD: ci_pass
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uci_user", "-pci_pass"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - ci_net
 
 networks:
   ci_net:
