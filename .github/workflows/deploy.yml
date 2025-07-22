@@ -16,9 +16,32 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Set up .env.testing
+            - name: Cache Docker layers
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/.buildx-cache
+                  key: ${{ runner.os }}-buildx-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-buildx-
+
+            - name: Build and start services
               run: |
-                  cat <<EOF > .env.testing
+                  docker buildx create --use
+                  docker compose -f docker-compose.yml build \
+                    --progress plain \
+                    --cache-from=type=local,src=/tmp/.buildx-cache \
+                    --cache-to=type=local,dest=/tmp/.buildx-cache-new
+
+                  docker compose -f docker-compose.yml up -d
+
+            - name: Save new cache
+              run: |
+                  rm -rf /tmp/.buildx-cache
+                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+            - name: Set up .env.ci
+              run: |
+                  cat <<EOF > .env.ci
                   APP_ENV=testing
                   APP_DEBUG=true
                   APP_KEY=base64:$(openssl rand -base64 32)
@@ -31,24 +54,17 @@ jobs:
                   EOF
 
             - name: Build and start services
-              run: |
-                  docker compose -f docker-compose.yml up -d --build
+              run: docker compose -f docker-compose.yml up -d --build
 
-            - name: Use .env.testing as active .env
+            - name: Copy .env.ci into app container as .env
               run: |
-                  docker cp .env.testing $(docker compose ps -q app):/var/www/html/.env
-
-            - name: Copy .env.testing into app container
-              run: |
-                  docker cp .env.testing $(docker compose ps -q app):/var/www/html/.env.testing
+                  docker cp .env.ci $(docker compose ps -q app):/var/www/html/.env
 
             - name: Run migrations
-              run: |
-                  docker compose exec -T app php artisan migrate:fresh --seed --force
+              run: docker compose exec -T app php artisan migrate:fresh --seed --force
 
             - name: Run Laravel tests
-              run: |
-                  docker compose exec -T app php artisan test
+              run: docker compose exec -T app php artisan test
 
             - name: Shut down containers
               run: docker compose down
