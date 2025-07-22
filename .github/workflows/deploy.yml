@@ -19,20 +19,22 @@ jobs:
               run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
               working-directory: ${{ github.workspace }}
 
-            - name: Wait for MySQL container to be healthy
+            - name: Wait for MySQL from app using PHP PDO
               run: |
-                  echo "Waiting for MySQL to be healthy..."
                   for i in {1..30}; do
-                    STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose -f docker/ci/docker-compose.ci.yml ps -q mysql))
-                    echo "Current status: $STATUS"
-                    if [ "$STATUS" == "healthy" ]; then
-                      echo "✅ MySQL is healthy"
-                      exit 0
-                    fi
+                    docker compose -f docker/ci/docker-compose.ci.yml exec -T app php -r '
+                      try {
+                        $pdo = new PDO("mysql:host=mysql;port=3306;dbname=testing", "ci_user", "ci_pass");
+                        echo "✅ Connected to MySQL\n";
+                        exit(0);
+                      } catch (PDOException $e) {
+                        echo "⏳ Waiting for DB: " . $e->getMessage() . "\n";
+                        exit(1);
+                      }
+                    ' && exit 0
                     sleep 2
                   done
-                  echo "❌ MySQL did not become healthy in time"
-                  docker compose -f docker/ci/docker-compose.ci.yml logs mysql
+                  echo "❌ Could not connect to DB"
                   exit 1
 
             - name: Wait for MySQL to accept connections from Laravel app
