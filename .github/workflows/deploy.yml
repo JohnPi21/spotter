@@ -19,7 +19,7 @@ jobs:
               run: |
                   if [ -f docker/ci/.env.ci ]; then
                     echo ".env.ci exists ✅"
-                    cat ".env.ci"
+                    cat ./.env.ci
                     exit 1
                   else
                     echo "❌ .env.ci is missing!"
