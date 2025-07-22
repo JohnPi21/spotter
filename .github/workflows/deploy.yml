@@ -50,6 +50,17 @@ jobs:
                   docker compose -f docker/ci/docker-compose.ci.yml logs mysql
                   exit 1
 
+            - name: Wait for MySQL to accept connections (REAL server)
+              run: |
+                  echo "Waiting for MySQL port 3306 to be open..."
+                  for i in {1..30}; do
+                    docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c \
+                      "nc -z mysql 3306" && echo "✅ Port is open!" && exit 0
+                    sleep 1
+                  done
+                  echo "❌ MySQL port 3306 never opened!"
+                  exit 1
+
             - name: Show MySQL logs
               run: docker compose -f docker/ci/docker-compose.ci.yml logs mysql
 
