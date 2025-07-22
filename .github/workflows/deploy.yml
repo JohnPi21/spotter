@@ -42,19 +42,6 @@ jobs:
             - name: Run PHPUnit Tests
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
 
-            - name: Save test results
-              if: always()
-              run: |
-                  mkdir -p storage/test-results
-                  docker compose -f docker/ci/docker-compose.ci.yml cp app:/var/www/html/storage/logs/laravel.log storage/test-results/laravel.log
-
-            - name: Upload logs
-              if: always()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: laravel-test-logs
-                  path: storage/test-results/
-
             - name: Tear Down
               run: docker compose -f docker/ci/docker-compose.ci.yml down
 
