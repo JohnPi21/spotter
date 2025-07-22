@@ -15,27 +15,9 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Check if .env.ci exists
-              run: |
-                  if [ -f docker/ci/.env.ci ]; then
-                    echo ".env.ci exists ✅"
-                    cat docker/ci/.env.ci
-                    exit 0
-                  else
-                    echo "❌ .env.ci is missing!"
-                    exit 1
-                  fi
-
             - name: Build and start services
               run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
               working-directory: ${{ github.workspace }}
-
-            - name: Check if .env is mounted correctly inside container
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "test -f /var/www/html/.env && echo '.env exists ✅' && cat /var/www/html/.env || (echo '❌ .env is missing inside container' && exit 1)"
-
-            - name: Show current working dir in container
-              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app pwd
 
             - name: Wait for MySQL container to be healthy
               run: |
@@ -53,11 +35,18 @@ jobs:
                   docker compose -f docker/ci/docker-compose.ci.yml logs mysql
                   exit 1
 
+            - name: Wait for MySQL to accept connections from Laravel app
+              run: |
+                  for i in {1..30}; do
+                    docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "mysql -h mysql -uci_user -pci_pass -e 'SELECT 1'" && echo '✅ MySQL reachable from app' && exit 0
+                    echo "Waiting for MySQL from app..."
+                    sleep 2
+                  done
+                  echo "❌ MySQL is still unreachable from app"
+                  exit 1
+
             - name: Show MySQL logs
               run: docker compose -f docker/ci/docker-compose.ci.yml logs mysql
-
-            - name: Debug Show Laravel .env inside container
-              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app cat /var/www/html/.env
 
             - name: Run Migrations
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
