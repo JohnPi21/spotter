@@ -1,8 +1,8 @@
 services:
   app:
     build:
-      context: ../..
-      dockerfile: ../../Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: spotter-ci
     environment:
       APP_ENV: testing
