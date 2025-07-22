@@ -79,8 +79,8 @@ jobs:
                       git fetch origin
                       git reset --hard origin/prod
 
-                      docker compose -f docker/prod/docker-compose.yml down --remove-orphans
-                      docker compose -f docker/prod/docker-compose.yml up -d --build
+                      docker compose down --remove-orphans
+                      docker compose up -d --build
 
                       chmod +x scripts/post_deploy.sh
                       ./scripts/post_deploy.sh
