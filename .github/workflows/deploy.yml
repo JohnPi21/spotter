@@ -43,11 +43,6 @@ jobs:
             - name: Run Migrations
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
 
-            - name: Clear and cache config
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan config:clear
-                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan config:cache
-
             - name: Run PHPUnit Tests
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
 
@@ -64,6 +59,9 @@ jobs:
         steps:
             - name: Checkout Code
               uses: actions/checkout@v3
+
+            - name: Add GitHub to known_hosts
+              run: ssh-keyscan github.com >> ~/.ssh/known_hosts
 
             - name: Deploy via SSH
               uses: appleboy/ssh-action@v1.0.3
