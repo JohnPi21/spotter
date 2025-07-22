@@ -34,17 +34,19 @@ jobs:
               run: |
                   docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "test -f /var/www/html/.env && echo '.env exists ✅' && cat /var/www/html/.env || (echo '❌ .env is missing inside container' && exit 1)"
 
-            - name: Wait for MySQL (timeout 60s)
+            - name: Wait for MySQL container to be healthy
               run: |
-                  for i in {1..60}; do
-                    if docker compose -f docker/ci/docker-compose.ci.yml exec -T mysql \
-                      mysqladmin ping -uroot -psecret --silent; then
-                      echo "MySQL is ready!"
+                  echo "Waiting for MySQL to be healthy..."
+                  for i in {1..30}; do
+                    STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose -f docker/ci/docker-compose.ci.yml ps -q mysql))
+                    echo "Current status: $STATUS"
+                    if [ "$STATUS" == "healthy" ]; then
+                      echo "✅ MySQL is healthy"
                       exit 0
                     fi
-                    sleep 1
+                    sleep 2
                   done
-                  echo "❌ MySQL did not start in time" >&2
+                  echo "❌ MySQL did not become healthy in time"
                   docker compose -f docker/ci/docker-compose.ci.yml logs mysql
                   exit 1
 
