@@ -15,14 +15,6 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Create CI .env
-              run: |
-                  echo "APP_KEY=base64:CI_TEST_KEY" >> docker/ci/.env.ci
-                  echo "APP_ENV=testing" >> docker/ci/.env.ci
-                  echo "DB_DATABASE=testing" >> docker/ci/.env.ci
-                  echo "DB_USERNAME=root" >> docker/ci/.env.ci
-                  echo "DB_PASSWORD=secret" >> docker/ci/.env.ci
-
             - name: Build and start services
               run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
               working-directory: ${{ github.workspace }}
