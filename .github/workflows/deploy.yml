@@ -43,10 +43,10 @@ jobs:
             - name: Run Migrations
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
 
-            - name: List vendor + storage
+            - name: Clear and cache config
               run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "ls -la /var/www/html/vendor"
-                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app bash -c "ls -la /var/www/html/storage"
+                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan config:clear
+                  docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan config:cache
 
             - name: Run PHPUnit Tests
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
