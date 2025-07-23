@@ -13,11 +13,15 @@ import MobileNav from "@/Components/MobileNav.vue";
 import Modal from "@/Components/Modal.vue";
 import SideNav from "@/Components/SideNav.vue";
 import { useExerciseStore } from "@/stores/exerciseStore";
+import { usePage } from "@inertiajs/vue3";
 import { onMounted } from "vue";
 
+const page = usePage();
 const exerciseStore = useExerciseStore();
 
 onMounted(async () => {
+    if (!page.props.auth.user) return;
+
     await exerciseStore.load();
 });
 </script>
