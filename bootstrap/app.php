@@ -32,6 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             $status = $response->getStatusCode();
 
+            // ✅ Let redirects and successful responses pass through
+            if ($response->isRedirection() || $status < 400) {
+                return $response;
+            }
+
             if (app()->environment(['local', 'testing'])) {
                 return $response;
             }
@@ -43,13 +48,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 default => 'An unexpected error occurred.',
             };
 
-            // 🟡 For POST/PUT/etc. requests, redirect back with flash
+            // POST, PUT, DELETE → redirect back with flash
             if (! $request->isMethod('GET')) {
-                return redirect()->back()
-                    ->with('error', $message); // ✅ Let it be a normal 302 response
+                return redirect()->back()->with('error', $message);
             }
 
-            // ✅ For GET requests, show error page
+            // GET → Inertia error page
             return Inertia::render('ErrorPage', [
                 'status' => $status,
                 'message' => $message,
