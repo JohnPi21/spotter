@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-screen" v-if="$page.props?.auth?.user">
+    <div class="flex min-h-screen" v-if="page.props?.auth?.user">
         <SideNav class="hidden md:block" />
         <Modal />
         <div class="container mx-auto mb-5 px-3 pb-[var(--mobilenav-height)] md:pl-[var(--sidenav-width)]">
@@ -20,7 +20,7 @@ const page = usePage();
 const exerciseStore = useExerciseStore();
 
 onMounted(async () => {
-    if (!page.props.auth.user) return;
+    if (!page?.props?.auth?.user) return;
 
     await exerciseStore.load();
 });
