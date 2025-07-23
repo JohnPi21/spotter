@@ -51,6 +51,7 @@ jobs:
               run: docker compose -f docker/ci/docker-compose.ci.yml down
 
     deploy:
+        if: always()
         name: Deploy to Production
         needs: test
         runs-on: ubuntu-latest
