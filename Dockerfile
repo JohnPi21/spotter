@@ -15,7 +15,7 @@ FROM node:20 AS build-assets
 
 WORKDIR /app
 
-# Copy Ziggy early
+# Copy Ziggy early (Ziggy is an Inertia dependency and it needs it to exist in vendor before installing the frontend side)
 COPY --from=php-deps /app/vendor ./vendor
 
 COPY package*.json ./
