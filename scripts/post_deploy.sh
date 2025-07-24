@@ -19,6 +19,7 @@ for i in {1..30}; do
 done
 
 docker compose exec -T app php artisan migrate --force
+docker compose exec -T app php artisan php artisan optimize:clear
 docker compose exec -T app php artisan config:cache
 docker compose exec -T app php artisan route:cache
 docker compose exec -T app php artisan storage:link
