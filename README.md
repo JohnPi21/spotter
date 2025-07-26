@@ -1,6 +1,6 @@
 # Production Setup (Laravel + Vue + Docker)
 
-This document describes how to build and deploy the **production version** of the Spotter app. Local development uses [Laravel Sail](https://laravel.com/docs/sail), while **production** runs on a custom Docker-based setup.
+This document describes how to build and deploy the **production version** of the spotacus app. Local development uses [Laravel Sail](https://laravel.com/docs/sail), while **production** runs on a custom Docker-based setup.
 
 ---
 
@@ -68,8 +68,8 @@ APP_DEBUG=false
 
 DB_HOST=mysql
 DB_PORT=3306
-DB_DATABASE=spotter
-DB_USERNAME=spotter
+DB_DATABASE=spotacus
+DB_USERNAME=spotacus
 DB_PASSWORD=secret
 ```
 
