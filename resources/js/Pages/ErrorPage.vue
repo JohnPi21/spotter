@@ -1,9 +1,15 @@
 <script setup>
-import PrimaryButton from "@/Components/PrimaryButton.vue";
+import PrimaryButton from "@/Components/Button/Primary.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Link } from "@inertiajs/vue3";
+
 defineProps({
     status: Number,
     message: String,
+});
+
+defineOptions({
+    layout: GuestLayout,
 });
 </script>
 
