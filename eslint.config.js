@@ -1,28 +1,34 @@
-import css from "@eslint/css";
 import js from "@eslint/js";
-import json from "@eslint/json";
 import pluginVue from "eslint-plugin-vue";
-import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import vueParser from "vue-eslint-parser";
 
-export default defineConfig([
-    // JS/TS
+export default [
+    // JS
     {
-        files: ["**/*.{js,mjs,cjs,ts}"],
-        plugins: { js },
-        extends: ["js/recommended"],
+        ...js.configs.recommended,
+        files: ["**/*.{js,mjs,cjs}"],
         languageOptions: {
-            globals: globals.browser,
+            ...js.configs.recommended.languageOptions,
+            globals: {
+                ...globals.browser,
+                ...globals.node,
+            },
         },
     },
-    // TypeScript
-    tseslint.configs.recommended,
+
+    // TS (spread because it's an array)
+    ...tseslint.configs.recommended.map((config) => ({
+        ...config,
+        files: ["**/*.ts"],
+    })),
+
     // Vue
     {
         files: ["**/*.vue"],
         languageOptions: {
-            parser: await import("vue-eslint-parser"),
+            parser: vueParser,
             parserOptions: {
                 parser: tseslint.parser,
                 ecmaVersion: 2020,
@@ -36,34 +42,9 @@ export default defineConfig([
             ...pluginVue.configs["flat/strongly-recommended"].rules,
         },
     },
-    // JSON
-    {
-        files: ["**/*.json"],
-        plugins: { json },
-        language: "json/json",
-        extends: ["json/recommended"],
-        rules: {
-            "json/no-empty-keys": "off",
-        },
-    },
-    {
-        files: ["**/*.jsonc"],
-        plugins: { json },
-        language: "json/jsonc",
-        extends: ["json/recommended"],
-    },
-    // CSS
-    {
-        files: ["**/*.css"],
-        plugins: { css },
-        language: "css/css",
-        extends: ["css/recommended"],
-        rules: {
-            "css/no-invalid-at-rules": "off",
-        },
-    },
+
     // Ignores
     {
         ignores: ["composer.json", "vendor/**", "public/**", "eslint.config.js", ".devcontainer/**"],
     },
-]);
+];
