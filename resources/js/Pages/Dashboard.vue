@@ -12,13 +12,18 @@
                     <span class="text-sm text-secondary">Spotted for: 2 weeks</span>
                 </div>
             </div>
+
+            <UiTabs :tabs="tabs" />
         </UiBox>
 
         <!-- Best Lifts Section -->
         <div>
             <div class="mb-2 flex items-center justify-between">
                 <h2 class="text-2xl">Best Lifts</h2>
-                <div class="text-sm text-secondary">By Weight | By Volume</div>
+                <div class="text-sm text-secondary">
+                    <!-- By Weight | By Volume -->
+                    <!-- <UiTabs :tabs="tabs" /> -->
+                </div>
             </div>
 
             <div class="flex flex-wrap gap-5">
@@ -27,7 +32,7 @@
                     :key="lift.name"
                     class="flex flex-1 flex-col items-center rounded-xl p-5"
                 >
-                    <div class="mb-2 rounded-xl bg-slate-200 p-2">
+                    <div class="mb-2 rounded-xl bg-accent p-2">
                         <img :src="exerciseImages[lift.image]" width="60px" />
                     </div>
                     <div class="text-xl font-extrabold text-accent">
@@ -43,7 +48,7 @@
         <div>
             <h2 class="mb-2 text-2xl">Activity</h2>
             <UiBox class="flex h-48 items-center justify-center">
-                <p class="text-secondary">[ Graph will be displayed here ]</p>
+                <ChartLine :chart-data="chartData" />
             </UiBox>
         </div>
 
@@ -103,9 +108,14 @@
 </template>
 
 <script setup lang="ts">
+import ChartLine from "@/Components/Chart/Line.vue";
 import UiBox from "@/Components/Ui/Box.vue";
+import UiTabs from "@/Components/Ui/tabs.vue";
+import { useTailwindColors } from "@/Composables/useTailwindTheme";
 import { Icon } from "@iconify/vue";
 import { ref } from "vue";
+
+const tailwindColors = useTailwindColors();
 
 const exerciseImages = {
     deadlift: new URL("@/assets/images/deadlift.png", import.meta.url).href,
@@ -128,6 +138,28 @@ const props = defineProps<{
     bestLifts: BestLift[];
     activity: Activity;
 }>();
+
+// The activity can be daily weekly and per mesocycle
+// Graphic example for daily
+// Daily: Y -> volume ; x -> day of exercise (like 12.06 Day 1    15.06 Day 2  17.06 Day 3   19.06 Day 1   22.06 Day 2 ...)
+// Weekly: week of exercise (Week 1   Week 2   Week 3  Week 4) week of the mesocycle not calendaristic week. This is for the current active mesocycle
+// Select box for filter by Weight or by volume
+
+const chartData = ref({
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    datasets: [
+        {
+            label: "Line dataset",
+            data: [65, 59, 80, 81, 56, 55, 40],
+            fill: true,
+            borderColor: tailwindColors.accent,
+            backgroundColor: tailwindColors.amber,
+            tension: 0.1,
+        },
+    ],
+});
+
+const tabs = ref([{ name: "By Weight" }, { name: "By Volume" }]);
 
 const bestLifts = ref<BestLift[]>([
     { name: "Deadlift", weight: 120, unit: "kg", image: "deadlift" },
