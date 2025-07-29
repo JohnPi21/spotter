@@ -16,6 +16,8 @@ class Mesocycle extends Model
 
     public const STATUS_ACTIVE = 1;
     public const STATUS_INACTIVE = 0;
+    public const MIN_WEEKS = 3;
+    public const MAX_WEEKS = 12;
 
     protected $guarded = [];
 
@@ -34,5 +36,10 @@ class Mesocycle extends Model
     protected function active(Builder $query): void
     {
         $query->where('status', 1);
+    }
+
+    public static function weeksRange(): array
+    {
+        return range(self::MIN_WEEKS, self::MAX_WEEKS);
     }
 }
