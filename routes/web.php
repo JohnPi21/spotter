@@ -7,15 +7,13 @@ use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExerciseController;
-use App\Models\MuscleGroup;
+use App\Http\Controllers\DashboardController as Dashboard;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/', [Dashboard::class, 'index'])->name('dashboard');
 
     Route::controller(MesocycleController::class)->group(function () {
         Route::get('/mesocycles', 'index')->name('mesocycles');
