@@ -24,10 +24,11 @@ class MesocycleSeeder extends Seeder
             ->create()
             ->each(function ($meso) use ($exerciseIDs) {
                 for ($week = 1; $week <= $meso->weeks_duration; $week++) {
-                    $days = MesoDay::factory()->count($meso->days_per_week)->create([
-                        'mesocycle_id' => $meso->id,
-                        'week' => $week,
-                    ]);
+                    $days = MesoDay::factory()->count($meso->days_per_week)->sequence(fn($sequence) => [
+                        "label"          => "Day $sequence->index",
+                        'mesocycle_id'  => $meso->id,
+                        'week'          => $week,
+                    ])->create();
 
                     $days->each(function ($day) use ($exerciseIDs) {
                         $dayExercises = DayExercise::factory()

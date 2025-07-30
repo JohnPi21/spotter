@@ -24,11 +24,13 @@ class MesocycleFactory extends Factory
             'comment'   => fake()->paragraph(),
         ]);
 
+        $names = ['Beginner', 'Superman', 'Hell for noobs', 'Upper Focus', 'Lower Focus', 'Accessory focus', 'Upper Lower', 'Bro Split', 'High reps', 'Hypertrophy', 'Power', 'Maintenance', 'Compounds'];
+
         $userIDs = User::pluck('id');
 
         return [
-            'name'              => fake()->words(2, true),
-            'unit'              => fake()->randomElement(['kg', 'lbs']),
+            'name'              => fake()->randomElement($names),
+            'unit'              => 'kg',
             'days_per_week'     => fake()->numberBetween(1, 7),
             'weeks_duration'    => fake()->numberBetween(...Mesocycle::weeksRange()),
             'user_id'           => fake()->randomElement($userIDs),
