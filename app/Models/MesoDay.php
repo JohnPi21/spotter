@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +31,12 @@ class MesoDay extends Model
     // {
     //     return $this->hasManyThrough(Exercise::class, DayExercise::class, 'meso_day_id', 'id', 'id', 'exercise_id');
     // }
+
+    #[Scope]
+    protected function forUser(Builder $query, int $userID)
+    {
+        return $query->whereHas('mesocycle', fn($q) => $q->where('user_id', $userID));
+    }
 
     public function ensureIsEditable(): void
     {

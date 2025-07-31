@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 
 class ExerciseSet extends Model
 {
@@ -15,5 +17,13 @@ class ExerciseSet extends Model
     public function dayExercise(): BelongsTo
     {
         return $this->belongsTo(DayExercise::class);
+    }
+
+    #[Scope]
+    protected function forUser(Builder $query, int $userID)
+    {
+        return $query->whereHas('dayExercise.day.mesocycle', function ($q) use ($userID) {
+            $q->where('user_id', $userID);
+        });
     }
 }
