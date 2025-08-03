@@ -11,13 +11,15 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        $faker = app(\Faker\Generator::class);
+
         $user = User::factory()->create([
             'name'              => 'Demo',
             'email'             => 'demo@example.com',
             'email_verified_at' => now(),
             'password'          => Hash::make('password'),
             'remember_token'    => Str::random(10),
-            'created_at'        => fake()->dateTimeBetween('-4 weeks', '-1 week'),
+            'created_at'        => $faker->dateTimeBetween('-4 weeks', '-1 week'),
         ]);
 
         foreach (range(1, $user->id) as $userID) {
