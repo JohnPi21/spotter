@@ -11,7 +11,7 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::factory()->create([
+        $user = User::create([
             'name'              => 'Demo',
             'email'             => 'demo@example.com',
             'email_verified_at' => now(),
