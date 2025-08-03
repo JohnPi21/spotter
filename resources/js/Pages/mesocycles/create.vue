@@ -34,6 +34,7 @@
                         <div class="rounded bg-orange-700 px-2">
                             {{ exerciseStore.muscleGroups[exercise.muscleGroup]?.name }}
                         </div>
+                        {{ exercise.exerciseID }}
                         <Icon
                             icon="material-symbols-light:delete-outline"
                             width="22px"

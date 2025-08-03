@@ -17,6 +17,10 @@ class MesoDay extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'finished_at' => 'datetime',
+    ];
+
     public function mesocycle(): BelongsTo
     {
         return $this->belongsTo(Mesocycle::class);
@@ -40,7 +44,7 @@ class MesoDay extends Model
 
     public function ensureIsEditable(): void
     {
-        if ((int) $this->status === 1) {
+        if ($this->finished_at) {
             throw ValidationException::withMessages([
                 'day_status' => 'This day is already completed and cannot be modified.',
             ]);

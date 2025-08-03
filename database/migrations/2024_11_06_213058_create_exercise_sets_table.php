@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignIdFor(DayExercise::class)->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('reps')->nullable();
             $table->unsignedInteger('weight')->nullable();
-            $table->unsignedTinyInteger('status');
+            $table->timestamp('finished_at')->nullable();
             // $table->boolean('bodyweight');
             // $table->boolean('assisted');
             $table->timestamps();

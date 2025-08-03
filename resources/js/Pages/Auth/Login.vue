@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ButtonPrimary from "@/Components/Button/Primary.vue";
+import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import Checkbox from "@/Components/Input/Checkbox.vue";
 import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
@@ -37,6 +38,15 @@ const submit = () => {
 
     <div v-if="status" class="text-green-600 mb-4 text-sm font-medium">
         {{ status }}
+    </div>
+
+    <a :href="route('demo.login')">
+        <ButtonPrimary class="w-full">Login as Guest</ButtonPrimary>
+    </a>
+
+    <div class="relative m-5 flex items-center justify-center">
+        <p class="z-10 bg-layer p-1 font-bold">OR</p>
+        <div class="absolute w-full border border-input"></div>
     </div>
 
     <form @submit.prevent="submit">
@@ -82,13 +92,13 @@ const submit = () => {
         </div>
 
         <div class="mt-4 flex justify-center">
-            <ButtonPrimary
+            <ButtonSecondary
                 class="flex-1 justify-center"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
                 Log in
-            </ButtonPrimary>
+            </ButtonSecondary>
         </div>
 
         <div class="flex-column mt-5">

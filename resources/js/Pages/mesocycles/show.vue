@@ -14,7 +14,7 @@
                 </div>
 
                 <div class="align-end flex items-center gap-3">
-                    <div class="flex items-center gap-1 rounded bg-green px-2" v-if="mesocycle.day.status === 1">
+                    <div class="flex items-center gap-1 rounded bg-green px-2" v-if="mesocycle.day.finished_at">
                         <p>Completed</p>
                         <Icon icon="ep:success-filled" />
                     </div>
@@ -55,10 +55,10 @@
                         v-for="weekDay in week"
                         :class="[
                             { 'bg-orange-700': isActiveDay(weekDay.id) },
-                            { 'border border-border-green opacity-50': weekDay.status == 1 },
+                            { 'border border-border-green opacity-50': weekDay.finished_at },
                         ]"
                     >
-                        <Icon icon="ep:success-filled" class="text-green" v-if="weekDay.status == 1" />
+                        <Icon icon="ep:success-filled" class="text-green" v-if="weekDay.finished_at" />
                         {{ weekDay.label }}
                     </Link>
                 </div>
@@ -161,8 +161,8 @@
                 </div>
                 <div class="flex items-center justify-end">
                     <Checkbox
-                        :checked="set.status == true"
-                        :value="set.status"
+                        :checked="set.finished_at"
+                        :value="set.finished_at"
                         v-model="set.status"
                         true-value="1"
                         false-value="0"
@@ -174,7 +174,7 @@
             </div>
         </UiBox>
 
-        <ButtonPrimary @click="toggleDay(day.id)" v-if="mesocycle.day.status === 0">Finish Workout</ButtonPrimary>
+        <ButtonPrimary @click="toggleDay(day.id)" v-if="!mesocycle.day.finished_at">Finish Workout</ButtonPrimary>
         <ButtonSecondary @click="toggleDay(day.id)" v-else>Reactivate</ButtonSecondary>
     </div>
 </template>

@@ -22,7 +22,6 @@ class ExerciseSetController extends Controller
 
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
-            'status'          => 0,
         ]);
 
         return redirect()->back();
@@ -39,6 +38,10 @@ class ExerciseSetController extends Controller
             'weight'    => ['required', 'integer', 'max:1024'],
             'status'    => ['nullable', 'integer', 'in:0,1'],
         ]);
+
+        $validated['finished_at'] = $validated['status'] === 0 ? null : now();
+
+        unset($validated['status']);
 
         $set->update($validated);
 
