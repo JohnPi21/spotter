@@ -7,7 +7,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 
-
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -15,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        // User::factory(5)->create();
 
         // User::factory()->create([
         //     'name' => 'Test User',
@@ -25,11 +24,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ExercisesSeeder::class,
             MuscleGroupsSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
+            DemoSeeder::class
         ]);
 
         if (app()->environment(['local', 'testing'])) {
-            $this->call([MesocycleSeeder::class]);
+            // $this->call([MesocycleSeeder::class]);
         }
     }
 }

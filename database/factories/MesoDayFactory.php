@@ -32,8 +32,7 @@ class MesoDayFactory extends Factory
                 : null,
             'label'         => fake()->word(),
             'position'      => fake()->numberBetween(1, 7),
-            'notes'         => $notes,
-            'status'        => fake()->numberBetween(0, 1),
+            'notes'         => null
         ];
     }
 

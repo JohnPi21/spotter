@@ -9,11 +9,11 @@
 
                 <div class="flex flex-col justify-center">
                     <p>{{ $page.props.auth.user.name }}</p>
-                    <span class="text-sm text-secondary">Spotted for: 2 weeks</span>
+                    <span class="text-sm text-secondary">Joined: {{ info.memberFor }}</span>
                 </div>
             </div>
 
-            <UiTabs :tabs="tabs" />
+            <UiTabs :tabs="tabs" :active="activeTab" @change="changeTab" />
         </UiBox>
 
         <!-- Best Lifts Section -->
@@ -28,18 +28,18 @@
 
             <div class="flex flex-wrap gap-5">
                 <UiBox
-                    v-for="lift in bestLifts"
-                    :key="lift.name"
+                    v-for="(lift, idx) in bestLifts"
+                    :key="lift.exercise"
                     class="flex flex-1 flex-col items-center rounded-xl p-5"
                 >
                     <div class="mb-2 rounded-xl bg-accent p-2">
-                        <img :src="exerciseImages[lift.image]" width="60px" />
+                        <img :src="exerciseImages[lift.type]" width="60px" />
                     </div>
                     <div class="text-xl font-extrabold text-accent">
-                        <span>{{ lift.weight }}</span>
+                        <span>{{ lift.value }}</span>
                         <span>{{ lift.unit }}</span>
                     </div>
-                    <p class="text-xl font-normal">Best {{ lift.name }}</p>
+                    <p class="text-center text-xl font-normal">{{ lift.exercise }}</p>
                 </UiBox>
             </div>
         </div>
@@ -56,33 +56,33 @@
         <div>
             <h2 class="mb-2 text-2xl">Last Workouts</h2>
             <div class="flex flex-col gap-3">
-                <UiBox class="flex items-center justify-between p-4" v-for="box in 3">
+                <UiBox class="flex items-center justify-between p-4" v-for="workout in lastWorkouts">
                     <div class="flex items-center gap-4">
                         <div
                             class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white"
                         >
-                            25
+                            {{ workout.day }}
                         </div>
                         <div>
-                            <p class="font-semibold">Push Day</p>
-                            <p class="text-sm text-secondary">2 days ago</p>
+                            <p class="font-semibold">{{ workout.label }}</p>
+                            <p class="text-sm text-secondary">{{ workout.finishedAt }}</p>
                         </div>
                     </div>
                     <div class="flex gap-1 text-sm text-secondary">
                         <div>
-                            <span>8</span>
+                            <span>{{ workout.exercisesCount }}</span>
                             exercises |
                         </div>
                         <div>
-                            <span>25</span>
+                            <span>{{ workout.setsCount }}</span>
                             sets |
                         </div>
                         <div>
-                            <span>1200kg</span>
+                            <span>{{ workout.totalValue }} {{ workout.unit }}</span>
                             |
                         </div>
                         <div>
-                            <span>4</span>
+                            <span>{{ workout.muscleGroups.length }}</span>
                             Muscle Groups
                         </div>
                     </div>
@@ -113,7 +113,8 @@ import UiBox from "@/Components/Ui/Box.vue";
 import UiTabs from "@/Components/Ui/tabs.vue";
 import { useTailwindColors } from "@/Composables/useTailwindTheme";
 import { Icon } from "@iconify/vue";
-import { ref } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+import { ref, watch } from "vue";
 
 const tailwindColors = useTailwindColors();
 
@@ -122,7 +123,6 @@ const exerciseImages = {
     bench: new URL("@/assets/images/bench.png", import.meta.url).href,
     squat: new URL("@/assets/images/squat.png", import.meta.url).href,
 };
-
 type ExerciseKey = keyof typeof exerciseImages;
 
 type BestLift = {
@@ -134,23 +134,36 @@ type BestLift = {
 
 type Activity = {};
 
+type LastWorkouts = {};
+
 const props = defineProps<{
-    bestLifts: BestLift[];
+    bestLifts: BestLift;
     activity: Activity;
+    lastWorkouts: LastWorkouts;
+    info;
 }>();
 
-// The activity can be daily weekly and per mesocycle
-// Graphic example for daily
-// Daily: Y -> volume ; x -> day of exercise (like 12.06 Day 1    15.06 Day 2  17.06 Day 3   19.06 Day 1   22.06 Day 2 ...)
-// Weekly: week of exercise (Week 1   Week 2   Week 3  Week 4) week of the mesocycle not calendaristic week. This is for the current active mesocycle
-// Select box for filter by Weight or by volume
+const tabs = ref([
+    { name: "By Weight", value: "weight" },
+    { name: "By Volume", value: "volume" },
+]);
+
+const activeTab = ref(usePage().url.includes("displayBy=volume") ? 1 : 0);
+
+const changeTab = (index: number) => {
+    activeTab.value = index;
+
+    const query = index === 0 ? { displayBy: "weight" } : { displayBy: "volume" };
+
+    router.visit(route("dashboard", query), { preserveState: true });
+};
 
 const chartData = ref({
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: props.activity.labels,
     datasets: [
         {
-            label: "Line dataset",
-            data: [65, 59, 80, 81, 56, 55, 40],
+            label: props.displayBy === "weight" ? "Weight / Day" : "Volume / Day",
+            data: props.activity.data,
             fill: true,
             borderColor: tailwindColors.accent,
             backgroundColor: tailwindColors.amber,
@@ -159,11 +172,13 @@ const chartData = ref({
     ],
 });
 
-const tabs = ref([{ name: "By Weight" }, { name: "By Volume" }]);
-
-const bestLifts = ref<BestLift[]>([
-    { name: "Deadlift", weight: 120, unit: "kg", image: "deadlift" },
-    { name: "Squat", weight: 100, unit: "kg", image: "squat" },
-    { name: "Bench", weight: 80, unit: "kg", image: "bench" },
-]);
+watch(
+    () => props.activity,
+    (activity) => {
+        chartData.value.labels = activity.labels;
+        chartData.value.datasets[0].data = activity.data;
+        chartData.value.datasets[0].label = props.displayBy === "weight" ? "Weight / Day" : "Volume / Day";
+    },
+    { deep: true }
+);
 </script>

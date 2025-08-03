@@ -36,13 +36,15 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function index(): \Inertia\Response
     {
-        $mesocycles = Mesocycle::mine()->with(['days:id,status,mesocycle_id'])->get();
+        $mesocycles = Mesocycle::mine()->with(['days:id,finished_at,mesocycle_id'])->get();
 
-        $mesocycles->each(function ($mesocycle) {
-            $mesocycle->lastDay = $mesocycle->days->first(function ($day) {
-                return $day->status == 0;
-            })?->id;
-        });
+        // On each mesocycle add the id (needed for building hte rul) 
+        // to the Current active day OR last day if the mesocycle is finished
+        $mesocycles->each(
+            fn($mesocycle) =>
+            $mesocycle->lastDay = $mesocycle->days
+                ->firstWhere('finished_at', null)?->id ?? $mesocycle->days->last()?->id
+        );
 
         return Inertia::render('mesocycles/index', [
             'title'     => 'Mesocycles',
@@ -107,7 +109,6 @@ class MesocycleController extends Controller implements HasMiddleware
                     "day_order"    => $idx + 1,
                     "label"        => $day['label'],
                     "position"     => $idx,
-                    "status"       => 0,
                 ]);
 
                 foreach ($day['exercises'] as $position => $exercise) {
@@ -119,7 +120,6 @@ class MesocycleController extends Controller implements HasMiddleware
 
                     ExerciseSet::create([
                         "day_exercise_id"   => $exerciseDay->id,
-                        "status"            => 0
                     ]);
                 }
             }
@@ -164,7 +164,7 @@ class MesocycleController extends Controller implements HasMiddleware
         // $day[13] has status 1 meaning i have to get $day[14] next;
         $days = MesoDay::where('mesocycle_id', $mesocycle->id)->orderBy('id', 'DESC')->get();
 
-        $index = $days->search(fn($day) => $day->status === 1);
+        $index = $days->search(fn($day) => $day->finished_at);
 
         $currentDay = [];
 

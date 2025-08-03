@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -34,6 +35,19 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return redirect('/');
+    }
+
+    public function demoLogin(): RedirectResponse
+    {
+        $user = User::find(2);
+
+        if (! $user) {
+            abort(500, 'Something went wrong!');
+        }
+
+        Auth::login($user);
+
+        return to_route('dashboard');
     }
 
     /**

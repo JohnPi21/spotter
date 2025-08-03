@@ -17,6 +17,7 @@ declare global {
         weight: number | null;
         target_reps: number | null;
         target_weight: number | null;
+        finished_at: string | null;
         status: boolean;
         created_at: string;
         updated_at: string;
@@ -60,10 +61,10 @@ declare global {
         body_weight: number | null;
         label: string;
         position: number;
-        status: number;
         notes: string | null;
         created_at: string;
         updated_at: string;
+        finished_at: string | null;
         day_exercises: DayExercise[];
         exercises?: Exercise[];
     };
@@ -73,6 +74,7 @@ declare global {
         mesocycle_id: number;
         label: string;
         status: number;
+        finished_at: string;
     };
 
     type Calendar = Record<number, CalendarEntry[]>;

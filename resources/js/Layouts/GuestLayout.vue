@@ -6,9 +6,11 @@ import { Link } from "@inertiajs/vue3";
 <template>
     <div class="flex min-h-screen flex-col items-center pt-6 sm:justify-center sm:pt-0">
         <div>
-            <Link href="/">
+            <Link href="/" class="flex flex-col items-center justify-center">
                 <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
             </Link>
+
+            <h1 class="text-2xl font-extrabold">Spotacus</h1>
         </div>
 
         <div

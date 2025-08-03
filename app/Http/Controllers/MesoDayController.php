@@ -15,7 +15,7 @@ class MesoDayController extends Controller
 
     public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
     {
-        $mesocycle->load('days:id,mesocycle_id,label,status');
+        $mesocycle->load('days:id,mesocycle_id,label,finished_at');
 
         $day->load(['dayExercises' => function ($query) {
             $query->orderBy('position');
@@ -68,7 +68,6 @@ class MesoDayController extends Controller
                     // Create set entry if it does not exist
                     if (! $dayExercise->sets[$i]) {
                         $dayExercise->sets[$i]->day_exercise_id = $dayExercise->id;
-                        $dayExercise->sets[$i]->status          = 0;
 
                         $dayExercise->sets[$i]->target_reps     = $lastSets[$i]->reps;
                         $dayExercise->sets[$i]->target_weight   = $lastSets[$i]->weight;
@@ -103,7 +102,7 @@ class MesoDayController extends Controller
     {
         Gate::authorize('owns', $day->mesocycle);
 
-        $day->status = $day->status == 0 ? 1 : 0;
+        $day->finished_at = $day->finished_at ? null : now();
 
         $day->save();
 

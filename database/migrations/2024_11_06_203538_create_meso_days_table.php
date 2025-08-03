@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('body_weight')->nullable();
             $table->string('label');
             $table->unsignedTinyInteger('position');
-            $table->tinyInteger('status');
+            $table->timestamp('finished_at')->nullable();
             $table->json('notes')->nullable();
             $table->timestamps();
         });
