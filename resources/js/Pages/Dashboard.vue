@@ -126,21 +126,38 @@ const exerciseImages = {
 type ExerciseKey = keyof typeof exerciseImages;
 
 type BestLift = {
-    name: string;
-    weight: number;
+    exercise: string;
+    value: number;
     unit: string;
-    image: ExerciseKey;
+    type: ExerciseKey;
 };
 
-type Activity = {};
+type Activity = {
+    labels: string[];
+    data: number[];
+};
 
-type LastWorkouts = {};
+type LastWorkout = {
+    day: number;
+    label: string;
+    finishedAt: string;
+    exercisesCount: number;
+    setsCount: number;
+    totalValue: number;
+    unit: string;
+    muscleGroups: MuscleGroup[];
+};
+
+type Info = {
+    memberFor: Date;
+};
 
 const props = defineProps<{
-    bestLifts: BestLift;
+    bestLifts: BestLift[];
     activity: Activity;
-    lastWorkouts: LastWorkouts;
-    info;
+    lastWorkouts: LastWorkout[];
+    displayBy: string;
+    info: Info;
 }>();
 
 const tabs = ref([
