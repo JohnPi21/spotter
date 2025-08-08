@@ -18,7 +18,12 @@
                         <p>Completed</p>
                         <Icon icon="ep:success-filled" />
                     </div>
-                    <Icon icon="quill:calendar" width="18px" />
+                    <Icon
+                        icon="quill:calendar"
+                        width="18px"
+                        @click="showCalendar = !showCalendar"
+                        class="cursor-pointer transition hover:text-secondary"
+                    />
 
                     <UiDropdownMenu idx="1" left="-50px">
                         <template #header>
@@ -46,7 +51,7 @@
             </div>
 
             <!-- ===== Calendar ===== -->
-            <div class="flex justify-between gap-1">
+            <div class="flex justify-between gap-1" v-if="showCalendar">
                 <div class="flex flex-1 flex-col items-center gap-1" v-for="(week, idx) in mesocycle.calendar">
                     <p>WEEK {{ idx }}</p>
                     <Link
@@ -198,6 +203,7 @@ const props = defineProps<{
 
 const day = ref<Day>(props.mesocycle.day);
 const exercisesModal = ref<boolean>();
+const showCalendar = ref<boolean>(true);
 
 function isActiveDay(dayID: number) {
     const url = usePage().url.split("/");

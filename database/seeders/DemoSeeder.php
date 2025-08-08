@@ -17,7 +17,7 @@ class DemoSeeder extends Seeder
             'email_verified_at' => now(),
             'password'          => Hash::make('password'),
             'remember_token'    => Str::random(10),
-            'created_at'        => now()->subWeeks(rand(1, 4))->subDays(rand(0, 6)),
+            'created_at'        => now()->subWeeks(5),
         ]);
 
         foreach (range(1, $user->id) as $userID) {
@@ -51,7 +51,7 @@ class DemoSeeder extends Seeder
                         'day_order' => $idx + 1,
                         'position'  => $idx,
                         'created_at' => now()->subWeeks(6 - $week),
-                        'finished_at' => now()->subWeeks(6 - $week)->subDays($idx),
+                        'finished_at' => now()->subWeeks(6 - $week)->subDays(count($dayLabels) - $idx),
                     ]);
 
                     foreach ($exercises[$label] as $position => $exerciseID) {

@@ -2,14 +2,14 @@
     <div class="mx-auto my-2 flex max-w-[768px] flex-col gap-6">
         <!-- Profile Box -->
         <UiBox class="flex items-center justify-between">
-            <div class="flex gap-2">
-                <div class="rounded-full border-2 border-layer-border p-3">
+            <div class="flex gap-1 md:gap-2">
+                <div class="h-fit rounded-full border-2 border-layer-border p-3">
                     <Icon icon="icon-park-outline:muscle" width="22px" />
                 </div>
 
                 <div class="flex flex-col justify-center">
                     <p>{{ $page.props.auth.user.name }}</p>
-                    <span class="text-sm text-secondary">Joined: {{ info.memberFor }}</span>
+                    <span class="block text-sm text-secondary max-[440px]:hidden">Joined: {{ info.memberFor }}</span>
                 </div>
             </div>
 
@@ -30,7 +30,7 @@
                 <UiBox
                     v-for="(lift, idx) in bestLifts"
                     :key="lift.exercise"
-                    class="flex flex-1 flex-col items-center rounded-xl p-5"
+                    class="flex min-w-52 flex-1 flex-col items-center rounded-xl p-5"
                 >
                     <div class="mb-2 rounded-xl bg-accent p-2">
                         <img :src="exerciseImages[lift.type]" width="60px" />
@@ -56,52 +56,49 @@
         <div>
             <h2 class="mb-2 text-2xl">Last Workouts</h2>
             <div class="flex flex-col gap-3">
-                <UiBox class="flex items-center justify-between p-4" v-for="workout in lastWorkouts">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white"
-                        >
-                            {{ workout.day }}
+                <UiBox v-for="workout in lastWorkouts" class="group hover:bg-layer-light">
+                    <Link
+                        :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayID })"
+                        class="flex cursor-pointer flex-col items-center justify-between gap-4 p-4 min-[450px]:flex-row"
+                    >
+                        <div class="flex min-w-32 items-center gap-2">
+                            <div
+                                class="flex aspect-square h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white"
+                            >
+                                {{ workout.day }}
+                            </div>
+                            <div>
+                                <p class="font-semibold">{{ workout.label }}</p>
+                                <p class="text-sm text-secondary">{{ workout.finishedAt }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-semibold">{{ workout.label }}</p>
-                            <p class="text-sm text-secondary">{{ workout.finishedAt }}</p>
+                        <div class="flex flex-wrap gap-1 whitespace-nowrap text-sm text-secondary">
+                            <div
+                                class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer"
+                            >
+                                <span>{{ workout.exercisesCount }}</span>
+                                exercises
+                            </div>
+                            <div
+                                class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer"
+                            >
+                                <span>{{ workout.setsCount }}</span>
+                                sets
+                            </div>
+                            <div
+                                class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer"
+                            >
+                                <span>{{ workout.totalValue }} {{ workout.unit }}</span>
+                            </div>
+                            <div
+                                class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer"
+                            >
+                                <span>{{ workout.muscleGroups.length }}</span>
+                                Muscle Groups
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex gap-1 text-sm text-secondary">
-                        <div>
-                            <span>{{ workout.exercisesCount }}</span>
-                            exercises |
-                        </div>
-                        <div>
-                            <span>{{ workout.setsCount }}</span>
-                            sets |
-                        </div>
-                        <div>
-                            <span>{{ workout.totalValue }} {{ workout.unit }}</span>
-                            |
-                        </div>
-                        <div>
-                            <span>{{ workout.muscleGroups.length }}</span>
-                            Muscle Groups
-                        </div>
-                    </div>
+                    </Link>
                 </UiBox>
-
-                <!-- <UiBox class="flex items-center justify-between p-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white"
-                        >
-                            22
-                        </div>
-                        <div>
-                            <p class="font-semibold">Pull Day</p>
-                            <p class="text-sm text-secondary">4 days ago</p>
-                        </div>
-                    </div>
-                    <div class="text-sm text-secondary">7 exercises | 20 sets | 950kg | 3 Muscle Groups</div>
-                </UiBox> -->
             </div>
         </div>
     </div>
@@ -113,7 +110,7 @@ import UiBox from "@/Components/Ui/Box.vue";
 import UiTabs from "@/Components/Ui/tabs.vue";
 import { useTailwindColors } from "@/Composables/useTailwindTheme";
 import { Icon } from "@iconify/vue";
-import { router, usePage } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 
 const tailwindColors = useTailwindColors();
@@ -146,6 +143,8 @@ type LastWorkout = {
     totalValue: number;
     unit: string;
     muscleGroups: MuscleGroup[];
+    mesocycle: number;
+    dayID: number;
 };
 
 type Info = {
