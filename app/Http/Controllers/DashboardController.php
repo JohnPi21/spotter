@@ -99,6 +99,7 @@ class DashboardController extends Controller
 
             return [
                 'day'            => $finishDate->day,
+                'dayID'          => $mesoDay->id,
                 'finishedAt'     => $finishDate->diffForHumans(),
                 'label'          => $mesoDay->label,
                 'exercisesCount' => $mesoDay->dayExercises->count(),
@@ -106,6 +107,7 @@ class DashboardController extends Controller
                 'totalValue'     => $totalValue,
                 'unit'           => $displayBy === 'weight' ? 'kg' : 'kg x reps',
                 'muscleGroups'   => $muscleGroups,
+                'mesocycle'      => $mesoDay->mesocycle_id
             ];
         });
 

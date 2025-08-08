@@ -3,7 +3,7 @@
         <TabList class="inline-flex overflow-hidden rounded-md border border-layer-border">
             <Tab v-for="(tab, index) in tabs" :key="index" v-slot="{ selected }" as="template">
                 <button
-                    class="px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus:outline-none"
+                    class="whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus:outline-none"
                     :class="[
                         selected ? 'bg-accent text-white' : 'bg-layer text-secondary hover:bg-layer-light',
                         // No spacing, handle rounding based on position
