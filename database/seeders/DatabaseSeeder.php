@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ExercisesSeeder::class,
             MuscleGroupsSeeder::class,
+            RolesAndPermissionsSeeder::class,
             UserSeeder::class,
-            DemoSeeder::class
+            // DemoSeeder::class
         ]);
 
         if (app()->environment(['local', 'testing'])) {

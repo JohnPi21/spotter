@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RolesEnum;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -13,12 +14,14 @@ class DemoSeeder extends Seeder
     {
         $user = User::create([
             'name'              => 'Demo',
-            'email'             => 'demo@example.com',
+            'email'             => 'demo-' . Str::random(8) . '@spotacus.com',
             'email_verified_at' => now(),
-            'password'          => Hash::make('password'),
+            'password'          => Hash::make(Str::random(16)),
             'remember_token'    => Str::random(10),
             'created_at'        => now()->subWeeks(5),
         ]);
+
+        $user->assignRole(RolesEnum::GUEST);
 
         foreach (range(1, $user->id) as $userID) {
             $meso = Mesocycle::create([

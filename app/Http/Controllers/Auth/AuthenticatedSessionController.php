@@ -37,19 +37,6 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 
-    public function demoLogin(): RedirectResponse
-    {
-        $user = User::find(2);
-
-        if (! $user) {
-            abort(500, 'Something went wrong!');
-        }
-
-        Auth::login($user);
-
-        return to_route('dashboard');
-    }
-
     /**
      * Destroy an authenticated session.
      */

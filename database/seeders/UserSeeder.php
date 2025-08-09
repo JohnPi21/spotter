@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RolesEnum;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class UserSeeder extends Seeder
 {
@@ -14,12 +16,15 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->insert([
-            'name'      => 'John Alex',
-            'email'     => 'imalex96ro@gmail.com',
-            'password'  => Hash::make(env('MASTER_PASSWORD')),
-            'created_at' => now(),
-            'updated_at' => now(),
+        $user = User::create([
+            'name'              => 'John Alex',
+            'email'             => 'imalex96ro@gmail.com',
+            'password'          => Hash::make(env('MASTER_PASSWORD')),
+            'email_verified_at' => now(),
+            'created_at'        => now(),
+            'updated_at'        => now(),
         ]);
+
+        $user->assignRole(RolesEnum::ADMIN);
     }
 }
