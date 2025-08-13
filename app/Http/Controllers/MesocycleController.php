@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\AppException;
 use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
-use App\Models\Exercise;
 use App\Models\ExerciseSet;
-use App\Models\MuscleGroup;
-use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class MesocycleController extends Controller implements HasMiddleware
@@ -130,13 +127,20 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
     {
-        $oldMeso = Mesocycle::mine()->active()->first();
+        DB::transaction(function () use ($mesocycle) {
 
-        if (! is_null($oldMeso)) {
-            $oldMeso->update(['status' => Mesocycle::STATUS_INACTIVE]);
-        }
+            $mesocycle->lockForUpdate();
 
-        $mesocycle->update(['status' => Mesocycle::STATUS_ACTIVE]);
+            $hasUnfinishedDays = $mesocycle->days()->whereNull('finished_at')->exists();
+
+            if (! $hasUnfinishedDays) {
+                throw new AppException(422, __('Mesocycle cannot activate (no unfinished days)'), 'NO_UNFINISHED_DAYS');
+            }
+
+            Mesocycle::mine()->active()->whereKeyNot($mesocycle->getKey())->update(['status' => Mesocycle::STATUS_INACTIVE]);
+
+            $mesocycle->update(['status' => Mesocycle::STATUS_ACTIVE]);
+        });
 
         return to_route('mesocycles');
     }
@@ -151,29 +155,21 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function currentActiveDay(): RedirectResponse
     {
-        $mesocycle = Mesocycle::mine()->where('status', 1)->first();
+        $mesocycle = Mesocycle::mine()->where('status', Mesocycle::STATUS_ACTIVE)->first();
 
-        if (is_null($mesocycle)) {
-            throw new \App\Exceptions\AppException("No active mesocycle", 404);
-            // return redirect()->route('mesocycles')->withErrors([
-            //     'mesocycle' => 'No active mesocycle found.',
-            // ]);
+        if (! $mesocycle) {
+            throw new AppException(404, __("No active mesocycle"), "NO_ACTIVE_MESOCYCLE");
         }
 
         // $days = [16, 15, 14, 13, 12];
-        // $day[13] has status 1 meaning i have to get $day[14] next;
-        $days = MesoDay::where('mesocycle_id', $mesocycle->id)->orderBy('id', 'DESC')->get();
+        // $day[13] has status 1 meaning I have to get $day[14] next;
 
-        $index = $days->search(fn($day) => $day->finished_at);
+        $currentDay = MesoDay::where('mesocycle_id', $mesocycle->id)->orderBy('id')->whereNull('finished_at')->value('id')
+            ?? MesoDay::where('mesocycle_id', $mesocycle->id)->orderByDesc('id')->value('id');
 
-        $currentDay = [];
 
-        if ($index && isset($days[$index - 1])) {
-            $currentDay = $days[$index - 1];
-        } elseif ($index !== false) {
-            $currentDay = $days[$index];
-        } else {
-            $currentDay = $days->last();
+        if (! $currentDay) {
+            throw new AppException(404, __("No day found for mesocycle"), 'NO_DAY_FOUND');
         }
 
         return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay->id]);
