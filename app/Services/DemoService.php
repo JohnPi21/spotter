@@ -64,6 +64,7 @@ class DemoService
                                 'day_exercise_id' => $de->id,
                                 'weight'          => $base + random_int(-5, 5),
                                 'reps'            => $reps,
+                                'finished_at'     => now(),
                             ]);
                         }
                     }

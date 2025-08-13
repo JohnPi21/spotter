@@ -37,7 +37,7 @@ class MesoDay extends Model
     // }
 
     #[Scope]
-    protected function forUser(Builder $query, int $userID)
+    protected function ownedBy(Builder $query, int $userID)
     {
         return $query->whereHas('mesocycle', fn($q) => $q->where('user_id', $userID));
     }
@@ -49,5 +49,10 @@ class MesoDay extends Model
                 'day_status' => 'This day is already completed and cannot be modified.',
             ]);
         }
+    }
+
+    public function isEditable(): bool
+    {
+        return ! ((bool)$this->finished_at);
     }
 }

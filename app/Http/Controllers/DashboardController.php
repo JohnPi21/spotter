@@ -54,7 +54,7 @@ class DashboardController extends Controller
         });
 
         $lastMesoDays = MesoDay::with(['mesocycle', 'dayExercises.exercise.muscleGroup', 'dayExercises.sets'])
-            ->forUser(Auth::id())
+            ->ownedBy(Auth::id())
             ->orderByDesc('finished_at')
             ->limit(3)
             ->get();
@@ -62,7 +62,7 @@ class DashboardController extends Controller
 
         $graphActivity = MesoDay::select('id', 'label', 'week', 'updated_at', 'finished_at')
             ->with(['dayExercises.sets'])
-            ->forUser(Auth::id())
+            ->ownedBy(Auth::id())
             ->orderBy('week')
             ->orderBy('finished_at')
             ->limit(14)

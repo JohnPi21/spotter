@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DayExercise;
+use App\Models\Exercise;
 use App\Models\ExerciseSet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,12 +14,12 @@ class ExerciseSetController extends Controller
     public function store(Request $request)
     {
         $dayExerciseID = $request->validate([
-            'day_exercise_id' => ['required', 'integer', 'exists:exercises,id']
+            'day_exercise_id' => ['required', 'integer', 'exists:day_exercises,id']
         ])['day_exercise_id'];
 
         $dayExercise = DayExercise::with('day.mesocycle:id,user_id,id')->findOrFail($dayExerciseID);
 
-        Gate::authorize('owns', $dayExercise->day->mesocycle);
+        Gate::authorize('create', [ExerciseSet::class, $dayExercise->day]);
 
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
@@ -31,7 +32,7 @@ class ExerciseSetController extends Controller
     {
         $set->load('dayExercise.day.mesocycle:id,user_id,id');
 
-        Gate::authorize('update', $set->dayExercise->day->mesocycle);
+        Gate::authorize('update', $set);
 
         $validated = $request->validate([
             'reps'      => ['required', 'integer', 'max:64'],
@@ -56,7 +57,7 @@ class ExerciseSetController extends Controller
 
     public function destroy(ExerciseSet $set)
     {
-        Gate::authorize('update', $set->dayExercise->day->mesocycle);
+        Gate::authorize('delete', $set);
 
         $set->delete();
 

@@ -39,7 +39,6 @@ class DayExerciseController extends Controller
 
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
-            'status'          => 0
         ]);
 
         return redirect()->route('days.show', [

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\DayExercise;
 use Inertia\Inertia;
-use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -13,15 +12,16 @@ use Illuminate\Support\Facades\Gate;
 class MesoDayController extends Controller
 {
 
-    public function show(Mesocycle $mesocycle, MesoDay $day): \Inertia\Response
+    public function show(int $mesocycle, MesoDay $day): \Inertia\Response
     {
-        $mesocycle->load('days:id,mesocycle_id,label,finished_at');
 
         $day->load(['dayExercises' => function ($query) {
             $query->orderBy('position');
         }, 'dayExercises.exercise.muscleGroup', 'dayExercises.sets']);
 
-        Gate::authorize('view', [$mesocycle, $day->mesocycle]);
+        Gate::authorize('view', $day);
+
+        $mesocycle = $day->mesocycle;
 
         $exerciseIds = $day->dayExercises()->pluck('exercise_id');
         $daysIds = $mesocycle->days->pluck('id');
@@ -100,7 +100,7 @@ class MesoDayController extends Controller
 
     public function toggleDay(MesoDay $day): RedirectResponse
     {
-        Gate::authorize('owns', $day->mesocycle);
+        Gate::authorize('owns', $day);
 
         $day->finished_at = $day->finished_at ? null : now();
 
