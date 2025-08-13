@@ -29,7 +29,13 @@ class Mesocycle extends Model
     #[Scope]
     protected function mine(Builder $query): void
     {
-        $query->where('user_id', Auth::id());
+        $this->ownedBy($query, Auth::id());
+    }
+
+    #[Scope]
+    protected function ownedBy(Builder $query, ?int $userID): void
+    {
+        $query->where('user_id', $userID);
     }
 
     #[Scope]

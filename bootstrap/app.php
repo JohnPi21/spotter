@@ -48,7 +48,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json($payload, $status, $e->getHeaders());
             }
 
-            return Inertia::render('ErrorPage', $payload)->toResponse($request)->setStatusCode($status);
+            return ! $request->isMethod('GET')
+                ? back()->withErrors(['error' => $payload['message']])->withInput()
+                : Inertia::render('ErrorPage', $payload)->toResponse($request)->setStatusCode($status);
         });
 
 
