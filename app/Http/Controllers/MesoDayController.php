@@ -8,6 +8,7 @@ use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\Builder;
 
 class MesoDayController extends Controller
 {
@@ -105,6 +106,8 @@ class MesoDayController extends Controller
         $day->finished_at = $day->finished_at ? null : now();
 
         $day->save();
+
+        $allDaysFinished = MesoDay::where('mesocycle_id', $day->mesocycle_id)->whereNotNull('finished_at')->exists();
 
         return  redirect()->back();
     }

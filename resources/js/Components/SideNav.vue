@@ -1,9 +1,5 @@
 <template>
-    <aside
-        id="default-sidebar"
-        class="fixed left-0 top-0 h-full w-[var(--sidenav-width)] border border-layer-border bg-layer"
-        aria-label="SideNav"
-    >
+    <aside id="default-sidebar" class="fixed left-0 top-0 h-full w-[var(--sidenav-width)] border border-layer-border bg-layer" aria-label="SideNav">
         <div class="p-2">
             <nav class="flex-column flex">
                 <ul class="flex flex-auto list-none flex-col gap-2">
@@ -37,7 +33,7 @@ const links = computed(() => [
         name: "Current Workout",
         path: route("mesocycles.current"),
         icon: "tabler:barbell",
-        show: page.props.auth.user && page.props?.auth?.user?.flags?.hasActiveMeso,
+        show: page.props.auth.user && page.props?.auth?.flags?.hasActiveMeso,
     },
     {
         name: "Mesocycles",

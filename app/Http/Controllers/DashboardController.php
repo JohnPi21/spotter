@@ -55,6 +55,7 @@ class DashboardController extends Controller
 
         $lastMesoDays = MesoDay::with(['mesocycle', 'dayExercises.exercise.muscleGroup', 'dayExercises.sets'])
             ->ownedBy(Auth::id())
+            ->whereNotNull('finished_at')
             ->orderByDesc('finished_at')
             ->limit(3)
             ->get();
@@ -65,6 +66,7 @@ class DashboardController extends Controller
             ->ownedBy(Auth::id())
             ->orderBy('week')
             ->orderBy('finished_at')
+            ->whereNotNull('finished_at')
             ->limit(14)
             ->get();
 
@@ -111,16 +113,30 @@ class DashboardController extends Controller
             ];
         });
 
-        $info = [
-            'memberFor' => Auth::user()->created_at->diffForHumans(),
+        $dashboardStats = [
+            'joinedAgo'     => Auth::user()->created_at->diffForHumans(),
+            'bestLifts'     => $mappedLifts->count(),
+            'activity'      => $graph['data']->count(),
+            'lastWorkouts'  => $lastWorkouts->count(),
         ];
 
-        return Inertia::render('Dashboard', [
+        $payload = [
             'displayBy'     => $displayBy,
-            'info'          => $info,
-            'bestLifts'     => $mappedLifts,
-            'activity'      => $graph,
-            'lastWorkouts'  => $lastWorkouts,
-        ]);
+            'dashboardStats' => $dashboardStats
+        ];
+
+        if ($mappedLifts->isNotEmpty()) {
+            $payload['bestLifts'] = $mappedLifts;
+        }
+
+        if ($graph['data']->isNotEmpty() && $graph['labels']->isNotEmpty()) {
+            $payload['activity'] = $graph;
+        }
+
+        if ($lastWorkouts->isNotEmpty()) {
+            $payload['lastWorkouts'] = $lastWorkouts;
+        }
+
+        return Inertia::render('Dashboard', $payload);
     }
 }

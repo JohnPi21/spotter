@@ -172,6 +172,6 @@ class MesocycleController extends Controller implements HasMiddleware
             throw new AppException(404, __("No day found for mesocycle"), 'NO_DAY_FOUND');
         }
 
-        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay->id]);
+        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay]);
     }
 }
