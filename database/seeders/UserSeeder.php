@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $user = User::create([
             'name'              => 'John Alex',
             'email'             => 'imalex96ro@gmail.com',
-            'password'          => Hash::make(env('MASTER_PASSWORD')),
+            'password'          => Hash::make(config('master_password')),
             'email_verified_at' => now(),
             'created_at'        => now(),
             'updated_at'        => now(),
