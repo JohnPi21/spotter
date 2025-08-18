@@ -1,7 +1,11 @@
 <template>
     <div class="mx-auto my-2 flex max-w-[768px] flex-col gap-3">
         <UiBox class="flex flex-col">
-            <ModalsExercises v-model="exercisesModal" :only-one-muscle-group="0" @select="(exerciseID: number) => addExercise(exerciseID)" />
+            <ModalsExercises
+                v-model="exercisesModal"
+                :only-one-muscle-group="0"
+                @select="(exerciseID: number) => addExercise(exerciseID)"
+            />
 
             <div class="mb-2 flex items-center justify-between">
                 <div class="flex flex-col">
@@ -14,7 +18,12 @@
                         <p>Completed</p>
                         <Icon icon="ep:success-filled" />
                     </div>
-                    <Icon icon="quill:calendar" width="18px" @click="showCalendar = !showCalendar" class="cursor-pointer transition hover:text-secondary" />
+                    <Icon
+                        icon="quill:calendar"
+                        width="18px"
+                        @click="showCalendar = !showCalendar"
+                        class="cursor-pointer transition hover:text-secondary"
+                    />
 
                     <UiDropdownMenu idx="1" left="-50px">
                         <template #header>
@@ -49,7 +58,10 @@
                         :href="route('days.show', { mesocycle: mesocycle.id, day: weekDay.id })"
                         class="flex w-full items-center justify-center gap-1 rounded-sm bg-main px-2 py-1 text-center"
                         v-for="weekDay in week"
-                        :class="[{ 'bg-orange-700': isActiveDay(weekDay.id) }, { 'border border-border-green opacity-50': weekDay.finished_at }]"
+                        :class="[
+                            { 'bg-orange-700': isActiveDay(weekDay.id) },
+                            { 'border border-border-green opacity-50': weekDay.finished_at },
+                        ]"
                     >
                         <Icon icon="ep:success-filled" class="text-green" v-if="weekDay.finished_at" />
                         {{ weekDay.label }}
@@ -104,7 +116,10 @@
             </div>
 
             <div class="grid grid-cols-6 gap-5">
-                <div class="flex h-fit w-fit cursor-pointer items-center self-center rounded-full bg-input p-1" @click="addSet(dayExercise.id)">
+                <div
+                    class="flex h-fit w-fit cursor-pointer items-center self-center rounded-full bg-input p-1"
+                    @click="addSet(dayExercise.id)"
+                >
                     <Icon icon="material-symbols:add" size="1rem" />
                 </div>
                 <div class="col-span-2 text-center">WEIGHT</div>
@@ -121,7 +136,12 @@
                             </div>
                         </template>
 
-                        <li v-for="(item, i) in setDropdownItems" :key="i" :class="item.class" @click="item.action(set.id)">
+                        <li
+                            v-for="(item, i) in setDropdownItems"
+                            :key="i"
+                            :class="item.class"
+                            @click="item.action(set.id)"
+                        >
                             <Icon :icon="item.icon" />
                             {{ item.label }}
                         </li>
@@ -184,7 +204,7 @@ const props = defineProps<{
     errors?: object;
 }>();
 
-const day = ref<Day>(props.mesocycle.day);
+const day = computed<Day>(() => props.mesocycle.day);
 const exercisesModal = ref<boolean>();
 const showCalendar = ref<boolean>(true);
 const isDayFinished = computed<boolean>(() => {
@@ -244,7 +264,11 @@ async function toggleDay(dayID: number) {
 }
 
 async function addExercise(exerciseID: number) {
-    router.post(route("dayExercises.store", { day: day.value.id }), { exercise_id: exerciseID }, { preserveState: false });
+    router.post(
+        route("dayExercises.store", { day: day.value.id }),
+        { exercise_id: exerciseID },
+        { preserveState: false }
+    );
 }
 
 function getPosition(dayExerciseID: number): number {

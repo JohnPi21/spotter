@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\AppException;
 use App\Models\DayExercise;
+use App\Models\ExerciseSet;
 use Inertia\Inertia;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
@@ -103,12 +105,14 @@ class MesoDayController extends Controller
     {
         Gate::authorize('owns', $day);
 
+        if (! $day->canFinish()) {
+            throw new AppException(422, __('All sets must be completed'), 'SETS_UNFINISHED');
+        }
+
         $day->finished_at = $day->finished_at ? null : now();
 
         $day->save();
 
-        $allDaysFinished = MesoDay::where('mesocycle_id', $day->mesocycle_id)->whereNotNull('finished_at')->exists();
-
-        return  redirect()->back();
+        return redirect()->back()->with('day', $day->finished_at);
     }
 }

@@ -131,7 +131,7 @@ import UiTabs from "@/Components/Ui/tabs.vue";
 import { useTailwindColors } from "@/Composables/useTailwindTheme";
 import { Icon } from "@iconify/vue";
 import { Link, router, usePage } from "@inertiajs/vue3";
-import { computed, defineProps, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const tailwindColors = useTailwindColors();
 
