@@ -55,4 +55,9 @@ class MesoDay extends Model
     {
         return ! ((bool)$this->finished_at);
     }
+
+    public function canFinish(): bool
+    {
+        return ! $this->dayExercises()->whereHas('sets', fn(Builder $q) => $q->whereNull('finished_at'))->exists();
+    }
 }
