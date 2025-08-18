@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'flags' => fn() => [
-                    'hasActiveMeso' => fn() =>  $request->user()?->hasActiveMesocycle() ?? false,
+                    'hasActiveMeso' =>  $request->user()?->hasActiveMesocycle() ?? false,
                 ],
             ],
             'ziggy' => fn() => [
