@@ -124,5 +124,5 @@ return [
     ],
 
 
-    'master_passowrd' => env('MASTER_PASSWORD')
+    'master_password' => env('MASTER_PASSWORD')
 ];
