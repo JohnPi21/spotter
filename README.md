@@ -100,6 +100,17 @@ When deploying to a **new EC2 instance**, obtain SSL certificates before enablin
 2. **Issue Certificates:**
     ```bash
     docker compose --profile certbot up -d nginx-certbot
+    ```
+
+# Once (or whenever you add domains):
+
+    docker compose run --rm certbot certbot certonly \
+    --webroot --webroot-path=/var/www/certbot \
+    --email imalex96ro@gmail.com --agree-tos --no-eff-email \
+    -d spotacus.app -d www.spotacus.app \
+    --key-type ecdsa --elliptic-curve secp384r1
+    docker compose exec -T nginx nginx -s reload
+
     docker run -it --rm \
       -v /etc/letsencrypt:/etc/letsencrypt \
       -v /var/lib/letsencrypt:/var/lib/letsencrypt \
@@ -113,6 +124,7 @@ When deploying to a **new EC2 instance**, obtain SSL certificates before enablin
       --rsa-key-size 4096 \
       -d spotacus.app -d www.spotacus.app
     ```
+
 3. **Persist Certificates:**
     ```bash
     cp -r ./certbot/letsencrypt /etc/letsencrypt-backup
