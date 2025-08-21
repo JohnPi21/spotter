@@ -1,0 +1,88 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches: [prod]
+
+jobs:
+    test:
+        if: contains(github.event.head_commit.message, '[skip-ci]') == false
+        name: Run Tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build and start services
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
+              working-directory: ${{ github.workspace }}
+
+            - name: Wait for MySQL from app using PHP PDO
+              run: |
+                  for i in {1..30}; do
+                    docker compose -f docker/ci/docker-compose.ci.yml exec -T app php -r '
+                      try {
+                        $pdo = new PDO("mysql:host=mysql;port=3306;dbname=testing", "ci_user", "ci_pass");
+                        echo "✅ Connected to MySQL\n";
+                        exit(0);
+                      } catch (PDOException $e) {
+                        echo "⏳ Waiting for DB: " . $e->getMessage() . "\n";
+                        exit(1);
+                      }
+                    ' && exit 0
+                    sleep 2
+                  done
+                  echo "❌ Could not connect to DB"
+                  exit 1
+
+            - name: Show MySQL logs
+              run: docker compose -f docker/ci/docker-compose.ci.yml logs mysql
+
+            - name: Run Migrations
+              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
+
+            - name: Run PHPUnit Tests
+              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
+
+            - name: Tear Down
+              run: docker compose -f docker/ci/docker-compose.ci.yml down
+
+    deploy:
+        if: always()
+        name: Deploy to Production
+        needs: test
+        runs-on: ubuntu-latest
+        environment:
+            name: production
+            url: https://spotacus.app
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
+
+            - name: Prepare SSH known_hosts
+              run: |
+                  mkdir -p ~/.ssh
+                  ssh-keyscan github.com >> ~/.ssh/known_hosts
+                  chmod 700 ~/.ssh
+                  chmod 644 ~/.ssh/known_hosts
+
+            - name: Deploy via SSH
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ${{ secrets.EC2_USER }}
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  script: |
+                      set -e
+                      cd /var/www/spotacus
+                      git fetch origin
+                      git reset --hard origin/prod
+
+                      docker compose down --remove-orphans
+                      docker compose up -d --build
+
+                      chmod +x scripts/post_deploy.sh
+                      ./scripts/post_deploy.sh
