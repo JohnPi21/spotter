@@ -1,0 +1,58 @@
+# -----------------------------------------
+# Ignore Git / CI
+# -----------------------------------------
+.git
+.gitignore
+.github
+.gitattributes
+.vscode
+.idea
+.DS_Store
+
+# -----------------------------------------
+# Node / Frontend build junk
+# -----------------------------------------
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# Local dev build outputs (Vite/webpack/etc.)
+dist
+build
+/public/hot
+/public/storage
+/public/vendor
+
+# -----------------------------------------
+# PHP / Laravel runtime junk
+# -----------------------------------------
+vendor
+/storage/*
+!/storage/app
+!/storage/framework
+!/storage/logs
+bootstrap/cache/*
+.env
+.env.*     # any environment-specific envs
+.phpunit.result.cache
+
+# -----------------------------------------
+# Docker itself
+# -----------------------------------------
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# -----------------------------------------
+# Misc
+# -----------------------------------------
+*.log
+*.swp
+*.swo
+*.bak
+*.tmp
+*.coverage
+coverage

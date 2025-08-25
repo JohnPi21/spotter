@@ -3,70 +3,111 @@ name: CI/CD Pipeline
 on:
     push:
         branches: [prod]
+    workflow_dispatch:
+
+concurrency:
+    group: prod
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    packages: write
+
+env:
+    REGISTRY: ghcr.io
+    IMAGE: ghcr.io/${{ github.repository }}
+    TAG: ${{ github.sha }}
 
 jobs:
-    test:
-        if: contains(github.event.head_commit.message, '[skip-ci]') == false
-        name: Run Tests
+    build:
         runs-on: ubuntu-latest
+        outputs:
+            tag: ${{ steps.meta.outputs.tag }}
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+            - uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Build and start services
-              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build
-              working-directory: ${{ github.workspace }}
+            - uses: docker/setup-buildx-action@v3
 
-            - name: Wait for MySQL from app using PHP PDO
-              run: |
-                  for i in {1..30}; do
-                    docker compose -f docker/ci/docker-compose.ci.yml exec -T app php -r '
-                      try {
-                        $pdo = new PDO("mysql:host=mysql;port=3306;dbname=testing", "ci_user", "ci_pass");
-                        echo "✅ Connected to MySQL\n";
-                        exit(0);
-                      } catch (PDOException $e) {
-                        echo "⏳ Waiting for DB: " . $e->getMessage() . "\n";
-                        exit(1);
-                      }
-                    ' && exit 0
-                    sleep 2
-                  done
-                  echo "❌ Could not connect to DB"
-                  exit 1
+            # optional: centralize metadata/tags
+            - id: meta
+              run: echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-            - name: Show MySQL logs
-              run: docker compose -f docker/ci/docker-compose.ci.yml logs mysql
+            # Build image for testing (load into local Docker, don't push yet)
+            - uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  load: true
+                  push: false
+                  tags: |
+                      ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-            - name: Run Migrations
+    test:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Compose up (CI)
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --build --wait
+
+            - name: Migrate fresh + seed
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
 
-            - name: Run PHPUnit Tests
+            - name: PHPUnit
               run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
 
-            - name: Tear Down
-              run: docker compose -f docker/ci/docker-compose.ci.yml down
+            - name: Tear down
+              if: always()
+              run: docker compose -f docker/ci/docker-compose.ci.yml down -v
+
+    push_image:
+        runs-on: ubuntu-latest
+        needs: test
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - uses: docker/setup-buildx-action@v3
+
+            # Rebuild (cached) and push immutable + rolling tags
+            - uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: |
+                      ${{ env.IMAGE }}:${{ env.TAG }}
+                      ${{ env.IMAGE }}:prod-latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
     deploy:
-        if: always()
-        name: Deploy to Production
-        needs: test
         runs-on: ubuntu-latest
+        needs: push_image
         environment:
             name: production
             url: https://spotacus.app
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
-            - name: Prepare SSH known_hosts
+            - name: Prepare known_hosts (EC2)
               run: |
-                  mkdir -p ~/.ssh
-                  ssh-keyscan github.com >> ~/.ssh/known_hosts
-                  chmod 700 ~/.ssh
+                  mkdir -p ~/.ssh && chmod 700 ~/.ssh
+                  echo "${{ secrets.EC2_HOST_KEY }}" >> ~/.ssh/known_hosts
                   chmod 644 ~/.ssh/known_hosts
 
             - name: Deploy via SSH
@@ -76,13 +117,17 @@ jobs:
                   username: ${{ secrets.EC2_USER }}
                   key: ${{ secrets.EC2_SSH_KEY }}
                   script: |
-                      set -e
+                      set -euo pipefail
                       cd /var/www/spotacus
+
+                      echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin || true
+
                       git fetch origin
                       git reset --hard origin/prod
 
-                      docker compose down --remove-orphans
-                      docker compose up -d --build
+                      # Pull & run the newly pushed image (compose.prod.yml uses image:, not build:)
+                      docker compose -f docker/compose.prod.yml pull
+                      docker compose -f docker/compose.prod.yml up -d --remove-orphans
 
-                      chmod +x scripts/post_deploy.sh
-                      ./scripts/post_deploy.sh
+                      chmod +x deploy/post_deploy.sh
+                      ./deploy/post_deploy.sh
