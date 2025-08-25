@@ -1,34 +1,32 @@
-# Stage 1: PHP + Composer (with dev deps)
-FROM composer:2 AS php-deps
+# Stage 1: vendor (dev deps) — cache-friendly
+FROM composer:2 AS vendor
 WORKDIR /app
+ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY composer.json composer.lock ./
+RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
+# If you rely on path repos or need full context for installs, keep this; otherwise it's optional:
 COPY . .
-RUN composer install --prefer-dist --no-interaction
+# If you copied full context above, you can run scripts now if needed:
+# RUN composer run post-autoload-dump || true
 
-# Stage 2: Assets
-FROM node:20 AS build-assets
-WORKDIR /app
-COPY --from=php-deps /app/vendor ./vendor
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 3: Full app with dev tools
-FROM php:8.3-fpm
+# Stage 2: PHP CLI runtime for tests
+FROM php:8.3-cli
 WORKDIR /var/www/html
 
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git zip unzip libpng-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
     && pecl install redis \
-    && docker-php-ext-enable redis
+    && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=php-deps /app /var/www/html
-COPY --from=build-assets /app/public/build /var/www/html/public/build
-COPY --from=build-assets /app/public/build/manifest.json /var/www/html/public/build/manifest.json
+# Copy app + vendor. Using --chown saves a later chown pass.
+COPY --from=vendor --chown=www-data:www-data /app /var/www/html
 
+# Ensure writable dirs exist (just in case)
 RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# (Optional) run as non-root for tests
+# USER www-data
+
+CMD ["php", "-v"]
