@@ -1,43 +1,48 @@
-# --- Stage 1: prod deps (no-dev)
-FROM composer:2 AS php-deps
-WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
-COPY . .
+# ---------- Stage 1: vendor (Composer deps incl. dev) ----------
+FROM composer:2 AS vendor
+WORKDIR /var/www/html
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# --- Stage 1b: ci deps (with dev, no scripts here)
-FROM composer:2 AS php-deps-dev
-WORKDIR /app
+# Copy only composer files first for better caching
 COPY composer.json composer.lock ./
 RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
+
+# Copy the rest of the app
 COPY . .
 
-# --- Stage 2: assets (reuse for prod & ci)
+# ---------- Stage 2: Frontend build (Vite/Vue) ----------
 FROM node:20 AS build-assets
-WORKDIR /app
-COPY --from=php-deps-dev /app/vendor ./vendor
+WORKDIR /var/www/html
+
+# vendor/ must be present for Ziggy or mix-manifests
+COPY --from=vendor /var/www/html/vendor ./vendor
+
+# Install frontend deps with lockfile
 COPY package*.json ./
 RUN npm ci
+
+# Build assets
 COPY . .
 RUN npm run build
 
-# --- Stage 3: PROD runtime (unchanged)
-FROM php:8.3-fpm AS runtime
-# ... your prod setup ...
+# ---------- Stage 3: PHP CLI runtime for tests ----------
+FROM php:8.3-cli
 WORKDIR /var/www/html
-# (install pkgs + extensions)
-COPY --from=php-deps     /app/               ./
-COPY --from=build-assets /app/public/build   ./public/build
-# (permissions, healthcheck, CMD php-fpm -F)
+ENV DEBIAN_FRONTEND=noninteractive
 
-# --- Stage 4: CI tests (CLI + dev deps + built assets)
-FROM php:8.3-cli AS ci-tests
-WORKDIR /var/www/html
-# (install pkgs + extensions similar to prod)
-COPY --from=php-deps-dev  /app/               ./
-COPY --from=php-deps-dev  /app/vendor         ./vendor
-COPY --from=build-assets  /app/public/build   ./public/build
-RUN composer dump-autoload --no-interaction --optimize \
-    && php artisan package:discover --ansi \
-    && mkdir -p storage bootstrap/cache
-CMD ["php","-v"]
+# System deps + php extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git zip unzip libxml2-dev libzip-dev libonig-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy full app with vendor + built assets
+COPY --from=vendor --chown=www-data:www-data /var/www/html /var/www/html
+COPY --from=build-assets --chown=www-data:www-data /var/www/html/public/build /var/www/html/public/build
+
+# Ensure writable dirs for Laravel
+RUN mkdir -p storage bootstrap/cache && \
+    chown -R www-data:www-data storage bootstrap/cache
+
+# Default command: show PHP version (override in CI job)
+CMD ["php", "-v"]
