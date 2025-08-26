@@ -1,30 +1,32 @@
-# ---------- Stage 1: install Composer deps (with dev) ----------
+# Stage 1: vendor (dev deps) — cache-friendly
 FROM composer:2 AS vendor
-WORKDIR /app
+WORKDIR /var/www/html
 
-# copy only composer manifests first (best layer cache)
+# Keep your setting
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Copy only composer manifests first for better caching
 COPY composer.json composer.lock ./
-RUN composer install --prefer-dist --no-interaction --no-progress
+RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
 
-# ---------- Stage 2: PHP CLI runtime for tests ----------
+# Now copy the rest of the app (if something here changes, vendor cache still helps)
+COPY . .
+
+# Stage 2: PHP CLI runtime for tests
 FROM php:8.3-cli
 WORKDIR /var/www/html
 ENV DEBIAN_FRONTEND=noninteractive
 
-# OS deps + PHP extensions commonly needed by Laravel
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git zip unzip libxml2-dev libzip-dev libonig-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
     && rm -rf /var/lib/apt/lists/*
 
-# app source
-COPY . .
+# Copy app + vendor from the vendor stage (fix the path)
+# We bring the *entire* app tree we prepared in stage1 (including vendor/)
+COPY --from=vendor --chown=www-data:www-data /var/www/html /var/www/html
 
-# bring in vendor from the vendor stage
-COPY --from=vendor /app/vendor ./vendor
-
-# ensure writable dirs
-RUN mkdir -p storage bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache
+# Ensure writable dirs
+RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
 CMD ["php", "-v"]
