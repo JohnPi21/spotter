@@ -4,32 +4,20 @@ WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY composer.json composer.lock ./
 RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
-# Optional (breaks cache more often if enabled):
-# COPY . .
+# (optional) COPY . .   # only if you truly need it for path repos
 
 # Stage 2: PHP CLI runtime for tests
 FROM php:8.3-cli
 WORKDIR /var/www/html
-
-# Avoid debconf noise
 ENV DEBIAN_FRONTEND=noninteractive
 
-# System libs + BUILD DEPS for PECL ($PHPIZE_DEPS) before installing redis
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git zip unzip libpng-dev libxml2-dev libzip-dev \
-    $PHPIZE_DEPS \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && pecl clear-cache \
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $PHPIZE_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy app + vendor (consider copying only /vendor if you want a cleaner context)
+# Copy app + vendor
 COPY --from=vendor --chown=www-data:www-data /app /var/www/html
-
-# Ensure writable dirs
 RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
-# USER www-data  # (optional for tests)
 CMD ["php", "-v"]
