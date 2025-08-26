@@ -15,7 +15,6 @@ permissions:
 
 env:
     REGISTRY: ghcr.io
-    IMAGE: ghcr.io/${{ toLower(github.repository) }}
     TAG: ${{ github.sha }}
 
 jobs:
@@ -34,11 +33,19 @@ jobs:
 
             - uses: docker/setup-buildx-action@v3
 
-            # optional: centralize metadata/tags
+            # centralize metadata/tags
             - id: meta
               run: echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-            # Build image for testing (load into local Docker, don't push yet)
+            # normalize image name to lowercase and expose as output + env
+            - id: normalize
+              shell: bash
+              run: |
+                  IMAGE_LC="${REGISTRY}/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
+                  echo "image=${IMAGE_LC}" >> "$GITHUB_OUTPUT"
+                  echo "IMAGE=${IMAGE_LC}" >> "$GITHUB_ENV"
+
+            # Build image for testing (load locally, don't push)
             - uses: docker/build-push-action@v6
               with:
                   context: .
@@ -46,7 +53,7 @@ jobs:
                   load: true
                   push: false
                   tags: |
-                      ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+                      ${{ steps.normalize.outputs.image }}:${{ steps.meta.outputs.tag }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
@@ -83,6 +90,14 @@ jobs:
 
             - uses: docker/setup-buildx-action@v3
 
+            # normalize again (env/outputs don't cross jobs)
+            - id: normalize
+              shell: bash
+              run: |
+                  IMAGE_LC="${REGISTRY}/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
+                  echo "image=${IMAGE_LC}" >> "$GITHUB_OUTPUT"
+                  echo "IMAGE=${IMAGE_LC}" >> "$GITHUB_ENV"
+
             # Rebuild (cached) and push immutable + rolling tags
             - uses: docker/build-push-action@v6
               with:
@@ -90,8 +105,8 @@ jobs:
                   file: ./Dockerfile
                   push: true
                   tags: |
-                      ${{ env.IMAGE }}:${{ env.TAG }}
-                      ${{ env.IMAGE }}:prod-latest
+                      ${{ steps.normalize.outputs.image }}:${{ env.TAG }}
+                      ${{ steps.normalize.outputs.image }}:prod-latest
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
@@ -125,7 +140,6 @@ jobs:
                       git fetch origin
                       git reset --hard origin/prod
 
-                      # Pull & run the newly pushed image (compose.prod.yml uses image:, not build:)
                       docker compose -f docker/compose.prod.yml pull
                       docker compose -f docker/compose.prod.yml up -d --remove-orphans
 
