@@ -12,7 +12,7 @@ WORKDIR /var/www/html
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git zip unzip libpng-dev libxml2-dev libzip-dev \
+    git zip unzip libxml2-dev libzip-dev libonig-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
     && rm -rf /var/lib/apt/lists/*
 
