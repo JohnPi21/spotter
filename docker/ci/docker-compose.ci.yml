@@ -14,7 +14,6 @@ services:
     # Force x86_64 in case GitHub ever schedules an ARM runner
     platform: linux/amd64
     command:
-      - --default-authentication-plugin=mysql_native_password
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-log-bin
