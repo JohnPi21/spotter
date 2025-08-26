@@ -1,6 +1,6 @@
 # Stage 1: vendor (dev deps) — cache-friendly
 FROM composer:2 AS vendor
-WORKDIR /app
+WORKDIR /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY composer.json composer.lock ./
 RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
