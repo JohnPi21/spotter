@@ -78,31 +78,18 @@ jobs:
                   export IMAGE TAG
                   docker compose -f docker/ci/docker-compose.ci.yml pull
 
-            - name: Compose up (CI)
+            - name: Compose up (CI mysql only)
               run: |
                   export IMAGE TAG
-                  docker compose -f docker/ci/docker-compose.ci.yml up -d --wait
-
-            # 👇 new: dump logs if 'up' fails (e.g., mysql exits (1))
-            - name: Dump Compose state on failure
-              if: failure()
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml ps
-                  docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql || true
-                  # container-level diagnostics
-                  CID=$(docker ps -a --filter "name=ci-mysql-1" --format "{{.ID}}")
-                  if [ -n "$CID" ]; then
-                  echo "--- docker inspect (State) ---"
-                  docker inspect --format='{{json .State}}' "$CID" | jq .
-                  echo "--- last 200 lines of docker logs ---"
-                  docker logs --tail=200 "$CID" || true
-                  fi
+                  docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
 
             - name: Migrate fresh + seed
-              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed --force
+              run: export IMAGE TAG
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
 
             - name: PHPUnit
-              run: docker compose -f docker/ci/docker-compose.ci.yml exec -T app php artisan test
+              run: export IMAGE TAG
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
             - name: MySQL logs (on failure)
               if: failure()
