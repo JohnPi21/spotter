@@ -16,7 +16,8 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-log-bin
-      - --innodb-buffer-pool-size=128M     # ↓ conservative to avoid OOM/crash
+      - --skip-name-resolve
+      - --innodb-buffer-pool-size=128M
       - --max-connections=50
       - --performance-schema=OFF
     environment:
@@ -25,15 +26,14 @@ services:
       MYSQL_USER: ci_user
       MYSQL_PASSWORD: ci_pass
     healthcheck:
-      # Use root for reliability during init; user accounts may not exist yet
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
-      interval: 3s
-      timeout: 3s
-      retries: 40
-      start_period: 5s
-    # Prefer a named volume over tmpfs on GH runners (tmpfs can fail unpredictably)
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     volumes:
-      - mysql_data:/var/lib/mysql
+      - type: tmpfs
+        target: /var/lib/mysql
     networks: [ci_net]
 
 networks:
