@@ -74,22 +74,16 @@ jobs:
                   password: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Pull images (CI)
-              run: |
-                  export IMAGE TAG
-                  docker compose -f docker/ci/docker-compose.ci.yml pull
+              run: docker compose -f docker/ci/docker-compose.ci.yml pull
 
             - name: Compose up (CI mysql only)
-              run: |
-                  export IMAGE TAG
-                  docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
 
             - name: Migrate fresh + seed
-              run: export IMAGE TAG
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
+              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
 
             - name: PHPUnit
-              run: export IMAGE TAG
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
+              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
             - name: MySQL logs (on failure)
               if: failure()
