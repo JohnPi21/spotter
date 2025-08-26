@@ -1,24 +1,13 @@
 services:
   app:
-    build:
-      context: ../../
-      dockerfile: ./docker/ci/Dockerfile.ci
-    image: spotter-ci
+    image: ${IMAGE}:${TAG}            # ← use the image built in the build job
     env_file:
       - .env.ci
     depends_on:
       mysql:
         condition: service_healthy
     networks: [ci_net]
-    # no ports in CI
-    # if you want to wait for DB right here, uncomment:
-    # command: >
-    #   sh -lc '
-    #     for i in $(seq 1 60); do
-    #       php -r "try{new PDO(\"mysql:host=mysql;port=3306;dbname=${DB_DATABASE}\",\"${DB_USERNAME}\",\"${DB_PASSWORD}\");exit(0);}catch(Throwable $e){exit(1);}"; rc=$?; [ $rc -eq 0 ] && break; sleep 1;
-    #     done;
-    #     php -v
-    #   '
+    # no ports needed in CI
 
   mysql:
     image: mysql:8.4
@@ -27,20 +16,28 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-log-bin
+      - --innodb-buffer-pool-size=128M     # ↓ conservative to avoid OOM/crash
+      - --max-connections=50
+      - --performance-schema=OFF
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: testing
       MYSQL_USER: ci_user
       MYSQL_PASSWORD: ci_pass
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pci_pass", "-uci_user"]
-      interval: 5s
+      # Use root for reliability during init; user accounts may not exist yet
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
+      interval: 3s
       timeout: 3s
-      retries: 20
-    # super fast ephemeral storage in CI:
-    tmpfs:
-      - /var/lib/mysql
+      retries: 40
+      start_period: 5s
+    # Prefer a named volume over tmpfs on GH runners (tmpfs can fail unpredictably)
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks: [ci_net]
 
 networks:
   ci_net: {}
+
+volumes:
+  mysql_data: {}
