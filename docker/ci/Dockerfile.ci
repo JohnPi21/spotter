@@ -1,23 +1,30 @@
-# Stage 1: vendor (dev deps) — cache-friendly
+# ---------- Stage 1: install Composer deps (with dev) ----------
 FROM composer:2 AS vendor
-WORKDIR /var/www/html
-ENV COMPOSER_ALLOW_SUPERUSER=1
-COPY composer.json composer.lock ./
-RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts
-# (optional) COPY . .   # only if you truly need it for path repos
+WORKDIR /app
 
-# Stage 2: PHP CLI runtime for tests
+# copy only composer manifests first (best layer cache)
+COPY composer.json composer.lock ./
+RUN composer install --prefer-dist --no-interaction --no-progress
+
+# ---------- Stage 2: PHP CLI runtime for tests ----------
 FROM php:8.3-cli
 WORKDIR /var/www/html
 ENV DEBIAN_FRONTEND=noninteractive
 
+# OS deps + PHP extensions commonly needed by Laravel
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git zip unzip libxml2-dev libzip-dev libonig-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy app + vendor
-COPY --from=vendor --chown=www-data:www-data /app /var/www/html
-RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
+# app source
+COPY . .
+
+# bring in vendor from the vendor stage
+COPY --from=vendor /app/vendor ./vendor
+
+# ensure writable dirs
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 CMD ["php", "-v"]
