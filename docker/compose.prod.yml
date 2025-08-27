@@ -8,7 +8,7 @@ services:
     image: *app_image
     restart: unless-stopped
     env_file:
-      - ../.env
+      - .env
     environment:
       APP_ENV: production
       APP_DEBUG: ${APP_DEBUG:-false}
@@ -35,7 +35,7 @@ services:
   queue:
     image: *app_image
     restart: unless-stopped
-    env_file: [../.env]
+    env_file: [.env]
     depends_on:
       mysql:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
   scheduler:
     image: *app_image
     restart: unless-stopped
-    env_file: [../.env]
+    env_file: [.env]
     depends_on:
       mysql:
         condition: service_healthy
