@@ -1,17 +1,16 @@
 services:
   app:
-    image: ${IMAGE}:${TAG}            # ← use the image built in the build job
+    image: ${IMAGE}@${DIGEST}
+    pull_policy: always
     env_file:
       - .env.ci
     depends_on:
       mysql:
         condition: service_healthy
     networks: [ci_net]
-    # no ports needed in CI
 
   mysql:
     image: mysql:8.4
-    # Force x86_64 in case GitHub ever schedules an ARM runner
     platform: linux/amd64
     command:
       - --character-set-server=utf8mb4

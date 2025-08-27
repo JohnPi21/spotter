@@ -23,6 +23,7 @@ jobs:
         outputs:
             tag: ${{ steps.meta.outputs.tag }}
             image: ${{ steps.normalize.outputs.image }}
+            digest: ${{ steps.build.outputs.digest }}
         steps:
             - uses: actions/checkout@v4
 
@@ -47,13 +48,13 @@ jobs:
                   echo "IMAGE=${IMAGE_LC}" >> "$GITHUB_ENV"
 
             # Build the CI image and PUSH it so test can pull it
-            - uses: docker/build-push-action@v6
+            - id: build
+              uses: docker/build-push-action@v6
               with:
                   context: .
-                  file: ./docker/ci/Dockerfile.ci
+                  file: ./Dockerfile
                   push: true
-                  tags: |
-                      ${{ steps.normalize.outputs.image }}:${{ steps.meta.outputs.tag }}
+                  tags: ${{ steps.normalize.outputs.image }}:${{ steps.meta.outputs.tag }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
@@ -63,6 +64,7 @@ jobs:
         env:
             IMAGE: ${{ needs.build.outputs.image }}
             TAG: ${{ needs.build.outputs.tag }}
+            DIGEST: ${{ needs.build.outputs.digest }}
         steps:
             - uses: actions/checkout@v4
 
@@ -73,63 +75,53 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Pull by digest to verify
+              run: docker pull "${IMAGE}@${DIGEST}"
+
             - name: Pull images (CI)
-              run: docker compose -f docker/ci/docker-compose.ci.yml pull
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml pull
 
             - name: Compose up (CI mysql only)
-              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
 
             - name: Migrate fresh + seed
-              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
 
             - name: PHPUnit
-              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
             - name: MySQL logs (on failure)
               if: failure()
-              run: docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
 
             - name: Tear down
               if: always()
-              run: docker compose -f docker/ci/docker-compose.ci.yml down -v
+              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml down -v
 
-    push_image:
+    promote: # retag the tested digest; no rebuild
         runs-on: ubuntu-latest
-        needs: test
+        needs: [build, test]
         steps:
-            - uses: actions/checkout@v4
-
             - uses: docker/login-action@v3
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: docker/setup-buildx-action@v3
-
-            # normalize again (env/outputs don't cross jobs)
-            - id: normalize
-              shell: bash
+            - name: Promote tested image
               run: |
-                  IMAGE_LC="${REGISTRY}/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
-                  echo "image=${IMAGE_LC}" >> "$GITHUB_OUTPUT"
-                  echo "IMAGE=${IMAGE_LC}" >> "$GITHUB_ENV"
+                  IMAGE="${{ needs.build.outputs.image }}"
+                  DIGEST="${{ needs.build.outputs.digest }}"
+                  SHA_TAG="${{ needs.build.outputs.tag }}"
 
-            # Rebuild (cached) and push immutable + rolling tags
-            - uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  file: ./Dockerfile
-                  push: true
-                  tags: |
-                      ${{ steps.normalize.outputs.image }}:${{ env.TAG }}
-                      ${{ steps.normalize.outputs.image }}:prod-latest
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+                  docker buildx imagetools create \
+                    -t "$IMAGE:$SHA_TAG" \
+                    -t "$IMAGE:prod-latest" \
+                    "$IMAGE@$DIGEST"
 
     deploy:
         runs-on: ubuntu-latest
-        needs: push_image
+        needs: promote
         environment:
             name: production
             url: https://spotacus.app
