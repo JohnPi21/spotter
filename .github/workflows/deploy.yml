@@ -81,18 +81,20 @@ jobs:
             - name: Pull images (CI)
               run: docker compose -f docker/ci/docker-compose.ci.yml pull
 
+            - name: Start MySQL (Wait until ready)
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
+
             - name: Install dev dependencies (CI)
               run: |
                   docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
-                  composer install --no-interaction --prefer-dist
-
-            - name: Compose up (CI mysql only)
-              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
+                  composer install --no-interaction --prefer-dist --no-progress
 
             - name: Migrate fresh + seed
-              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
+              run: |
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
+                    php artisan migrate:fresh --seed --force
 
-            - name: PHPUnit
+            - name: Run tests
               run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
             - name: MySQL logs (on failure)

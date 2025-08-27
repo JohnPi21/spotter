@@ -7,6 +7,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    volumes:
+      - vendor-ci:/var/www/html/vendor
     networks: [ci_net]
 
   mysql:
@@ -41,3 +43,4 @@ networks:
 
 volumes:
   mysql_data: {}
+  vendor-ci: {}
