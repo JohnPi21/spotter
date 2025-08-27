@@ -79,24 +79,29 @@ jobs:
               run: docker pull "${IMAGE}@${DIGEST}"
 
             - name: Pull images (CI)
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml pull
+              run: docker compose -f docker/ci/docker-compose.ci.yml pull
+
+            - name: Install dev dependencies (CI)
+              run: |
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
+                  composer install --no-interaction --prefer-dist
 
             - name: Compose up (CI mysql only)
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
+              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
 
             - name: Migrate fresh + seed
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
+              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan migrate:fresh --seed --force
 
             - name: PHPUnit
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
+              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
             - name: MySQL logs (on failure)
               if: failure()
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
+              run: docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
 
             - name: Tear down
               if: always()
-              run: IMAGE="$IMAGE" DIGEST="$DIGEST" docker compose -f docker/ci/docker-compose.ci.yml down -v
+              run: docker compose -f docker/ci/docker-compose.ci.yml down -v
 
     promote: # retag the tested digest; no rebuild
         runs-on: ubuntu-latest

@@ -38,6 +38,9 @@ RUN apt-get update && \
     && docker-php-ext-enable redis opcache \
     && rm -rf /var/lib/apt/lists/*
 
+# ⬇️ Add composer binary so CI can install dev deps at runtime
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 # Reasonable OPcache defaults
 RUN { \
     echo "opcache.enable=1"; \
