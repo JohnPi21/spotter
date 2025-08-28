@@ -15,7 +15,7 @@ if [ ! -f "$LIVE_DIR/fullchain.pem" ] || [ ! -f "$LIVE_DIR/privkey.pem" ]; then
   $DC_ACME up -d nginx
 
   echo "🔐 Requesting certificate via webroot…"
-  $DC run --rm --profile certbot certbot \
+  $DC --profile certbot run --rm certbot \
     certonly --webroot -w /var/www/certbot \
     -d "$DOMAIN" -d "www.$DOMAIN" \
     --email "$EMAIL" --agree-tos --no-eff-email
