@@ -125,8 +125,6 @@ services:
     volumes:
       - ./certbot/letsencrypt:/etc/letsencrypt
       - certbot-htdocs:/var/www/certbot
-    entrypoint: ""
-    command: sleep infinity
     profiles: ["certbot"]
 
   # Autorene w + hot reload (opt-in)
