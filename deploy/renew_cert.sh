@@ -1,30 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-echo "🟢 Starting temporary nginx-certbot for challenge..."
-docker compose up -d nginx-certbot
+REPO="/var/www/spotacus"
+DC="docker compose -f $REPO/docker/compose.prod.yml --env-file $REPO/docker/.env.prod -p spotacus"
+DC_ACME="docker compose -f $REPO/docker/compose.prod.yml -f $REPO/docker/compose.acme.yml --env-file $REPO/docker/.env.prod -p spotacus"
 
-echo "🔁 Running certbot..."
-docker compose run --rm certbot certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email imalex96ro@gmail.com \
-  --agree-tos \
-  --no-eff-email \
-  -d spotacus.app -d www.spotacus.app
+DOMAIN="spotacus.app"
+EMAIL="imalex96ro@gmail.com"
+LIVE_DIR="$REPO/docker/certbot/letsencrypt/live/$DOMAIN"
 
-echo "🛑 Stopping nginx-certbot..."
-docker compose stop nginx-certbot
+echo "🔎 Checking existing certs for $DOMAIN…"
+if [ ! -f "$LIVE_DIR/fullchain.pem" ] || [ ! -f "$LIVE_DIR/privkey.pem" ]; then
+  echo "🌐 Starting Nginx (HTTP-only) for ACME challenge…"
+  $DC_ACME up -d nginx
 
-echo "📂 Fixing permissions for certbot folder..."
-sudo chown -R $USER:$USER ./certbot
+  echo "🔐 Requesting certificate via webroot…"
+  $DC run --rm --profile certbot certbot \
+    certonly --webroot -w /var/www/certbot \
+    -d "$DOMAIN" -d "www.$DOMAIN" \
+    --email "$EMAIL" --agree-tos --no-eff-email
 
-# Optional: Copy certs to static folder for easier Nginx mount
-echo "📂 Copying certs to static path..."
-mkdir -p ./certbot/static/spotacus.app
-cp ./certbot/letsencrypt/live/spotacus.app/fullchain.pem ./certbot/static/spotacus.app/
-cp ./certbot/letsencrypt/live/spotacus.app/privkey.pem ./certbot/static/spotacus.app/
-
-echo "🚀 Starting nginx..."
-docker compose up -d nginx
-
-echo "✅ Done! Cert renewed and Nginx reloaded."
+  echo "🔁 Switching to full TLS config & reloading…"
+  $DC up -d nginx
+  $DC exec -T nginx nginx -t
+  $DC exec -T nginx nginx -s reload
+else
+  echo "✅ Certs already present at $LIVE_DIR"
+fi
