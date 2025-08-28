@@ -1,65 +1,93 @@
-# Production Setup (Laravel + Vue + Docker)
+# 🚀 Spotacus — Production Deployment (Laravel + Vue + Docker)
 
-This document describes how to build and deploy the **production version** of the spotacus app. Local development uses [Laravel Sail](https://laravel.com/docs/sail), while **production** runs on a custom Docker-based setup.
+This document describes how to **build, deploy, and maintain** the production version of the **Spotacus** app.  
+Local development uses [Laravel Sail](https://laravel.com/docs/sail), while **production** runs on a custom Docker stack.
 
 ---
 
-## Overview
+## ⚡ Quick Start (new EC2 server)
 
-The production stack uses:
+```bash
+# 1. Clone repo & enter project
+git clone git@github.com:your-org/spotacus.git
+cd spotacus
+
+# 2. Set up production env
+cp docker/.env.prod.example docker/.env.prod
+nano docker/.env.prod   # update APP_KEY, DB creds, etc.
+
+# 3. Issue SSL certs (first time only)
+./deploy/renew_cert.sh
+
+# 4. Deploy stack
+docker compose -f docker/compose.prod.yml --env-file docker/.env.prod -p spotacus up -d --remove-orphans
+
+# 5. Run post-deploy tasks
+./deploy/post_deploy.sh
+```
+
+````
+
+---
+
+## 📂 Repository Structure (deployment-related)
+
+```
+docker/
+ ├─ ci/                  # CI Dockerfile + docker-compose.ci.yml + .env.ci
+ ├─ nginx/               # Nginx configs (prod & acme variants)
+ │   ├─ nginx.prod.conf
+ │   └─ nginx.acme.conf
+ ├─ certbot/             # SSL certs (Let’s Encrypt) + ACME challenge volume
+ ├─ .env.prod            # Production environment vars
+ ├─ compose.prod.yml     # Main production stack
+ ├─ compose.acme.yml     # Temporary override for first-time cert issuance
+deploy/
+ ├─ post_deploy.sh       # Runs after deploy: waits for DB, runs migrations, clears caches
+ └─ renew_cert.sh        # Issues/renews SSL certs & reloads nginx
+.github/workflows/
+ └─ deploy.yml           # CI/CD workflow (build, test, promote, deploy)
+```
+
+---
+
+## 🏗️ Stack Overview
 
 - **Laravel (PHP 8.3-FPM)**
-- **Vue 3 (Vite build, SSR support)**
-- **MySQL 8**
-- **Redis 7**
-- **Nginx** (with SSL via Let's Encrypt / Certbot)
+- **Vue 3 + Vite** (built into `/public/build`)
+- **MySQL 8** (persistent named volume: `mysql-prod-data`)
+- **Redis 7** (cache & queues)
+- **Nginx** (reverse proxy + SSL termination)
+- **Certbot** (for Let’s Encrypt issuance/renewal)
 
 ---
 
-## Docker Compose Setup
+## ⚙️ Production Docker Compose (`compose.prod.yml`)
 
-Production containers are defined in `docker-compose.yml`:
+Services:
 
-- `app` – Laravel application running PHP-FPM
-- `nginx` – Serves the Laravel app via HTTPS (443)
-- `mysql` – Database
-- `redis` – Cache / Queue driver
-- `certbot` – Used for issuing/renewing SSL certificates
-- `nginx-certbot` – Temporary HTTP server for Certbot HTTP challenge
+- `app` → Laravel app (PHP-FPM)
+- `nginx` → serves app on ports 80/443
+- `mysql` → database (persistent volume `mysql-prod-data`)
+- `redis` → queues/cache
+- `certbot` → used to issue/renew SSL certs (profile `certbot`)
+- `queue` + `scheduler` → optional Laravel workers
 
-### Networks & Volumes
+Networks:
 
-- **Networks:** `appnet` (isolated internal network)
-- **Volumes:**
-    - `mysql-prod-data` → MySQL persistent storage
-    - `public-build` → Built frontend assets
-    - `certbot-htdocs` → Certbot challenge directory
+- `appnet` (internal)
 
----
+Volumes:
 
-## Dockerfile (Production Build)
-
-The Dockerfile uses **multi-stage builds**:
-
-1. **Composer Dependencies (no-dev):**
-    ```bash
-    composer install --no-dev --optimize-autoloader
-    ```
-2. **Frontend Build:**
-    ```bash
-    npm run build
-    ```
-    > `npm run build` uses devDependencies (e.g., `vue-tsc` for type checking).
-3. **Final PHP Image:**
-    - Copies app code, vendor files, and built assets
-    - Installs PHP extensions (pdo_mysql, redis, bcmath, etc.)
-    - Runs as `php-fpm`
+- `mysql-prod-data` → MySQL persistent storage
+- `public-build` → built frontend assets
+- `certbot-htdocs` → ACME challenge
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
-Ensure `.env.prod` contains the correct values:
+`docker/.env.prod` (example):
 
 ```dotenv
 APP_ENV=production
@@ -75,149 +103,152 @@ DB_PASSWORD=secret
 
 ---
 
-## Build & Run (Production)
+## 📜 Deployment Flow
+
+### 1. Build & push app image (CI)
+
+GitHub Actions builds & pushes a tagged image to GHCR on every push to `prod`.
+
+### 2. Test stage (CI)
+
+- Uses `docker/ci/` configs (`docker-compose.ci.yml`, `.env.ci`).
+- Installs dev deps, runs migrations & PHPUnit tests.
+
+### 3. Promote stage (CI)
+
+- Retags tested digest as `prod-latest`.
+
+### 4. Deploy stage (CI/CD)
+
+- SSH into EC2 using GitHub secrets
+- Pulls latest `prod` branch
+- Runs:
+
+    ```bash
+    docker compose --env-file docker/.env.prod -f docker/compose.prod.yml -p spotacus pull
+    docker compose --env-file docker/.env.prod -f docker/compose.prod.yml -p spotacus up -d --remove-orphans
+    ./deploy/post_deploy.sh
+    ```
+
+---
+
+## 🔐 SSL Certificates (Let’s Encrypt)
+
+### First-time issuance
+
+Certificates must exist **before** Nginx can serve HTTPS. Use the ACME override:
 
 ```bash
-# Build the application image
-docker compose -f docker-compose.yml build
+# Start nginx with HTTP-only config
+docker compose -f docker/compose.prod.yml -f docker/compose.acme.yml -p spotacus up -d nginx
 
-# Run the stack
-docker compose -f docker-compose.yml up -d
+# Issue certs
+./deploy/renew_cert.sh
+```
+
+This script:
+
+- Starts Nginx (HTTP only)
+- Runs Certbot with webroot method
+- Reloads Nginx with full TLS config
+
+### Renewal
+
+Certificates auto-renew via cron (recommended):
+
+```
+0 3 * * * docker compose -f /var/www/spotacus/docker/compose.prod.yml --env-file /var/www/spotacus/docker/.env.prod -p spotacus run --rm --profile certbot certbot renew && docker compose -f /var/www/spotacus/docker/compose.prod.yml -p spotacus exec -T nginx nginx -s reload
+```
+
+Or manually run:
+
+```bash
+./deploy/renew_cert.sh
 ```
 
 ---
 
-## SSL Certificates (Certbot)
+## 🔧 Utility Scripts
 
-### Initial Setup
+- **`deploy/post_deploy.sh`**
+    - Waits for MySQL
+    - Runs `php artisan migrate --force`
+    - Clears/rebuilds caches
+    - Ensures `storage:link`
+    - Brings app out of maintenance
+    - Health check via `/health`
 
-When deploying to a **new EC2 instance**, obtain SSL certificates before enabling HTTPS:
-
-1. **Temporary HTTP Setup:**
-    - Start `nginx-certbot` (HTTP-only) using `nginx.certbot.conf` on port 80.
-    - Ensure Cloudflare or any reverse proxy does not redirect to HTTPS.
-    - Confirm server responds with HTTP 200 on port 80.
-2. **Issue Certificates:**
-    ```bash
-    docker compose --profile certbot up -d nginx-certbot
-    ```
-
-# Once (or whenever you add domains):
-
-    docker compose run --rm certbot certbot certonly \
-    --webroot --webroot-path=/var/www/certbot \
-    --email imalex96ro@gmail.com --agree-tos --no-eff-email \
-    -d spotacus.app -d www.spotacus.app \
-    --key-type ecdsa --elliptic-curve secp384r1
-    docker compose exec -T nginx nginx -s reload
-
-    docker run -it --rm \
-      -v /etc/letsencrypt:/etc/letsencrypt \
-      -v /var/lib/letsencrypt:/var/lib/letsencrypt \
-      -v $(pwd)/certbot-htdocs:/data/letsencrypt \
-      certbot/certbot certonly \
-      --webroot \
-      --webroot-path=/data/letsencrypt \
-      --email imalex96ro@gmail.com \
-      --agree-tos \
-      --no-eff-email \
-      --rsa-key-size 4096 \
-      -d spotacus.app -d www.spotacus.app
-    ```
-
-3. **Persist Certificates:**
-    ```bash
-    cp -r ./certbot/letsencrypt /etc/letsencrypt-backup
-    ```
-4. **Configure Nginx:**
-    ```nginx
-    ssl_certificate     /etc/letsencrypt-backup/live/spotacus.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt-backup/live/spotacus.app/privkey.pem;
-    ```
-5. **Renew Certificates:**
-    ```bash
-    docker compose run --rm certbot renew
-    ```
+- **`deploy/renew_cert.sh`**
+    - Boots Nginx (HTTP-only)
+    - Issues/renews certificates via Certbot
+    - Reloads Nginx
 
 ---
 
-## Cloudflare Handling & SSH Keys
+## 🛡️ Nginx Configuration
 
-### Cloudflare HTTP-01 Challenge
-
-- Disable Cloudflare "Always Use HTTPS" and redirect rules temporarily.
-- Optionally enable Cloudflare Development Mode.
-- Confirm EC2 responds on port 80.
-
-### SSH Keys for GitHub
-
-1. Generate key pair:
-    ```bash
-    ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
-    ```
-2. Add GitHub to known hosts:
-    ```bash
-    ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    ```
-3. Add public key to GitHub Deploy Keys.
-4. Set repo to use SSH:
-    ```bash
-    git remote set-url origin git@github.com:username/repo.git
-    ```
-5. Test connection:
-    ```bash
-    ssh -T git@github.com
-    ```
+- **`nginx.prod.conf`** → Full HTTPS + app serving
+- **`nginx.acme.conf`** → Minimal HTTP-only config for ACME challenges
+- Includes:
+    - Rate limiting (`limit_req`)
+    - Security headers (HSTS, X-Frame-Options, etc.)
+    - Static asset caching (`/build/`, `/storage/`)
+    - PHP-FPM proxy to `app:9000`
 
 ---
 
-## Utility Scripts
+## ✅ Operational Notes
 
-- **Post Deploy Script:** `/scripts/post_deploy.sh` – waits for DB, runs migrations, clears caches, and prepares Laravel for production.
-    - Run manually:
-        ```bash
-        bash ./scripts/post_deploy.sh
-        ```
-- **Certificate Renewal Script:** `/scripts/renew_cert.sh` – spins up temporary HTTP challenge server, renews certificates, adjusts permissions, and restarts Nginx.
-    - Run manually:
-        ```bash
-        bash ./scripts/renew_cert.sh
-        ```
+- Always run migrations with `php artisan migrate --force` in prod (never `migrate:fresh`).
+- Database data is persisted via `mysql-prod-data` named volume.
+- `.gitignore` should exclude:
 
----
+    ```
+    /docker/certbot/letsencrypt/
+    /docker/storage/
+    /docker/nginx.conf/
+    ```
 
-## CI/CD Pipeline (GitHub Actions)
-
-- **Workflow:** `.github/workflows/deploy.yml`
-- **Trigger:** Pushes to `prod` branch.
-
-### Jobs:
-
-1. **Test Stage:**
-    - Uses `docker-compose.ci.yml` and `.env.ci`.
-    - Installs dev dependencies, runs migrations and PHPUnit tests.
-2. **Deploy Stage:**
-    - SSH to EC2 using GitHub Secrets keys.
-    - Pull latest `prod` branch, rebuild containers, and run `/scripts/post_deploy.sh`.
-
-### Security:
-
-- Secrets: `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`.
-- Deploy keys: EC2 → GitHub and vice versa.
+- Health checks:
+    - `/health` (HTTP 200 plain) on port 80 → container check
+    - `/health` route in Laravel (or `/nginx-health`) for HTTPS CI/CD smoke check
 
 ---
 
-## Next Steps
+## 📦 CI/CD Pipeline
 
-- [ ] Automate SSL renewal (cron or scheduled container).
-- [ ] Implement rolling Laravel boot (zero downtime).
+Located in `.github/workflows/deploy.yml`.
+Jobs:
+
+- **build** → build & push image
+- **test** → run tests with CI stack
+- **promote** → retag tested image as `prod-latest`
+- **deploy** → SSH into EC2 and run deployment
+
+Secrets required:
+
+- `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`
+- `GHCR_USERNAME`, `GHCR_TOKEN`
 
 ---
 
-## References
+## 📋 Next Steps
 
-- [Laravel Deployment Docs](https://laravel.com/docs/deployment)
-- [Vue 3 + Vite SSR](https://vitejs.dev/guide/ssr.html)
+- [ ] Automate SSL renewal with cron/systemd
+- [ ] Optionally add rolling deploys for zero downtime
+- [ ] Harden MySQL (backups, monitoring)
+
+---
+
+## 📚 References
+
+- [Laravel Deployment](https://laravel.com/docs/deployment)
+- [Vue + Vite Build](https://vitejs.dev/guide/)
 - [Certbot](https://certbot.eff.org/)
 - [Docker Compose](https://docs.docker.com/compose/)
 - [GitHub Actions](https://docs.github.com/en/actions)
+
+```
+
+```
+````
