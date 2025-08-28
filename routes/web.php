@@ -61,6 +61,10 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'time' => now()], 200);
+});
+
 
 require __DIR__ . '/auth.php';
 

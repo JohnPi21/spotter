@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 # ===== Config you may tweak =====
 PROJECT="spotacus"
-HEALTH_URL="${HEALTH_URL:-http://localhost/health}"  # change to your URL
+HEALTH_URL="${HEALTH_URL:-https://spotacus.app/health}"
 # =================================
 
 # Find repo root (works both inside/outside a git repo)
