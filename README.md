@@ -26,8 +26,6 @@ docker compose -f docker/compose.prod.yml --env-file docker/.env.prod -p spotacu
 ./deploy/post_deploy.sh
 ```
 
-````
-
 ---
 
 ## 📂 Repository Structure (deployment-related)
@@ -251,4 +249,7 @@ Secrets required:
 ```
 
 ```
-````
+
+```
+
+```
