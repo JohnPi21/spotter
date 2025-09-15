@@ -105,7 +105,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 return !$request->isMethod('GET')
-                    ? back()->withErrors(['error' => $msg])->withInput()
+                    ? back()->withErrors(['error' => $msg])->withInput()->setStatusCode(302)
                     : Inertia::render('ErrorPage', ['status' => 403, 'message' => $msg])->toResponse($request)->setStatusCode(403);
             }
 

@@ -203,6 +203,7 @@ const props = defineProps<{
     mesocycle: Mesocycle;
     errors?: object;
 }>();
+console.log(props.mesocycle);
 
 const day = computed<Day>(() => props.mesocycle.day);
 const exercisesModal = ref<boolean>();

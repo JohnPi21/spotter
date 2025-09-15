@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mesocycle extends Model
 {
@@ -21,9 +23,25 @@ class Mesocycle extends Model
 
     protected $guarded = [];
 
+    protected $appends = ['last_day'];
+
     public function days(): HasMany
     {
         return $this->hasMany(MesoDay::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function lastDay(): Attribute
+    {
+        return Attribute::make(get: function () {
+            return $this->days
+                ->firstWhere('finished_at', null)?->id
+                ?? $this->days->last()?->id;
+        });
     }
 
     #[Scope]
@@ -47,5 +65,10 @@ class Mesocycle extends Model
     public static function weeksRange(): array
     {
         return range(self::MIN_WEEKS, self::MAX_WEEKS);
+    }
+
+    public function totalDays(): int
+    {
+        return $this->days_per_week * $this->weeks_duration;
     }
 }

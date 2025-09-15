@@ -9,7 +9,7 @@
         <UiBox v-if="props.mesocycles.length > 0">
             <ul>
                 <li v-for="(meso, idx) in mesocycles" :key="meso.id">
-                    <Link :href="route('days.show', { mesocycle: meso.id, day: meso.lastDay })">
+                    <Link :href="route('days.show', { mesocycle: meso.id, day: meso.last_day })">
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col gap-1">
                                 <h3>{{ meso.name }}</h3>

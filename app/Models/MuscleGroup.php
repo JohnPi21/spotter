@@ -10,6 +10,8 @@ class MuscleGroup extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     public function exercises(): HasMany
     {
         return $this->hasMany(Exercise::class);

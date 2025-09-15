@@ -2930,29 +2930,5 @@
         "updatedAt": "2023-01-26T22:06:23.109Z",
         "deletedAt": null,
         "notes": []
-    },
-    {
-        "id": 326663,
-        "name": "Squat",
-        "muscleGroupId": 6,
-        "youtubeId": "",
-        "exerciseType": "bodyweight-only",
-        "userId": 1447598,
-        "createdAt": "2024-10-01T12:47:05.744Z",
-        "updatedAt": "2024-10-01T12:47:05.744Z",
-        "deletedAt": null,
-        "notes": []
-    },
-    {
-        "id": 329421,
-        "name": "Goblet",
-        "muscleGroupId": 6,
-        "youtubeId": "",
-        "exerciseType": "dumbbell",
-        "userId": 1447598,
-        "createdAt": "2024-10-04T12:58:15.000Z",
-        "updatedAt": "2024-10-04T12:58:15.000Z",
-        "deletedAt": null,
-        "notes": []
     }
 ]

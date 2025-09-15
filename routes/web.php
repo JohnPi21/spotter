@@ -8,6 +8,7 @@ use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\DashboardController as Dashboard;
+use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -60,6 +61,8 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 });
+
+Route::get('/test', [TestController::class, 'index']);
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'time' => now()], 200);

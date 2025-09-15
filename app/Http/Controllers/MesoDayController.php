@@ -51,13 +51,6 @@ class MesoDayController extends Controller
             ->get()
             ->keyBy('exercise_id');
 
-        // days =>
-        // days -> sets (sets / exercise)
-        // days -> sets (sets / exercise)
-
-        // day => 
-        // exercise in a day -> sets
-        // exercise in a day -> sets
 
         $lastSets = [];
 
@@ -94,6 +87,8 @@ class MesoDayController extends Controller
         }
 
         $mesocycle->calendar = $calendar;
+        $mesocycle->makeHidden('days');
+        $day->makeHidden('mesocycle');
 
         $mesocycle->setRelation('day', $day);
 

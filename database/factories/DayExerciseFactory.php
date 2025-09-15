@@ -27,4 +27,9 @@ class DayExerciseFactory extends Factory
             'position' => $this->faker->numberBetween(0, 10),
         ];
     }
+
+    public function exercise(int $exerciseID)
+    {
+        return $this->state(fn() => ['exercise_id' => $exerciseID]);
+    }
 }

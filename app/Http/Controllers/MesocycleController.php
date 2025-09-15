@@ -35,14 +35,6 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         $mesocycles = Mesocycle::mine()->with(['days:id,finished_at,mesocycle_id'])->get();
 
-        // On each mesocycle add the id (needed for building hte rul) 
-        // to the Current active day OR last day if the mesocycle is finished
-        $mesocycles->each(
-            fn($mesocycle) =>
-            $mesocycle->lastDay = $mesocycle->days
-                ->firstWhere('finished_at', null)?->id ?? $mesocycle->days->last()?->id
-        );
-
         return Inertia::render('mesocycles/index', [
             'title'     => 'Mesocycles',
             'mesocycles' => $mesocycles
@@ -70,8 +62,6 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        // $muscleGroups = MuscleGroup::pluck('id')->toArray();
-
         $validated = $request->validate([
             'meso'                              => ['required', 'array'],
             'meso.name'                         => ['required', 'string'],
@@ -161,17 +151,14 @@ class MesocycleController extends Controller implements HasMiddleware
             throw new AppException(404, __("No active mesocycle"), "NO_ACTIVE_MESOCYCLE");
         }
 
-        // $days = [16, 15, 14, 13, 12];
-        // $day[13] has status 1 meaning I have to get $day[14] next;
+        $currentDayId = $mesocycle->days()->whereNull('finished_at')->orderBy('id')->value('id');
 
-        $currentDay = MesoDay::where('mesocycle_id', $mesocycle->id)->orderBy('id')->whereNull('finished_at')->value('id')
-            ?? MesoDay::where('mesocycle_id', $mesocycle->id)->orderByDesc('id')->value('id');
+        $currentDayId ??= $mesocycle->days()->orderByDesc('id')->value('id');
 
-
-        if (! $currentDay) {
+        if (! $currentDayId) {
             throw new AppException(404, __("No day found for mesocycle"), 'NO_DAY_FOUND');
         }
 
-        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDay]);
+        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDayId]);
     }
 }

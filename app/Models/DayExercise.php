@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DayExercise extends Model
 {
@@ -14,7 +15,7 @@ class DayExercise extends Model
 
     protected $guarded = [];
 
-    public function day()
+    public function day(): BelongsTo
     {
         return $this->belongsTo(MesoDay::class, 'meso_day_id');
     }
@@ -24,9 +25,9 @@ class DayExercise extends Model
         return $this->hasMany(ExerciseSet::class);
     }
 
-    public function exercise(): HasOne
+    public function exercise(): BelongsTo
     {
-        return $this->hasOne(Exercise::class, 'id', 'exercise_id');
+        return $this->belongsTo(Exercise::class);
     }
 
     public function mesocycle(): Mesocycle|null

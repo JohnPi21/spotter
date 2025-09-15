@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use RuntimeException;
 
 class ExercisesSeeder extends Seeder
 {
@@ -16,7 +17,13 @@ class ExercisesSeeder extends Seeder
     public function run(): void
     {
 
-        $exercises_file = File::get(database_path('seeders/exercises.json'));
+        $path = database_path('/seeders/exercises.json');
+
+        if (! File::exists($path)) {
+            throw new RuntimeException("Missing exercises seed file: {$path}");
+        }
+
+        $exercises_file = File::get($path);
 
         $exercises = json_decode($exercises_file, true);
 

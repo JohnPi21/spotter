@@ -21,7 +21,7 @@ class ExerciseSetFactory extends Factory
             'day_exercise_id' => DayExercise::factory(),
             'reps'            => fake()->numberBetween(3, 30),
             'weight'          => fake()->numberBetween(5, 300),
-            'status'          => 1,
+            'finished_at'     => now()
         ];
     }
 }
