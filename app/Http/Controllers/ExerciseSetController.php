@@ -10,6 +10,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Arr;
 
 class ExerciseSetController extends Controller
 {
@@ -47,9 +48,8 @@ class ExerciseSetController extends Controller
             'status'    => ['nullable', 'integer', 'in:0,1'],
         ]);
 
-        $validated['finished_at'] = $validated['status'] === 0 ? null : now();
-
-        unset($validated['status']);
+        $status = (int) Arr::pull($validated, 'status', 1);
+        $validated['finished_at'] = $status === 1 ? now() : null;
 
         $set->update($validated);
 

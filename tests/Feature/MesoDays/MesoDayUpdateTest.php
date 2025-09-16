@@ -7,8 +7,6 @@ use App\Models\User;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Inertia\Testing\AssertableInertia as Assert;
-use App\Models\ExerciseSet;
 
 class MesoDayUpdateTest extends TestCase
 {
@@ -36,7 +34,6 @@ class MesoDayUpdateTest extends TestCase
         $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
 
         $day = $mesocycle->days->first();
-        $day->update(['finished_at' => null]);
 
         $set = $day->dayExercises->first()->sets->first();
         $set->update(['finished_at' => null]);
@@ -44,6 +41,7 @@ class MesoDayUpdateTest extends TestCase
         $this->actingAs($user)->patch(route('days.toggle', ['day' => $day->id]))->assertSessionHasErrors();
 
         $this->assertNull((MesoDay::find($day->id))->finished_at);
+        $this->assertDatabaseHas('meso_days', ['id' => $day->id, 'finished_at' => null]);
     }
 
     public function test_user_cannot_toggle_other_users_days(): void
