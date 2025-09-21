@@ -28,7 +28,7 @@ class DayExerciseController extends Controller
             ]
         ]);
 
-        $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? -1;
+        $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? 0;
 
         // Maybe send the object back?
         $dayExercise = DayExercise::create([
@@ -59,7 +59,7 @@ class DayExerciseController extends Controller
         ])['order'];
 
         foreach ($order as $position => $id) {
-            DayExercise::where('id', $id)->update(['position' => $position]);
+            DayExercise::where('id', $id)->update(['position' => $position + 1]);
         }
 
         return to_route('days.show', [

@@ -8,14 +8,14 @@ use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
-use Database\Factories\MesoDayFactory;
 use Inertia\Testing\AssertableInertia as Assert;
 
 class MesoDayShowTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_user_can_see_day(): void
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
