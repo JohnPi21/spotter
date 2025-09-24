@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\Mesocycle\CreateData as MesocycleCreateData;
 use App\Exceptions\AppException;
+use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
@@ -25,8 +27,6 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy']),
-            // new Middleware('can:view,mesocycle', only: ['show']),
-            // new Middleware('can:create,' . Mesocycle::class, only: ['create']),
         ];
     }
 
@@ -60,48 +60,36 @@ class MesocycleController extends Controller implements HasMiddleware
         return Inertia::render('mesocycles/create');
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreMesocycleRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $validated = $request->validate([
-            'meso'                              => ['required', 'array'],
-            'meso.name'                         => ['required', 'string'],
-            'meso.unit'                         => ['sometimes', Rule::in(['kg', 'lbs'])],
-            'meso.weeksDuration'                => ['required', 'integer', 'min:3', 'max:12'],
-            'days'                              => ['required', 'array', 'min:1', 'max:7'],
-            'days.*.label'                      => ['required', 'string', 'min:1', 'max:64'],
-            'days.*.exercises'                  => ['required', 'array', 'min:1', 'max:32'],
-            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', 'exists:muscle_groups,id'],
-            'days.*.exercises.*.exerciseID'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
-        ]);
-
-        $validatedMeso = collect($validated['meso']);
+        $mesoDTO = MesocycleCreateData::from($request->validated());
 
         $activateMeso = ! Mesocycle::mine()->exists();
 
         $mesocycle = Mesocycle::create([
-            'name'            => $validatedMeso->get('name'),
-            'unit'            => $validatedMeso->get('unit', 'kg'),
-            'weeks_duration'  => $validatedMeso->get('weeksDuration'),
-            'days_per_week'   => count($validated['days']),
+            'name'            => $mesoDTO->name,
+            'unit'            => $mesoDTO->unit,
+            'weeks_duration'  => $mesoDTO->weeks_duration,
+            'days_per_week'   => count($mesoDTO->days),
             'user_id'         => $request->user()->id,
-            'status'          => $activateMeso
+            'status'          => !!$activateMeso
         ]);
 
-        for ($i = 1; $i <= $mesocycle['weeks_duration']; $i++) {
+        for ($i = 1; $i <= $mesocycle->weeks_duration; $i++) {
 
-            foreach ($validated['days'] as $idx => $day) {
+            foreach ($mesoDTO->days as $idx => $day) {
                 $createdDay = MesoDay::create([
-                    "mesocycle_id" => $mesocycle['id'],
+                    "mesocycle_id" => $mesocycle->id,
                     "week"         => $i,
                     "day_order"    => $idx + 1,
-                    "label"        => $day['label'],
+                    "label"        => $day->label,
                     "position"     => $idx,
                 ]);
 
-                foreach ($day['exercises'] as $position => $exercise) {
+                foreach ($day->exercises as $position => $exercise) {
                     $exerciseDay = DayExercise::create([
                         "meso_day_id" => $createdDay->id,
-                        "exercise_id" => $exercise['exerciseID'],
+                        "exercise_id" => $exercise->exerciseID,
                         "position"    => (int)$position,
                     ]);
 
