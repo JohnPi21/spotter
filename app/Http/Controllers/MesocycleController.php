@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Mesocycle\CreateAction;
 use App\Data\Mesocycle\CreateData as MesocycleCreateData;
 use App\Exceptions\AppException;
 use App\Http\Requests\StoreMesocycleRequest;
@@ -64,41 +65,7 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         $mesoDTO = MesocycleCreateData::from($request->validated());
 
-        $activateMeso = ! Mesocycle::mine()->exists();
-
-        $mesocycle = Mesocycle::create([
-            'name'            => $mesoDTO->name,
-            'unit'            => $mesoDTO->unit,
-            'weeks_duration'  => $mesoDTO->weeks_duration,
-            'days_per_week'   => count($mesoDTO->days),
-            'user_id'         => $request->user()->id,
-            'status'          => !!$activateMeso
-        ]);
-
-        for ($i = 1; $i <= $mesocycle->weeks_duration; $i++) {
-
-            foreach ($mesoDTO->days as $idx => $day) {
-                $createdDay = MesoDay::create([
-                    "mesocycle_id" => $mesocycle->id,
-                    "week"         => $i,
-                    "day_order"    => $idx + 1,
-                    "label"        => $day->label,
-                    "position"     => $idx,
-                ]);
-
-                foreach ($day->exercises as $position => $exercise) {
-                    $exerciseDay = DayExercise::create([
-                        "meso_day_id" => $createdDay->id,
-                        "exercise_id" => $exercise->exerciseID,
-                        "position"    => (int)$position,
-                    ]);
-
-                    ExerciseSet::create([
-                        "day_exercise_id"   => $exerciseDay->id,
-                    ]);
-                }
-            }
-        }
+        CreateAction::execute($mesoDTO);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
