@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Mesocycle\ActivateAction;
 use App\Actions\Mesocycle\CreateAction;
 use App\Data\Mesocycle\CreateData as MesocycleCreateData;
 use App\Exceptions\AppException;
@@ -9,6 +10,7 @@ use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
+use App\Actions\Mesocycle\ActivateAction as MesocycleAcivateAction;
 use App\Models\ExerciseSet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,20 +74,7 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function activate(Mesocycle $mesocycle): RedirectResponse
     {
-        DB::transaction(function () use ($mesocycle) {
-
-            $mesocycle->lockForUpdate();
-
-            $hasUnfinishedDays = $mesocycle->days()->whereNull('finished_at')->exists();
-
-            if (! $hasUnfinishedDays) {
-                throw new AppException(422, __('Mesocycle cannot activate (no unfinished days)'), 'NO_UNFINISHED_DAYS');
-            }
-
-            Mesocycle::mine()->active()->whereKeyNot($mesocycle->getKey())->update(['status' => Mesocycle::STATUS_INACTIVE]);
-
-            $mesocycle->update(['status' => Mesocycle::STATUS_ACTIVE]);
-        });
+        MesocycleAcivateAction::execute($mesocycle);
 
         return to_route('mesocycles');
     }

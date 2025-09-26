@@ -3,8 +3,11 @@
 namespace App\Http\Requests;
 
 use App\Enums\UnitOfMeasure;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreMesocycleRequest extends FormRequest
 {
@@ -14,6 +17,19 @@ class StoreMesocycleRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $days = collect($this->input('days', []));
+
+        $exercisesIds = $days->flatMap->exercises->pluck('exerciseID')->filter()->unique()->toArray();
+        $muscleGroupsIds = $days->flatMap->exercises->pluck('muscleGroup')->filter()->unique()->toArray();
+
+        $this->merge([
+            'exercisesIds' => $exercisesIds,
+            'muscleGroupsIds' => $muscleGroupsIds
+        ]);
     }
 
     /**
@@ -30,8 +46,10 @@ class StoreMesocycleRequest extends FormRequest
             'days'                              => ['required', 'array', 'min:1', 'max:7'],
             'days.*.label'                      => ['required', 'string', 'min:1', 'max:64'],
             'days.*.exercises'                  => ['required', 'array', 'min:1', 'max:32'],
-            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1', 'exists:muscle_groups,id'],
-            'days.*.exercises.*.exerciseID'     => ['required', 'integer', 'min:1', 'exists:exercises,id']
+            'days.*.exercises.*.muscleGroup'    => ['required', 'integer', 'min:1'],
+            'days.*.exercises.*.exerciseID'     => ['required', 'integer', 'min:1'],
+            'exercisesIds'                      => [Rule::exists('exercises', 'id')],
+            'muscleGroupsIds'                   => [Rule::exists('muscle_groups', 'id')],
         ];
     }
 }
