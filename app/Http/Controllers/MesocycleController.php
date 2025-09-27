@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Mesocycle\ActivateAction;
 use App\Actions\Mesocycle\CreateAction;
 use App\Data\Mesocycle\CreateData as MesocycleCreateData;
-use App\Exceptions\AppException;
 use App\Http\Requests\StoreMesocycleRequest;
-use App\Models\DayExercise;
 use App\Models\Mesocycle;
-use App\Models\MesoDay;
 use App\Actions\Mesocycle\ActivateAction as MesocycleAcivateAction;
-use App\Models\ExerciseSet;
+use App\Actions\Mesocycle\ResolveActiveMesocycleDayAction;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
-use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\DB;
 
 class MesocycleController extends Controller implements HasMiddleware
 {
@@ -87,22 +80,10 @@ class MesocycleController extends Controller implements HasMiddleware
     }
 
 
-    public function currentActiveDay(): RedirectResponse
+    public function currentActiveDay(ResolveActiveMesocycleDayAction $resolve): RedirectResponse
     {
-        $mesocycle = Mesocycle::mine()->where('status', Mesocycle::STATUS_ACTIVE)->first();
+        [$currentDayId, $mesocycleId] = $resolve();
 
-        if (! $mesocycle) {
-            throw new AppException(404, __("No active mesocycle"), "NO_ACTIVE_MESOCYCLE");
-        }
-
-        $currentDayId = $mesocycle->days()->whereNull('finished_at')->orderBy('id')->value('id');
-
-        $currentDayId ??= $mesocycle->days()->orderByDesc('id')->value('id');
-
-        if (! $currentDayId) {
-            throw new AppException(404, __("No day found for mesocycle"), 'NO_DAY_FOUND');
-        }
-
-        return to_route("days.show", ['mesocycle' => $mesocycle->id, 'day' => $currentDayId]);
+        return to_route("days.show", ['mesocycle' => $mesocycleId, 'day' => $currentDayId]);
     }
 }
