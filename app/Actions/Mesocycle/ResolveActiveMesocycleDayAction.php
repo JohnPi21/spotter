@@ -11,7 +11,7 @@ class ResolveActiveMesocycleDayAction
 
     function __invoke(): array | AppException
     {
-        $mesocycle = Mesocycle::select('id')::with('days')::mine()->where('status', Mesocycle::STATUS_ACTIVE)->first();
+        $mesocycle = Mesocycle::select('id')->with('days')->mine()->where('status', Mesocycle::STATUS_ACTIVE)->first();
 
         if (! $mesocycle) {
             throw new AppException(404, __("No active mesocycle"), "NO_ACTIVE_MESOCYCLE");

@@ -5,6 +5,7 @@ namespace App\Actions\Mesocycle;
 use App\Models\Mesocycle;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\AppException;
+use Illuminate\Contracts\Database\Query\Builder;
 
 class ActivateAction
 {
@@ -18,13 +19,11 @@ class ActivateAction
 
     public static function execute(Mesocycle $mesocycle)
     {
-
         $affected = DB::update('
             UPDATE mesocycles
             SET status = 
-                CASE
-                    WHEN id = ? THEN ? ELSE ?
-                END
+                CASE WHEN id = ? THEN ? ELSE ?  END
+                updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
             AND EXISTS(
                 SELECT 1 from meso_days d
