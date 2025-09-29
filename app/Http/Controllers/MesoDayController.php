@@ -20,7 +20,6 @@ class MesoDayController extends Controller
 
         Gate::authorize('view', $day);
 
-
         $mesocycle = $day->mesocycle;
 
         // CREATE OBSERVER for ExerciseSet
@@ -97,9 +96,7 @@ class MesoDayController extends Controller
             throw new AppException(422, __('All sets must be completed'), 'SETS_UNFINISHED');
         }
 
-        $day->finished_at = $day->finished_at ? null : now();
-
-        $day->save();
+        $day->update(['finished_at' => $day->finished_at ? null : now()]);
 
         return redirect()->back()->with('day', $day->finished_at);
     }

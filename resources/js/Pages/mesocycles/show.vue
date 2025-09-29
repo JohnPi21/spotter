@@ -241,13 +241,9 @@ async function updateSet(set: ExerciseSet) {
 }
 
 async function addSet(dayExerciseID: number) {
-    router.post(
-        route("sets.store"),
-        { day_exercise_id: dayExerciseID },
-        {
-            preserveState: false,
-        }
-    );
+    router.post(route("sets.store", { dayExercise: dayExerciseID }), {
+        preserveState: false,
+    });
 }
 
 async function removeSet(setID: number) {

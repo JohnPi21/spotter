@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ExerciseSetSaved;
 use App\Models\DayExercise;
-use App\Models\Exercise;
 use App\Models\ExerciseSet;
 use App\Models\MesoDay;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -14,21 +14,17 @@ use Illuminate\Support\Arr;
 
 class ExerciseSetController extends Controller
 {
-    public function store(Request $request)
+    public function store(DayExercise $dayExercise)
     {
-        $dayExerciseID = $request->validate([
-            'day_exercise_id' => ['required', 'integer', 'exists:day_exercises,id']
-        ])['day_exercise_id'];
-
-        $dayExercise = DayExercise::with('day.mesocycle:id,user_id,id')->findOrFail($dayExerciseID);
+        $dayExercise->loadMissing(['day:id,mesocycle_id', 'day.mesocycle:id,user_id']);
 
         Gate::authorize('create', [ExerciseSet::class, $dayExercise->day]);
 
-        ExerciseSet::create([
-            'day_exercise_id' => $dayExercise->id,
-        ]);
+        $set = $dayExercise->sets()->create();
 
-        return redirect()->back();
+        ExerciseSetSaved::dispatch($set);
+
+        return back();
     }
 
     public function update(Request $request, ExerciseSet $set): RedirectResponse

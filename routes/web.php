@@ -33,9 +33,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::controller(ExerciseSetController::class)->group(function () {
-        Route::post('/sets', 'store')->name('sets.store');
-        Route::patch('/sets/{set}', 'update')->name('sets.update');
-        Route::delete('/sets/{set}', 'destroy')->name('sets.destroy');
+        Route::post('/day-exercises/{dayExercise}/sets', 'store')->name('sets.store');
+        Route::patch('/day-exercises/{dayExercise}/sets/{set}', 'update')->name('sets.update');
+        Route::delete('/day-exercises/{dayExercise}/sets/{set}', 'destroy')->name('sets.destroy');
     });
 
     Route::controller(DayExerciseController::class)->group(function () {
