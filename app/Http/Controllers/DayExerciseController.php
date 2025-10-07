@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use App\Models\MesoDay;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,20 +16,19 @@ class DayExerciseController extends Controller
 {
     public function store(Request $request, MesoDay $day): RedirectResponse
     {
-        // Authorize
+        $day->loadMissing(['mesocycle', 'dayExercises' => fn(Builder $q) => $q->orderBy('position')]);
+
         Gate::authorize('owns', $day->mesocycle);
 
         $day->ensureIsEditable();
 
         $validated = $request->validate([
-            'exercise_id' => [
-                'required',
-                'exists:exercises,id',
-                Rule::unique('day_exercises')->where('meso_day_id', $day->id),
-            ]
+            'exercise_id' => ['required', 'exists:exercises,id']
         ]);
 
-        $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? 0;
+        $dayExercises = $day->dayExercises()->orderBy('position')->get();
+        dd($dayExercises);
+        // $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? 0;
 
         // Maybe send the object back?
         $dayExercise = DayExercise::create([

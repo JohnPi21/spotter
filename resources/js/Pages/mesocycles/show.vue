@@ -173,7 +173,7 @@
                         v-model="set.status"
                         true-value="1"
                         false-value="0"
-                        @change="updateSet(set)"
+                        @change="updateSet(set, dayExercise.id)"
                         class="mr-2"
                         :id="exercise_idx + '-' + set_idx + '-status'"
                         :disabled="isDayFinished"
@@ -227,11 +227,11 @@ async function removeExercise(dayExerciseID: number) {
     });
 }
 
-async function updateSet(set: ExerciseSet) {
+async function updateSet(set: ExerciseSet, dayExerciseID: number) {
     if (!set.status) return;
 
     router.patch(
-        route("sets.update", { set: set.id }),
+        route("sets.update", { dayExercise: dayExerciseID, set: set.id }),
         { ...set },
         {
             preserveState: true,

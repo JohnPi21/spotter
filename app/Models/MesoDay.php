@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Validation\ValidationException;
 
 class MesoDay extends Model
@@ -19,6 +18,8 @@ class MesoDay extends Model
 
     protected $casts = [
         'finished_at' => 'datetime',
+        'week' => 'integer',
+        'day_order' => 'integer',
     ];
 
     public function mesocycle(): BelongsTo
@@ -30,11 +31,6 @@ class MesoDay extends Model
     {
         return $this->hasMany(DayExercise::class, 'meso_day_id', 'id');
     }
-
-    // public function exercises(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(Exercise::class, DayExercise::class, 'meso_day_id', 'id', 'id', 'exercise_id');
-    // }
 
     #[Scope]
     protected function ownedBy(Builder $query, int $userID)
@@ -53,11 +49,16 @@ class MesoDay extends Model
 
     public function isEditable(): bool
     {
-        return ! ((bool)$this->finished_at);
+        return is_null($this->finished_at);
     }
 
     public function canFinish(): bool
     {
         return ! $this->dayExercises()->whereHas('sets', fn(Builder $q) => $q->whereNull('finished_at'))->exists();
+    }
+
+    public function orderSiblings(): HasMany
+    {
+        return $this->hasMany(self::class, 'mesocycle_id', 'mesocycle_id')->whereKeyNot($this->getKey())->where('day_order', $this->day_order);
     }
 }
