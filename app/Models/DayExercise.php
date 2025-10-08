@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DayExercise extends Model
 {
@@ -33,6 +34,11 @@ class DayExercise extends Model
     public function mesocycle(): Mesocycle|null
     {
         return $this?->day->mesocycle;
+    }
+
+    public function weekSiblings(): HasMany
+    {
+        return $this->hasMany(self::class, 'id', 'id');
     }
 
     #[Scope]

@@ -2,44 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DayExercise\CreateAction as DayExerciseCreateAction;
+use App\Http\Requests\StoreDayExerciseRequest;
+use App\Http\Requests\UpdateDayExerciseOrderRequest;
 use App\Models\DayExercise;
-use App\Models\ExerciseSet;
 use App\Models\MesoDay;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-
+use Illuminate\Validation\ValidationException;
 
 class DayExerciseController extends Controller
 {
-    public function store(Request $request, MesoDay $day): RedirectResponse
+    public function store(StoreDayExerciseRequest $request, MesoDay $day): RedirectResponse
     {
-        $day->loadMissing(['mesocycle', 'dayExercises' => fn(Builder $q) => $q->orderBy('position')]);
-
-        Gate::authorize('owns', $day->mesocycle);
-
-        $day->ensureIsEditable();
-
-        $validated = $request->validate([
-            'exercise_id' => ['required', 'exists:exercises,id']
-        ]);
-
-        $dayExercises = $day->dayExercises()->orderBy('position')->get();
-        dd($dayExercises);
-        // $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? 0;
-
-        // Maybe send the object back?
-        $dayExercise = DayExercise::create([
-            'meso_day_id' => $day->id,
-            'exercise_id' => $validated['exercise_id'],
-            'position'    => $lastPosition + 1,
-        ]);
-
-        ExerciseSet::create([
-            'day_exercise_id' => $dayExercise->id,
-        ]);
+        DayExerciseCreateAction::execute($request->validated('exercise_id'), $day);
 
         return redirect()->route('days.show', [
             'mesocycle' => $day->mesocycle,
@@ -47,20 +25,36 @@ class DayExerciseController extends Controller
         ]);
     }
 
-    public function updateOrder(Request $request, MesoDay $day): RedirectResponse
+    // @TODO: Move this into an action
+    public function updateOrder(UpdateDayExerciseOrderRequest $request, MesoDay $day): RedirectResponse
     {
-        $day->load('mesocycle');
+        $order = collect($request->validated('order'));
 
-        Gate::authorize('owns', $day->mesocycle);
+        DB::transaction(function () use ($order, $day) {
+            $dayExercises = $day->dayExercises()->lockForUpdate()->pluck('id');
 
-        $order = $request->validate([
-            'order' => ['required', 'array', 'distinct', 'list'],
-            'order.*' => ['required', 'integer'],
-        ])['order'];
+            if ($dayExercises->diff($order->all())->isNotEmpty()) {
+                throw ValidationException::withMessages(['order' => 'Not all exercises belong to the current day.']);
+            }
 
-        foreach ($order as $position => $id) {
-            DayExercise::where('id', $id)->update(['position' => $position + 1]);
-        }
+            if ($order->diff($dayExercises->all())->isNotEmpty()) {
+                throw ValidationException::withMessages(['order' => 'Not all exercises belong to the current day.']);
+            }
+
+            $placeholders = implode(',', array_fill(0, $order->count(), '?'));
+
+            DB::update("
+                UPDATE day_exercises
+                SET position = position + 100
+                where meso_day_id = ?
+            ", [$day->id]);
+
+            DB::update("
+                UPDATE day_exercises
+                SET position = FIELD(id, $placeholders)
+                WHERE meso_day_id = ?
+            ", [...$order->all(), $day->id]);
+        });
 
         return to_route('days.show', [
             'mesocycle' => $day->mesocycle,
@@ -68,6 +62,7 @@ class DayExerciseController extends Controller
         ]);
     }
 
+    // @TODO: check the day from dayexercise is the same as $day sent in request
     public function destroy(MesoDay $day, DayExercise $exercise): RedirectResponse
     {
         Gate::authorize('owns', $day->mesocycle);
