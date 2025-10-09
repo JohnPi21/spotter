@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
@@ -13,7 +12,7 @@ class StoreDayExerciseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->route()->day->loadMissing(['mesocycle', 'dayExercises' => fn(Builder $q) => $q->orderBy('position')]);
+        $this->route()->day->loadMissing(['mesocycle', 'dayExercises' => fn($q) => $q->orderBy('position')]);
 
         return Gate::allows('owns', $this->route()->day->mesocycle);
     }

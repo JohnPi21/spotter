@@ -140,7 +140,7 @@
                             v-for="(item, i) in setDropdownItems"
                             :key="i"
                             :class="item.class"
-                            @click="item.action(set.id)"
+                            @click="item.action(dayExercise.id, set.id)"
                         >
                             <Icon :icon="item.icon" />
                             {{ item.label }}
@@ -222,7 +222,7 @@ function isActiveDay(dayID: number) {
 onMounted(() => {});
 
 async function removeExercise(dayExerciseID: number) {
-    router.delete(route("dayExercise.destroy", { day: day.value.id, exercise: dayExerciseID }), {
+    router.delete(route("dayExercise.destroy", { day: day.value.id, dayExercise: dayExerciseID }), {
         preserveState: "errors",
     });
 }
@@ -246,8 +246,8 @@ async function addSet(dayExerciseID: number) {
     });
 }
 
-async function removeSet(setID: number) {
-    router.delete(route("sets.destroy", { set: setID }), {
+async function removeSet(dayExerciseID:number, setID: number) {
+    router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
         preserveState: false,
     });
 }
@@ -382,7 +382,7 @@ const setDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (setID: number) => removeSet(setID),
+        action: (dayExerciseID: number, setID: number) => removeSet(dayExerciseID, setID),
     },
 ];
 </script>

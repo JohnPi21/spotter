@@ -22,14 +22,14 @@ class ExerciseSetController extends Controller
         return back();
     }
 
-    public function update(UpdateSetRequest $request, int $dayExercise, ExerciseSet $set): RedirectResponse
+    public function update(UpdateSetRequest $request, DayExercise $dayExercise, ExerciseSet $set): RedirectResponse
     {
         UpdateAction::execute($request, $set);
 
         return to_route('days.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day])->with('success', 'Set has been updated!');
     }
 
-    public function destroy(ExerciseSet $set)
+    public function destroy(DayExercise $dayExercise, ExerciseSet $set)
     {
         Gate::authorize('delete', $set);
 

@@ -17,7 +17,7 @@ class CreateAction
         //
     }
 
-    public static function execute(int $exerciseId, MesoDay $day)
+    public function execute(int $exerciseId, MesoDay $day)
     {
         $day->ensureIsEditable();
 
