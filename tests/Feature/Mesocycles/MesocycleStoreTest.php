@@ -21,11 +21,9 @@ class MesocycleStoreTest extends TestCase
         $muscleGroup = MuscleGroup::factory()->create();
 
         return [
-            'meso' => [
-                'name' => Str::random(32),
-                'unit' => 'kg',
-                'weeksDuration' => 5,
-            ],
+            'name' => Str::random(32),
+            'unit' => 'kg',
+            'weeksDuration' => 5,
             'days' => [
                 [
                     'label' => 'Day 1',
@@ -48,7 +46,7 @@ class MesocycleStoreTest extends TestCase
 
     protected function tamperPayload(array $payload): array
     {
-        $payload['meso']['name'] = 22;
+        $payload['name'] = 22;
         $payload['days'][0]['label'] = '';
         $payload['days'][0]['exercises'][0]['exerciseID'] = 9999;
         $payload['days'][0]['exercises'][0]['muscleGroup'] = 10000;
@@ -82,11 +80,11 @@ class MesocycleStoreTest extends TestCase
         $response->assertRedirect(route('mesocycles'))->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('mesocycles', [
-            'name' => $payload['meso']['name'],
-            'weeks_duration' => $payload['meso']['weeksDuration'],
+            'name' => $payload['name'],
+            'weeks_duration' => $payload['weeksDuration'],
         ]);
 
-        $meso = Mesocycle::where('user_id', $user->id)->where('name', $payload['meso']['name'])->latest('id')->firstOrFail();
+        $meso = Mesocycle::where('user_id', $user->id)->where('name', $payload['name'])->latest('id')->firstOrFail();
 
         $this->assertEquals($user->id, $meso->user_id);
 
@@ -110,7 +108,7 @@ class MesocycleStoreTest extends TestCase
         $this->actingAs($user)->post(route('mesocycles.store'), $payload)->assertSessionDoesntHaveErrors();
 
         $this->assertDatabaseHas('mesocycles', [
-            'name' => $payload['meso']['name'],
+            'name' => $payload['name'],
             'user_id' => $user->id,
         ]);
     }

@@ -26,7 +26,7 @@ class ExerciseSetDestroyTest extends TestCase
         $countBefore = ExerciseSet::where('day_exercise_id', $dayExercise->id)->count();
 
         $this->actingAs($user)
-            ->delete(route('sets.destroy', ['set' => $set->id]))
+            ->delete(route('sets.destroy', [$dayExercise, $set]))
             ->assertRedirectBack()
             ->assertSessionHasNoErrors();
 
@@ -45,7 +45,7 @@ class ExerciseSetDestroyTest extends TestCase
         $countBefore = ExerciseSet::where('day_exercise_id', $dayExercise->id)->count();
 
         $this->actingAs($other)
-            ->delete(route('sets.destroy', ['set' => $set->id]))
+            ->delete(route('sets.destroy', [$dayExercise, $set]))
             ->assertRedirectBackWithErrors();
 
         $this->assertDatabaseHas('exercise_sets', ['id' => $set->id]);

@@ -4,6 +4,7 @@ namespace App\Data\Set;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Hidden;
 
 class UpdateData extends Data
 {
@@ -11,8 +12,13 @@ class UpdateData extends Data
         public int $reps,
         public string $weight,
         public ?Carbon $finished_at,
-        bool $status,
+        #[Hidden]
+        public ?bool $status,
     ) {
-        $this->finished_at = $status ? now() : null;
+        if ($this->status || is_null($this->status)) {
+            $this->finished_at = now();
+        } else {
+            $this->finished_at = null;
+        }
     }
 }

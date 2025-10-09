@@ -23,7 +23,7 @@ class ExerciseSetStoreTest extends TestCase
         $dayExercise = $mesocycle->days()->first()->dayExercises()->first();
         $setsCount = $dayExercise->sets->count();
 
-        $this->actingAs($user)->post(route('sets.store'), ['day_exercise_id' => $dayExercise->id])
+        $this->actingAs($user)->post(route('sets.store', [$dayExercise]))
             ->assertRedirectBack()
             ->assertSessionHasNoErrors();
 
@@ -38,7 +38,7 @@ class ExerciseSetStoreTest extends TestCase
         Mesocycle::factory()->for($user)->withFullStructure()->create();
         $lastDayEx = DayExercise::orderByDesc('id')->first();
 
-        $this->actingAs($user)->post(route('sets.store'), ['day_exercise_id' => ($lastDayEx->id + 1)])
+        $this->actingAs($user)->post(route('sets.store', ['dayExercise' => ($lastDayEx->id + 1)]))
             ->assertRedirectBack()
             ->assertSessionHasErrors();
     }
@@ -53,7 +53,7 @@ class ExerciseSetStoreTest extends TestCase
         $dayExercise = $mesocycle->days()->first()->dayExercises()->first();
         $setsCount = $dayExercise->sets->count();
 
-        $this->actingAs($otherUser)->post(route('sets.store'), ['day_exercise_id' => $dayExercise->id])
+        $this->actingAs($otherUser)->post(route('sets.store', [$dayExercise]))
             ->assertRedirectBack()
             ->assertSessionHasErrors();
 
