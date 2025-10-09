@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Set\UpdateAction;
 use App\Http\Requests\UpdateSetRequest;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use App\Data\Set\UpdateData as SetUpdateData;
 
 class ExerciseSetController extends Controller
 {
@@ -24,7 +24,9 @@ class ExerciseSetController extends Controller
 
     public function update(UpdateSetRequest $request, DayExercise $dayExercise, ExerciseSet $set): RedirectResponse
     {
-        UpdateAction::execute($request, $set);
+        $updateSetDTO = SetUpdateData::from($request->validated());
+
+        $set->update($updateSetDTO->toArray());
 
         return to_route('days.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day])->with('success', 'Set has been updated!');
     }

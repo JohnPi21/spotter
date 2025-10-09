@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Mesocycle\CreateAction;
+use App\Actions\Mesocycle\CreateAction as MesocycleCreateAction;
 use App\Data\Mesocycle\CreateData as MesocycleCreateData;
 use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\Mesocycle;
@@ -56,18 +56,18 @@ class MesocycleController extends Controller implements HasMiddleware
         return Inertia::render('mesocycles/create');
     }
 
-    public function store(StoreMesocycleRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreMesocycleRequest $request, MesocycleCreateAction $createAction): \Illuminate\Http\RedirectResponse
     {
         $mesoDTO = MesocycleCreateData::from($request->validated());
 
-        CreateAction::execute($mesoDTO);
+        $createAction($mesoDTO);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
 
-    public function activate(Mesocycle $mesocycle): RedirectResponse
+    public function activate(Mesocycle $mesocycle, MesocycleAcivateAction $activateAction): RedirectResponse
     {
-        MesocycleAcivateAction::execute($mesocycle);
+        $activateAction($mesocycle);
 
         return to_route('mesocycles');
     }

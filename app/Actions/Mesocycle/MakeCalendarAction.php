@@ -9,15 +9,12 @@ class MakeCalendarAction
     /**
      * Create a new class instance.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct() {}
 
     /**
      * Invoke the class instance.
      */
-    public static function execute(Mesocycle $mesocycle): array
+    public function __invoke(Mesocycle $mesocycle): array
     {
         $calendar = [];
         $weekIdx = 1;

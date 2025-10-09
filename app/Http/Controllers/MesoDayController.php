@@ -9,11 +9,11 @@ use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use App\Actions\Mesocycle\MakeCalendarAction;
+use App\Actions\Mesocycle\MakeCalendarAction as MesocycleMakeCalendarAction;
 
 class MesoDayController extends Controller
 {
-    public function show(int $mesocycle, MesoDay $day): \Inertia\Response
+    public function show(int $mesocycle, MesoDay $day, MesocycleMakeCalendarAction $makeCalendarAction): \Inertia\Response
     {
 
         $day->load(['dayExercises' => fn($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
@@ -76,7 +76,7 @@ class MesoDayController extends Controller
         //     }
         // }
 
-        $calendar = MakeCalendarAction::execute($mesocycle);
+        $calendar = $makeCalendarAction($mesocycle);
 
         $mesocycle->calendar = $calendar;
         $mesocycle->makeHidden('days');

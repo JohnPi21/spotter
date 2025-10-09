@@ -5,7 +5,6 @@ namespace App\Actions\Mesocycle;
 use App\Models\Mesocycle;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\AppException;
-use Illuminate\Contracts\Database\Query\Builder;
 
 class ActivateAction
 {
@@ -17,7 +16,7 @@ class ActivateAction
         //
     }
 
-    public static function execute(Mesocycle $mesocycle)
+    public function __invoke(Mesocycle $mesocycle): void
     {
         $affected = DB::update('
             UPDATE mesocycles

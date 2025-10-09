@@ -17,7 +17,7 @@ class CreateAction
      */
     public function __construct() {}
 
-    public static function execute(CreateData $mesoDTO): void
+    public function __invoke(CreateData $mesoDTO): void
     {
         $activateMeso = ! Mesocycle::mine()->exists();
 
