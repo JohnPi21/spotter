@@ -6,7 +6,7 @@ use App\Models\MesoDay;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-final class ReorderAction
+final class ReorderDayExercises
 {
     public function __construct() {}
 

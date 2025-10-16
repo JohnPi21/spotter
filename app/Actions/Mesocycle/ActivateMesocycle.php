@@ -6,7 +6,7 @@ use App\Models\Mesocycle;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\AppException;
 
-class ActivateAction
+class ActivateMesocycle
 {
     /**
      * Create a new class instance.
@@ -16,7 +16,7 @@ class ActivateAction
         //
     }
 
-    public function __invoke(Mesocycle $mesocycle): void
+    public function execute(Mesocycle $mesocycle): void
     {
         $affected = DB::update('
             UPDATE mesocycles

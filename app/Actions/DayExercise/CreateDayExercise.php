@@ -2,12 +2,11 @@
 
 namespace App\Actions\DayExercise;
 
-use App\Http\Requests\StoreDayExerciseRequest;
 use App\Models\MesoDay;
 use App\Models\ExerciseSet;
 use Illuminate\Validation\ValidationException;
 
-class CreateAction
+class CreateDayExercise
 {
     /**
      * Create a new class instance.

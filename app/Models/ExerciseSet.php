@@ -20,7 +20,7 @@ class ExerciseSet extends Model
         return $this->belongsTo(DayExercise::class);
     }
 
-    public function day()
+    public function day(): BelongsTo
     {
         return $this->belongsToThrough(
             MesoDay::class,

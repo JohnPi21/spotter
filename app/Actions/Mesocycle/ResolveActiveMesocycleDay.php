@@ -5,11 +5,11 @@ namespace App\Actions\Mesocycle;
 use App\Models\Mesocycle;
 use App\Exceptions\AppException;
 
-class ResolveActiveMesocycleDayAction
+class ResolveActiveMesocycleDay
 {
     public function __construct() {}
 
-    function __invoke(): array | AppException
+    function execute(): array | AppException
     {
         $mesocycle = Mesocycle::select('id')->with('days')->mine()->where('status', Mesocycle::STATUS_ACTIVE)->first();
 

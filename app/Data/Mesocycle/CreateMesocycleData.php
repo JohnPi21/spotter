@@ -8,7 +8,7 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\CamelCaseMapper;
 use Spatie\LaravelData\Optional;
 
-class CreateData extends Data
+class CreateMesocycleData extends Data
 {
     /**
      * @param array<int, \App\Data\Mesocycle\DayTemplateData> $days

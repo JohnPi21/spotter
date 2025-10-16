@@ -52,4 +52,33 @@ class StoreMesocycleRequest extends FormRequest
             'muscleGroupsIds'                   => [Rule::exists('muscle_groups', 'id')],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'days.required'                          => __('mesocycle.days_required'),
+            'days.*.exercises.required'              => __('mesocycle.exercises_required'),
+            'days.*.exercises.*.exerciseID.required' => __('mesocycle.exercise_required'),
+            'days.*.exercises.*.exerciseID.min'       => __('mesocycle.exercise_required'),
+        ];
+    }
+
+    /**
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'days.*.label'                          => __('mesocycle.attr.day_label'),
+            'days.*.exercises'                      => __('mesocycle.attr.exercises'),
+            'days.*.exercises.*.exerciseID'         => __('mesocycle.attr.exercise'),
+            'days.*.exercises.*.muscleGroup'        => __('mesocycle.attr.muscle_group'),
+        ];
+    }
 }

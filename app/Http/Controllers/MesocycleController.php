@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Mesocycle\CreateAction as MesocycleCreateAction;
-use App\Data\Mesocycle\CreateData as MesocycleCreateData;
 use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\Mesocycle;
-use App\Actions\Mesocycle\ActivateAction as MesocycleAcivateAction;
-use App\Actions\Mesocycle\ResolveActiveMesocycleDayAction;
+use App\Actions\Mesocycle\ActivateMesocycle;
+use App\Actions\Mesocycle\CreateMesocycle;
+use App\Actions\Mesocycle\ResolveActiveMesocycleDay;
+use App\Data\Mesocycle\CreateMesocycleData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
@@ -56,16 +56,16 @@ class MesocycleController extends Controller implements HasMiddleware
         return Inertia::render('mesocycles/create');
     }
 
-    public function store(StoreMesocycleRequest $request, MesocycleCreateAction $createAction): \Illuminate\Http\RedirectResponse
+    public function store(StoreMesocycleRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $mesoDTO = MesocycleCreateData::from($request->validated());
+        $mesoDTO = CreateMesocycleData::from($request->validated());
 
-        $createAction($mesoDTO);
+        app(CreateMesocycle::class)->execute($mesoDTO, $request->user()->id);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
 
-    public function activate(Mesocycle $mesocycle, MesocycleAcivateAction $activateAction): RedirectResponse
+    public function activate(Mesocycle $mesocycle, ActivateMesocycle $activateAction): RedirectResponse
     {
         $activateAction($mesocycle);
 
@@ -80,9 +80,9 @@ class MesocycleController extends Controller implements HasMiddleware
     }
 
 
-    public function currentActiveDay(ResolveActiveMesocycleDayAction $resolve): RedirectResponse
+    public function currentActiveDay(ResolveActiveMesocycleDay $resolve): RedirectResponse
     {
-        [$currentDayId, $mesocycleId] = $resolve();
+        [$currentDayId, $mesocycleId] = $resolve->execute();
 
         return to_route("days.show", ['mesocycle' => $mesocycleId, 'day' => $currentDayId]);
     }

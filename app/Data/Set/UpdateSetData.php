@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Hidden;
 
-class UpdateData extends Data
+class UpdateSetData extends Data
 {
     public function __construct(
         public int $reps,

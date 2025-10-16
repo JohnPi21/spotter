@@ -4,7 +4,7 @@ namespace App\Actions\Mesocycle;
 
 use App\Models\Mesocycle;
 
-class MakeCalendarAction
+class MakeMesocycleCalendar
 {
     /**
      * Create a new class instance.
@@ -14,7 +14,7 @@ class MakeCalendarAction
     /**
      * Invoke the class instance.
      */
-    public function __invoke(Mesocycle $mesocycle): array
+    public function execute(Mesocycle $mesocycle): array
     {
         $calendar = [];
         $weekIdx = 1;

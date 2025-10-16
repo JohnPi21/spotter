@@ -26,7 +26,7 @@ class UpdateSetRequest extends FormRequest
     {
         return [
             'reps'      => ['required', 'integer', 'max:64'],
-            'weight'    => ['required', 'string', 'max:8'],
+            'weight'    => ['required', 'decimal:0,3', 'max:2048'],
             'status'    => ['sometimes', 'boolean'],
         ];
     }

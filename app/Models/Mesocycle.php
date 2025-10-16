@@ -62,6 +62,11 @@ class Mesocycle extends Model
         $query->where('status', 1);
     }
 
+    public static function userHasActiveMeso(int $userId): bool
+    {
+        return static::query()->ownedBy($userId)->active()->exists();
+    }
+
     public static function weeksRange(): array
     {
         return range(self::MIN_WEEKS, self::MAX_WEEKS);

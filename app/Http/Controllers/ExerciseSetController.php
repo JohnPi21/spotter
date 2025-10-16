@@ -7,7 +7,7 @@ use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use App\Data\Set\UpdateData as SetUpdateData;
+use App\Data\Set\UpdateSetData;
 
 class ExerciseSetController extends Controller
 {
@@ -24,7 +24,7 @@ class ExerciseSetController extends Controller
 
     public function update(UpdateSetRequest $request, DayExercise $dayExercise, ExerciseSet $set): RedirectResponse
     {
-        $updateSetDTO = SetUpdateData::from($request->validated());
+        $updateSetDTO = UpdateSetData::from($request->validated());
 
         $set->update($updateSetDTO->toArray());
 

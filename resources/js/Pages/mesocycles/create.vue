@@ -2,7 +2,7 @@
     <div class="mb-4 mt-2 flex items-center justify-between">
         <div class="flex flex-col">
             <InputText v-model="meso.name" placeholder="Untitled Meso" />
-            <InputError :message="errors['meso.name']" />
+            <InputError :message="errors['name']" />
         </div>
         <ButtonPrimary :disabled="loading" @click="submit">Create Meso</ButtonPrimary>
     </div>
@@ -86,7 +86,7 @@
         <div class="flex w-full flex-col md:w-fit">
             <InputLabel value="Number of Weeks" />
             <InputText v-model="meso.weeksDuration" placeholder="Weeks Duration" />
-            <InputError :message="errors['meso.weeksDuration']" />
+            <InputError :message="errors['weeksDuration']" />
         </div>
 
         <ButtonPrimary class="h-fit w-full min-w-44" @click="addDay()" v-if="days.length < 7">
