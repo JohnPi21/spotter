@@ -15,10 +15,19 @@ class ExerciseSet extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'target_weight' => 'decimal:2',
+        'weight'        => 'decimal:2',
+        'target_reps'   => 'int',
+        'reps'          => 'int'
+    ];
+
     public function dayExercise(): BelongsTo
     {
         return $this->belongsTo(DayExercise::class);
     }
+
+
 
     public function day(): BelongsTo
     {

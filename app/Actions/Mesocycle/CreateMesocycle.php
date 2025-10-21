@@ -32,8 +32,7 @@ class CreateMesocycle
             $this->createMesoDays->execute($mesoDTO->days, $mesocycle->id, $mesocycle->weeks_duration);
 
             $daysIds = MesoDay::where('mesocycle_id', $mesocycle->id)
-                ->orderBy('day_order')
-                ->orderBy('week')
+                ->orderBy('id')
                 ->pluck('id')->all();
 
             $this->createManyDayExercises->execute($mesoDTO->days, $daysIds);

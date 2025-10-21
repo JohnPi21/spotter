@@ -159,7 +159,7 @@
                 </div>
                 <div class="col-span-2">
                     <InputText
-                        :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
+                        :placeholder="set?.target_reps != null ? `${set.target_reps}` : '3 RIR'"
                         v-model="set.reps"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-reps'"

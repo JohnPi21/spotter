@@ -5,6 +5,7 @@ namespace App\Actions\DayExercise;
 use App\Models\MesoDay;
 use App\Models\ExerciseSet;
 use Illuminate\Validation\ValidationException;
+use Log;
 
 class CreateDayExercise
 {
