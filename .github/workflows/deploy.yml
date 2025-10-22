@@ -96,8 +96,10 @@ jobs:
 
             - name: Run tests
               run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
-                    php artisan test -- --fail-on-warning=0 --fail-on-risky=0
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app sh -lc '
+                    vendor/bin/phpunit -v --do-not-cache-result
+                    code=$?; echo "PHPUnit exit code: $code"; exit $code
+                  '
 
             - name: MySQL logs (on failure)
               if: failure()
