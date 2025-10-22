@@ -96,10 +96,8 @@ jobs:
 
             - name: Run tests
               run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app sh -lc '
-                    vendor/bin/phpunit -v --do-not-cache-result
-                    code=$?; echo "PHPUnit exit code: $code"; exit $code
-                  '
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
+                    vendor/bin/phpunit --configuration phpunit.xml
 
             - name: MySQL logs (on failure)
               if: failure()
