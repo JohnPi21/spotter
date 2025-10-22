@@ -19,8 +19,10 @@ return new class extends Migration
             $table->foreignIdFor(MesoDay::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Exercise::class)->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('position');
-            // $table->foreignIdFor(ExerciseSet::class)->nullable();
             $table->timestamps();
+
+            $table->unique(['meso_day_id', 'exercise_id']);
+            $table->unique(['meso_day_id', 'position']);
         });
     }
 

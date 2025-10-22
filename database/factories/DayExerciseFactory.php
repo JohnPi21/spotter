@@ -24,7 +24,12 @@ class DayExerciseFactory extends Factory
         return [
             'meso_day_id' => MesoDay::factory(),
             'exercise_id' => $exerciseIDs->random(),
-            'position' => $this->faker->numberBetween(0, 10),
+            'position'    => 1,
         ];
+    }
+
+    public function exercise(int $exerciseID)
+    {
+        return $this->state(fn() => ['exercise_id' => $exerciseID]);
     }
 }

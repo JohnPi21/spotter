@@ -55,7 +55,6 @@ class ExerciseSetPolicy
 
         if (! $day->isEditable()) {
             return $this->denyFinished();
-            // return false;
         }
 
         return $day->mesocycle->user_id === $user->id;

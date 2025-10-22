@@ -5,6 +5,7 @@ namespace Tests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Spatie\Permission\PermissionRegistrar;
+use Database\Seeders\TestCatalogSeeder;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -14,7 +15,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->seed();
+        $this->seed(TestCatalogSeeder::class);
 
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
     }

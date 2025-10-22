@@ -2,44 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DayExercise\CreateDayExercise;
+use App\Actions\DayExercise\ReorderDayExercises;
+use App\Http\Requests\StoreDayExerciseRequest;
+use App\Http\Requests\UpdateDayExerciseOrderRequest;
 use App\Models\DayExercise;
-use App\Models\ExerciseSet;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
-
 
 class DayExerciseController extends Controller
 {
-    public function store(Request $request, MesoDay $day): RedirectResponse
+    public function store(StoreDayExerciseRequest $request, MesoDay $day): RedirectResponse
     {
-        // Authorize
-        Gate::authorize('owns', $day->mesocycle);
-
-        $day->ensureIsEditable();
-
-        $validated = $request->validate([
-            'exercise_id' => [
-                'required',
-                'exists:exercises,id',
-                Rule::unique('day_exercises')->where('meso_day_id', $day->id),
-            ]
-        ]);
-
-        $lastPosition = DayExercise::where('meso_day_id', $day->id)->orderBy('position', 'DESC')->value('position') ?? -1;
-
-        // Maybe send the object back?
-        $dayExercise = DayExercise::create([
-            'meso_day_id' => $day->id,
-            'exercise_id' => $validated['exercise_id'],
-            'position'    => $lastPosition + 1,
-        ]);
-
-        ExerciseSet::create([
-            'day_exercise_id' => $dayExercise->id,
-        ]);
+        app(CreateDayExercise::class)->execute($request->validated('exercise_id'), $day);
 
         return redirect()->route('days.show', [
             'mesocycle' => $day->mesocycle,
@@ -47,40 +23,23 @@ class DayExerciseController extends Controller
         ]);
     }
 
-    public function updateOrder(Request $request, MesoDay $day): RedirectResponse
+    public function updateOrder(UpdateDayExerciseOrderRequest $request, MesoDay $day): RedirectResponse
     {
-        $day->load('mesocycle');
+        app(ReorderDayExercises::class)->execute($day, $request->validated('order'));
 
-        Gate::authorize('owns', $day->mesocycle);
-
-        $order = $request->validate([
-            'order' => ['required', 'array', 'distinct', 'list'],
-            'order.*' => ['required', 'integer'],
-        ])['order'];
-
-        foreach ($order as $position => $id) {
-            DayExercise::where('id', $id)->update(['position' => $position]);
-        }
-
-        return to_route('days.show', [
-            'mesocycle' => $day->mesocycle,
-            'day'       => $day,
-        ]);
+        return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }
 
-    public function destroy(MesoDay $day, DayExercise $exercise): RedirectResponse
+    public function destroy(MesoDay $day, DayExercise $dayExercise): RedirectResponse
     {
         Gate::authorize('owns', $day->mesocycle);
 
-        $exercise->load('day.mesocycle');
+        $dayExercise->load('day.mesocycle');
 
-        $exercise->day->ensureIsEditable();
+        $dayExercise->day->ensureIsEditable();
 
-        $exercise->delete();
+        $dayExercise->delete();
 
-        return redirect()->route('days.show', [
-            'mesocycle' => $exercise->day->mesocycle,
-            'day'       => $exercise->day,
-        ]);
+        return redirect()->route('days.show', ['mesocycle' => $dayExercise->day->mesocycle, 'day' => $dayExercise->day]);
     }
 }

@@ -32,16 +32,17 @@ class MesoDayFactory extends Factory
                 : null,
             'label'         => fake()->word(),
             'position'      => fake()->numberBetween(1, 7),
+            'finished_at'   => null,
             'notes'         => null
         ];
     }
 
 
-    public function completed(): Factory
+    public function isFinished(): Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => 1
+                'finished_at' => now(),
             ];
         });
     }

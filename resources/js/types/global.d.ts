@@ -97,7 +97,7 @@ declare global {
         calendar: Calendar;
         days: Day[];
         day: Day;
-        lastDay?: Day["id"];
+        last_day?: Day["id"];
     };
 
     type DropdownOption = {

@@ -2,7 +2,7 @@
     <div class="mb-4 mt-2 flex items-center justify-between">
         <div class="flex flex-col">
             <InputText v-model="meso.name" placeholder="Untitled Meso" />
-            <InputError :message="errors['meso.name']" />
+            <InputError :message="errors['name']" />
         </div>
         <ButtonPrimary :disabled="loading" @click="submit">Create Meso</ButtonPrimary>
     </div>
@@ -15,12 +15,21 @@
             <div class="flex items-center justify-between gap-3">
                 <InputText v-model="day.label" />
 
-                <Icon icon="material-symbols-light:delete-outline" width="22px" class="cursor-pointer transition hover:text-red" @click="removeDay(dayIdx)" />
+                <Icon
+                    icon="material-symbols-light:delete-outline"
+                    width="22px"
+                    class="cursor-pointer transition hover:text-red"
+                    @click="removeDay(dayIdx)"
+                />
             </div>
             <InputError :message="errors[`days.${dayIdx}.label`]" />
 
             <template v-if="day.exercises.length > 0">
-                <UiBox class="flex flex-col gap-2 bg-layer-light" v-for="(exercise, exerciseIDx) in day.exercises" :key="exerciseIDx">
+                <UiBox
+                    class="flex flex-col gap-2 bg-layer-light"
+                    v-for="(exercise, exerciseIDx) in day.exercises"
+                    :key="exerciseIDx"
+                >
                     <div class="flex-center flex justify-between">
                         <div class="rounded bg-orange-700 px-2">
                             {{ exerciseStore.muscleGroups[exercise.muscleGroup]?.name }}
@@ -33,7 +42,10 @@
                         />
                     </div>
 
-                    <ButtonSecondary @click="openExerciseModal(exercise)" :class="{ 'bg-layer-light': exercise.exerciseID }">
+                    <ButtonSecondary
+                        @click="openExerciseModal(exercise)"
+                        :class="{ 'bg-layer-light': exercise.exerciseID }"
+                    >
                         <span v-if="!exercise.exerciseID">Select Exercise</span>
                         <span v-else>{{ exerciseStore?.exercises[exercise.exerciseID]?.name }}</span>
                     </ButtonSecondary>
@@ -74,7 +86,7 @@
         <div class="flex w-full flex-col md:w-fit">
             <InputLabel value="Number of Weeks" />
             <InputText v-model="meso.weeksDuration" placeholder="Weeks Duration" />
-            <InputError :message="errors['meso.weeksDuration']" />
+            <InputError :message="errors['weeksDuration']" />
         </div>
 
         <ButtonPrimary class="h-fit w-full min-w-44" @click="addDay()" v-if="days.length < 7">
@@ -150,7 +162,7 @@ function addMuscleGroup(muscleGroupId: number) {
 }
 
 function submit() {
-    const mesoForm = useForm({ days: [...days], meso: { ...meso.value } });
+    const mesoForm = useForm({ days: [...days], ...meso.value });
 
     mesoForm.post("/mesocycles", {
         onStart: () => (loading.value = true),

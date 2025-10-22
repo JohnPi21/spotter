@@ -8,6 +8,7 @@ use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\DashboardController as Dashboard;
+use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -32,15 +33,15 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::controller(ExerciseSetController::class)->group(function () {
-        Route::post('/sets', 'store')->name('sets.store');
-        Route::patch('/sets/{set}', 'update')->name('sets.update');
-        Route::delete('/sets/{set}', 'destroy')->name('sets.destroy');
-    });
+        Route::post('/day-exercises/{dayExercise}/sets', 'store')->name('sets.store');
+        Route::patch('/day-exercises/{dayExercise}/sets/{set}', 'update')->name('sets.update');
+        Route::delete('/day-exercises/{dayExercise}/sets/{set}', 'destroy')->name('sets.destroy');
+    })->scopeBindings();
 
     Route::controller(DayExerciseController::class)->group(function () {
         Route::post('/day/{day}/exercises', 'store')->name('dayExercises.store');
         Route::patch('/day/{day}/reorder', 'updateOrder')->name('dayExercises.reorder');
-        Route::delete('day/{day}/exercises/{exercise}', 'destroy')->name('dayExercise.destroy');
+        Route::delete('day/{day}/exercises/{dayExercise}', 'destroy')->name('dayExercise.destroy')->scopeBindings();
     });
 
     Route::controller(ExerciseController::class)->group(function () {
@@ -60,6 +61,8 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 });
+
+Route::get('/test', [TestController::class, 'index']);
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'time' => now()], 200);
