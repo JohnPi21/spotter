@@ -9,8 +9,6 @@ services:
         condition: service_healthy
     volumes:
       - vendor-ci:/var/www/html/vendor
-      - ./docker/ci/.env.ci:/var/www/html/.env:ro
-      - ./docker/ci/.env.ci:/var/www/html/.env.testing:ro
     networks: [ci_net]
 
   mysql:
