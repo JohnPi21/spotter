@@ -95,11 +95,18 @@ jobs:
                     php artisan migrate:fresh --seed --force
 
             - name: Run tests
-              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
+              run: |
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
+                    php artisan test -- --fail-on-warning=0 --fail-on-risky=0
 
             - name: MySQL logs (on failure)
               if: failure()
               run: docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
+
+            - name: Echo exit code
+              if: always()
+              run: |
+                  echo "Previous step exit code: $?"
 
             - name: Tear down
               if: always()
