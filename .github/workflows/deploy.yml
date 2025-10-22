@@ -76,11 +76,15 @@ jobs:
                   chmod 644 .env .env.testing
                   echo "[ci] .env files ready:"; ls -l .env .env.testing
 
-            - name: Verify .env files exist
+            - name: Verify .env files inside container
               run: |
-                  echo "[ci] Checking .env files..."
-                  ls -l .env .env.testing || true
-                  ls -l ./
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app sh -lc '
+                    pwd; ls -la
+                    echo "[ci] Looking for .env files in /var/www/html..."
+                    ls -l /var/www/html/.env /var/www/html/.env.testing || true
+                    [ -f /var/www/html/.env ] && echo "[ci] ✅ .env present" || echo "[ci] ❌ .env missing"
+                    [ -f /var/www/html/.env.testing ] && echo "[ci] ✅ .env.testing present" || echo "[ci] ❌ .env.testing missing"
+                  '
 
             # login so compose can pull from GHCR
             - uses: docker/login-action@v3
