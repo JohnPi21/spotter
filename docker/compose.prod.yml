@@ -1,5 +1,6 @@
 x-app-image: &app_image ${APP_IMAGE}:${APP_TAG}
 x-app-env: &app_env [ "../.env" ]
+name: spotacus
 
 services:
   app:

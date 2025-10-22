@@ -11,9 +11,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel 2>/dev/null || echo "$SCRIPT_DIR")"
 
 COMPOSE_FILE="$REPO_ROOT/docker/compose.prod.yml"
+ENV_FILE="$REPO_ROOT/docker/.env.prod"
 
 # Build the docker compose command as an ARRAY (no eval, safe quoting)
-DC=(docker compose -f "$COMPOSE_FILE" -p "$PROJECT")
+DC=(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE")
 
 trap 'echo -e "\n❌ Failed at line $LINENO: $BASH_COMMAND"; exit 1' ERR
 echo "📦 Laravel post-deploy setup"
