@@ -140,7 +140,7 @@
                             v-for="(item, i) in setDropdownItems"
                             :key="i"
                             :class="item.class"
-                            @click="item.action(set.id)"
+                            @click="item.action(dayExercise.id, set.id)"
                         >
                             <Icon :icon="item.icon" />
                             {{ item.label }}
@@ -159,7 +159,7 @@
                 </div>
                 <div class="col-span-2">
                     <InputText
-                        :placeholder="set?.target_reps != null ? `${set.target_reps} RIR` : '3 RIR'"
+                        :placeholder="set?.target_reps != null ? `${set.target_reps}` : '3 RIR'"
                         v-model="set.reps"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-reps'"
@@ -173,7 +173,7 @@
                         v-model="set.status"
                         true-value="1"
                         false-value="0"
-                        @change="updateSet(set)"
+                        @change="updateSet(set, dayExercise.id)"
                         class="mr-2"
                         :id="exercise_idx + '-' + set_idx + '-status'"
                         :disabled="isDayFinished"
@@ -222,16 +222,16 @@ function isActiveDay(dayID: number) {
 onMounted(() => {});
 
 async function removeExercise(dayExerciseID: number) {
-    router.delete(route("dayExercise.destroy", { day: day.value.id, exercise: dayExerciseID }), {
+    router.delete(route("dayExercise.destroy", { day: day.value.id, dayExercise: dayExerciseID }), {
         preserveState: "errors",
     });
 }
 
-async function updateSet(set: ExerciseSet) {
+async function updateSet(set: ExerciseSet, dayExerciseID: number) {
     if (!set.status) return;
 
     router.patch(
-        route("sets.update", { set: set.id }),
+        route("sets.update", { dayExercise: dayExerciseID, set: set.id }),
         { ...set },
         {
             preserveState: true,
@@ -241,17 +241,13 @@ async function updateSet(set: ExerciseSet) {
 }
 
 async function addSet(dayExerciseID: number) {
-    router.post(
-        route("sets.store"),
-        { day_exercise_id: dayExerciseID },
-        {
-            preserveState: false,
-        }
-    );
+    router.post(route("sets.store", { dayExercise: dayExerciseID }), {
+        preserveState: false,
+    });
 }
 
-async function removeSet(setID: number) {
-    router.delete(route("sets.destroy", { set: setID }), {
+async function removeSet(dayExerciseID:number, setID: number) {
+    router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
         preserveState: false,
     });
 }
@@ -386,7 +382,7 @@ const setDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (setID: number) => removeSet(setID),
+        action: (dayExerciseID: number, setID: number) => removeSet(dayExerciseID, setID),
     },
 ];
 </script>

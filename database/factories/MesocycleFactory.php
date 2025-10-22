@@ -10,6 +10,7 @@ use App\Models\MesoDay;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use App\Models\MuscleGroup;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use RuntimeException;
 
 /**
@@ -67,11 +68,11 @@ class MesocycleFactory extends Factory
                     // Pick exercises (random by default, or via custom picker)
                     $exerciseIds = collect(range(1, $exercisesPerDay))->map(function () use ($exercisePicker) {
                         return optional($exercisePicker ? $exercisePicker() : Exercise::inRandomOrder()->first())->id;
-                    })->filter()->values();
+                    })->filter()->unique()->values();
 
                     // Create DayExercise rows for those exercises
-                    $dayExercises = collect($exerciseIds)->map(function ($exerciseId) use ($day) {
-                        return DayExercise::factory()->for($day, 'day')->for(Exercise::find($exerciseId))->create();
+                    $dayExercises = collect($exerciseIds)->map(function ($exerciseId, $i) use ($day) {
+                        return DayExercise::factory()->for($day, 'day')->for(Exercise::find($exerciseId))->state(['position' => $i + 1])->create();
                     });
 
                     // Create sets for each day exercise

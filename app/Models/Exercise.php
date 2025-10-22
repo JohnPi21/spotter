@@ -16,20 +16,4 @@ class Exercise extends Model
     {
         return $this->belongsTo(MuscleGroup::class);
     }
-
-    // public function sets(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(ExerciseSet::class, DayExercise::class, 'exercise_id', 'day_exercise_id', 'id', 'id');
-    // }
-    // public function sets(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(
-    //         ExerciseSet::class,       // Final model
-    //         DayExercise::class,       // Intermediate model
-    //         'exercise_id',            // Foreign key on day_exercises table (links to this model)
-    //         'day_exercise_id',        // Foreign key on exercise_sets table (links to exercises)
-    //         'id',                     // Local key on this model (meso_days)
-    //         'id'                      // Local key on day_exercises (links to exercises)
-    //     );
-    // }
 }
