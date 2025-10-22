@@ -3,7 +3,7 @@ services:
     # Testing ci / cd on local
     # build:
     #   context: ../../
-    #   dockerfile: ./docker/ci/Dockerfile.ci
+    #   dockerfile: Dockerfile
     # image: ci-image:dev
     image: ${IMAGE}@${DIGEST}
     pull_policy: always
@@ -14,8 +14,16 @@ services:
       mysql:
         condition: service_healthy
     volumes:
-      - ../../:/var/www/html
+      # - ../../:/var/www/html
       - vendor-ci:/var/www/html/vendor
+      - type: bind
+        source: ./.env.ci
+        target: /var/www/html/.env
+        read_only: true
+      - type: bind
+        source: ./.env.ci
+        target: /var/www/html/.env.testing
+        read_only: true
     networks: [ci_net]
 
   mysql:
