@@ -66,6 +66,57 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    queue:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.3'
+            dockerfile: Dockerfile
+            args: { WWWGROUP: '${WWWGROUP}' }
+        image: 'sail-8.3/app'
+        env_file:
+            - .env
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: 'off' # keep workers snappy
+        volumes:
+            - '.:/var/www/html'
+        depends_on:
+            - redis
+            - mysql
+        command: >
+            sh -lc "php artisan queue:work redis
+                --sleep=1
+                --tries=3
+                --max-time=3600
+                --timeout=90
+                --backoff=2
+                --max-jobs=50"
+        restart: unless-stopped
+        networks: [ sail ]
+
+    scheduler:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.3'
+            dockerfile: Dockerfile
+            args: { WWWGROUP: '${WWWGROUP}' }
+        image: 'sail-8.3/app'
+        env_file:
+            - .env
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: 'off'
+        volumes:
+            - '.:/var/www/html'
+        depends_on:
+            - laravel.test
+        command: >
+            sh -lc 'trap "exit 0" TERM; while :; do
+                php artisan schedule:run --no-interaction || true; sleep 60;
+            done'
+        restart: unless-stopped
+        networks: [ sail ]
+
     meilisearch:
         image: 'getmeili/meilisearch:latest'
         ports:

@@ -1,16 +1,9 @@
 {
   "name": "Spotter (Sail)",
-  "dockerComposeFile": ["../docker-compose.yml"],        // only the main compose is needed
+  "dockerComposeFile": ["../docker-compose.yml"],
   "service": "laravel.test",
-  "workspaceFolder": "/var/www/html",                    // <- KEY: use Sail's mount
-  "remoteUser": "sail",                                  // optional, nice to have
-  "overrideCommand": true,
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "bmewburn.vscode-intelephense-client",
-        "xdebug.php-pack"
-      ]
-    }
-  }
+  "workspaceFolder": "/var/www/html",
+  "remoteUser": "sail",
+  "overrideCommand": false,
+  "runServices": ["laravel.test","mysql","redis","meilisearch","mailpit","selenium","queue","scheduler","phpmyadmin"]
 }
