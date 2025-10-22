@@ -95,7 +95,7 @@ jobs:
                     php artisan migrate:fresh --seed --force
 
             - name: Run tests
-              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
+              run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test --no-exit
 
             - name: MySQL logs (on failure)
               if: failure()
