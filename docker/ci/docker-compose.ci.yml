@@ -8,11 +8,13 @@ services:
     image: ${IMAGE}@${DIGEST}
     pull_policy: always
     env_file:
-      - .env.ci
+      - .env.ci                 # this stays (process env vars)
+    working_dir: /var/www/html
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
+      - ../../:/var/www/html
       - vendor-ci:/var/www/html/vendor
     networks: [ci_net]
 

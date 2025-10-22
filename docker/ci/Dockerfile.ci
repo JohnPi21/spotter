@@ -41,9 +41,9 @@ COPY --from=vendor --chown=www-data:www-data /var/www/html /var/www/html
 COPY --from=build-assets --chown=www-data:www-data /var/www/html/public/build /var/www/html/public/build
 
 # 💥 ensure .env paths are NOT directories, then create files
-COPY docker/ci/.env.ci .env
-COPY docker/ci/.env.ci .env.testing
-RUN chmod 644 .env .env.testing
+# COPY docker/ci/.env.ci .env
+# COPY docker/ci/.env.ci .env.testing
+# RUN chmod 644 .env .env.testing
 
 # Ensure writable dirs for Laravel
 RUN mkdir -p storage bootstrap/cache && \
