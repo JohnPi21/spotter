@@ -76,6 +76,12 @@ jobs:
                   chmod 644 .env .env.testing
                   echo "[ci] .env files ready:"; ls -l .env .env.testing
 
+            - name: Verify .env files exist
+              run: |
+                  echo "[ci] Checking .env files..."
+                  ls -l .env .env.testing || true
+                  ls -l ./
+
             # login so compose can pull from GHCR
             - uses: docker/login-action@v3
               with:
