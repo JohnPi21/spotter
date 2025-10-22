@@ -11,7 +11,7 @@ class AppException extends HttpException
     public function __construct(
         int $status = 400,
         string $message = 'Something went wrong',
-        ?string $error,
+        ?string $error = null,
         ?\Throwable $previous = null,
         array $headers = [],
     ) {
