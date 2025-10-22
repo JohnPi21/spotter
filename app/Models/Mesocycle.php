@@ -38,9 +38,19 @@ class Mesocycle extends Model
     public function lastDay(): Attribute
     {
         return Attribute::make(get: function () {
-            return $this->days
-                ->firstWhere('finished_at', null)?->id
-                ?? $this->days->last()?->id;
+            // If relation is loaded, use it
+            if ($this->relationLoaded('days')) {
+                return $this->days
+                    ->firstWhere('finished_at', null)?->id
+                    ?? $this->days->last()?->id;
+            }
+
+            // Otherwise, query directly
+            return $this->days()
+                ->whereNull('finished_at')
+                ->orderBy('id')
+                ->value('id')
+                ?? $this->days()->latest('id')->value('id');
         });
     }
 

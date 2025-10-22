@@ -32,7 +32,7 @@ class MesocycleController extends Controller implements HasMiddleware
     {
         $mesocycles = Mesocycle::mine()->with(['days:id,finished_at,mesocycle_id'])->get();
 
-        Log::info('Mesocycle last day', $mesocycles->first()->last_day);
+        Log::info('Mesocycle last day', [$mesocycles->first()?->last_day]);
 
         return Inertia::render('mesocycles/index', [
             'title'     => 'Mesocycles',

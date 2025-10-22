@@ -20,6 +20,7 @@ class MesocycleIndexTest extends TestCase
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
+        Mesocycle::factory()->withFullStructure()->create();
 
         $this->actingAs($user, 'web')
             ->get(route('mesocycles'))
@@ -44,6 +45,7 @@ class MesocycleIndexTest extends TestCase
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
+        Mesocycle::factory()->withFullStructure()->create();
 
         $this->actingAs($user, 'web')->get(route('mesocycles'))
             ->assertOk()
@@ -60,7 +62,7 @@ class MesocycleIndexTest extends TestCase
 
         Mesocycle::factory()->count(3)->for(User::factory())->create();
 
-        $ownedMesosCount = Mesocycle::factory()->count(2)->for($user)->create()->count();
+        $ownedMesosCount = Mesocycle::factory()->withFullStructure()->count(2)->for($user)->create()->count();
 
         $props = $this->actingAs($user, 'web')->get(route('mesocycles'))
             ->assertOk()
@@ -77,7 +79,7 @@ class MesocycleIndexTest extends TestCase
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
 
-        $meso = Mesocycle::factory()->for($user)->create();
+        $meso = Mesocycle::factory()->withFullStructure()->for($user)->create();
 
         MesoDay::factory()
             ->count($meso->totalDays() - 1)
@@ -111,7 +113,7 @@ class MesocycleIndexTest extends TestCase
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
 
-        $meso = Mesocycle::factory()->for($user)->isFinished()->create();
+        $meso = Mesocycle::factory()->withFullStructure()->for($user)->isFinished()->create();
 
         MesoDay::factory()
             ->count($meso->totalDays())
