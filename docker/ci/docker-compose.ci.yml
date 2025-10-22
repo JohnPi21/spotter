@@ -1,5 +1,10 @@
 services:
   app:
+    # Testing ci / cd on local
+    # build:
+    #   context: ../../
+    #   dockerfile: ./docker/ci/Dockerfile.ci
+    # image: ci-image:dev
     image: ${IMAGE}@${DIGEST}
     pull_policy: always
     env_file:

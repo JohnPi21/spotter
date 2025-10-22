@@ -88,9 +88,11 @@ class MesoDayUpdateTest extends TestCase
         $exExists = DayExercise::where('meso_day_id', $nextDay->id)->where('exercise_id', $dayExercise->exercise_id)->exists();
 
         if (! $exExists) {
+            $nextPos = $nextDay->dayExercises()->max('position') + 1;
             $nextDayExercise = DayExercise::factory()
                 ->for($nextDay, 'day')
                 ->exercise($dayExercise->exercise_id)
+                ->state(['position' => $nextPos])
                 ->create();
         }
 
