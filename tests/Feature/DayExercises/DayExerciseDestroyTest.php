@@ -14,7 +14,7 @@ class DayExerciseDestroyTest extends TestCase
     use RefreshDatabase;
 
 
-    public function user_can_delete_exercise_from_own_day_and_sets_are_removed()
+    public function test_user_can_delete_exercise_from_own_day_and_sets_are_removed()
     {
         /** @var Authenticatable $user */
         $user = User::factory()->create();
@@ -34,7 +34,7 @@ class DayExerciseDestroyTest extends TestCase
         $this->assertDatabaseMissing('exercise_sets', ['day_exercise_id' => $dayExercise->id]);
     }
 
-    public function user_cannot_delete_exercise_from_another_day()
+    public function test_user_cannot_delete_exercise_from_another_day()
     {
         /** @var Authenticatable $user */
         $user = User::factory()->create();
@@ -49,7 +49,7 @@ class DayExerciseDestroyTest extends TestCase
     }
 
 
-    public function user_cannot_delete_exercise_from_someone_elses_day()
+    public function test_user_cannot_delete_exercise_from_someone_elses_day()
     {
         [$owner, $other] = User::factory()->count(2)->create();
         $meso = Mesocycle::factory()->for($owner)->withFullStructure()->create();
