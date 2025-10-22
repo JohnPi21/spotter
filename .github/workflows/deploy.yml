@@ -94,6 +94,20 @@ jobs:
                   docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
                     php artisan migrate:fresh --seed --force
 
+            - name: Prepare .env inside the app container (runtime only)
+              run: |
+                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app sh -lc '
+                    # make sure there is no leftover dir
+                    rm -rf .env .env.testing
+
+                    # create .env from the repo file you already keep for CI
+                    cp docker/ci/.env.ci .env
+                    cp docker/ci/.env.ci .env.testing
+                    chmod 644 .env .env.testing
+
+                    echo "[ci] .env files ready:"; ls -l .env .env.testing
+                  '
+
             - name: Run tests
               run: docker compose -f docker/ci/docker-compose.ci.yml run --rm app php artisan test
 
