@@ -39,6 +39,11 @@ artisan down --secret="$MAINT_SECRET" || true
 echo "🗃️ Running migrations"
 artisan migrate --force --no-interaction
 
+echo "🗑️  Resetting public-build volume to avoid stale assets"
+docker compose -p "$PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" down app nginx || true
+docker volume rm "${PROJECT}_public-build" || true
+docker compose -p "$PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d app nginx
+
 # 5) Rebuild caches
 echo "🧰 Rebuilding caches"
 artisan config:cache
