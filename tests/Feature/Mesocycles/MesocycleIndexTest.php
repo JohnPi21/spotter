@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Mesocycles;
 
 use App\Models\Mesocycle;
 use App\Models\MesoDay;

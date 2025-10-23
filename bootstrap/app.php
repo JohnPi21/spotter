@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Illuminate\Auth\AuthenticationException;
+use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //     });
         // }
 
+        Integration::handles($exceptions);
 
 
         $exceptions->render(function (\App\Exceptions\AppException $e, Request $request) {

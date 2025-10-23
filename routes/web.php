@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/test', [TestController::class, 'index']);
+Route::get('/boom', fn() => throw new \RuntimeException('Test Sentry'));
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'time' => now()], 200);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\MesoDays;
 
 use App\Events\DayFinished;
 use App\Listeners\UpdateProgressTargets;
