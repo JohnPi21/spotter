@@ -128,6 +128,40 @@ services:
       driver: "json-file"
       options: { max-size: "10m", max-file: "5" }
 
+  cloudflared:
+      image: cloudflare/cloudflared:latest
+      container_name: cloudflared
+      restart: unless-stopped
+      volumes:
+        - ./docker/cloudflare/config.yaml:/etc/cloudflared/config.yaml:ro
+      networks: [ appnet ]
+
+      environment:
+            # Inject the Token from the environment file
+            TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+
+      command: 
+            # Run the tunnel using the token and the config file
+            tunnel --config /etc/cloudflared/config.yaml run --token ${TUNNEL_TOKEN}
+
+      depends_on:
+        mysql:
+          condition: service_healthy
+        # nginx:
+        #   condition: service_healthy
+      logging:
+        driver: "json-file"
+        options: { max-size: "10m", max-file: "5" }
+
+# ... (rest of the file)
+
+volumes:
+  mysql-prod-data:
+  certbot-htdocs:
+  public-build:
+  # New volume to persist the Tunnel credentials securely
+  cloudflare-credentials:
+
   # One-shot helper (run with --profile certbot)
   certbot:
     image: certbot/certbot
@@ -155,3 +189,4 @@ volumes:
   mysql-prod-data:
   certbot-htdocs:
   public-build:
+  cloudflare-credentials:

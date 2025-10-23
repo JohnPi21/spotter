@@ -1,0 +1,18 @@
+# docker/cloudflare/config.yaml
+# Replace <YOUR_TUNNEL_UUID> with the actual ID from the Cloudflare dashboard.
+tunnel: ${CLOUDFLARE_TUNNEL_UUID}
+
+# Defines how traffic for public hostnames should be routed to your internal services.
+ingress:
+  # 1. Access to the MySQL database (Arbitrary TCP)
+  # This is for your local machine connection (e.g., MySQL Workbench).
+  - hostname: mysql.spotacus.app
+    service: tcp://mysql:3306  # 'mysql' is the Docker Compose service name
+
+  # 2. Access to your Nginx web server (HTTP/HTTPS)
+  # This is for public/web app access.
+#   - hostname: app.spotacus.app
+    # service: http://nginx
+
+  # 3. Catch-all rule (must be the last rule)
+  # All other traffic to the tunnel's IP/hostname will result in a 404 error.
