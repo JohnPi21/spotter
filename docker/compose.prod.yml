@@ -133,7 +133,6 @@ services:
         restart: unless-stopped
         networks: [appnet]
         volumes:
-            # ✅ correct path
             - ./docker/cloudflared/config.yaml:/etc/cloudflared/config.yaml:ro
         command:
             - tunnel
@@ -144,10 +143,10 @@ services:
             - --token
             - ${CLOUDFLARE_TUNNEL_TOKEN}
         logging:
-        driver: json-file
-        options:
-            max-size: "10m"
-            max-file: "5"
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "5"
 
     # One-shot helper (run with --profile certbot)
     certbot:
