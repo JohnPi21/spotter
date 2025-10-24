@@ -64,52 +64,63 @@ class MesoDayUpdateTest extends TestCase
 
     public function test_targets_for_next_week_update_on_day_finish()
     {
-        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
         $meso = Mesocycle::factory()->for($user)->withFullStructure()->create();
 
-        // Current day/exercise + ensure there are at least 2 sets
         $dayExercise = $meso->days()->first()->dayExercises()->first();
-        $currentSet = $dayExercise->sets()->first();
-        ExerciseSet::create(['day_exercise_id' => $dayExercise->id, 'finished_at' => now()]); // now count > 1
 
-        // Find or create next week's same weekday
+        // Ensure at least 2 finished sets on current day
+        // Finish existing sets (if any)
+        $dayExercise->sets()->update(['finished_at' => now()]);
+
+        // And add one more finished set explicitly
+        ExerciseSet::create([
+            'day_exercise_id' => $dayExercise->id,
+            'weight' => 50,
+            'reps'   => 8,
+            'finished_at' => now(),
+        ]);
+
         $day = $dayExercise->day;
-        $nextDay = $day->nextWeekSibling()->first();
 
-        if (!$nextDay) {
-            $nextDay = MesoDay::factory()->for($meso)->create([
+        // Ensure next week sibling exists with a matching DayExercise
+        $nextDay = $day->nextWeekSibling()->first()
+            ?? MesoDay::factory()->for($meso)->create([
                 'week' => $day->week + 1,
                 'day_order' => $day->day_order,
             ]);
-        }
 
-        // Ensure a DayExercise exists on next day for the same exercise
-        $exExists = DayExercise::where('meso_day_id', $nextDay->id)->where('exercise_id', $dayExercise->exercise_id)->exists();
+        DayExercise::firstOrCreate(
+            ['meso_day_id' => $nextDay->id, 'exercise_id' => $dayExercise->exercise_id],
+            ['position' => ($nextDay->dayExercises()->max('position') ?? 0) + 1]
+        );
 
-        if (! $exExists) {
-            $nextPos = $nextDay->dayExercises()->max('position') + 1;
-            $nextDayExercise = DayExercise::factory()
-                ->for($nextDay, 'day')
-                ->exercise($dayExercise->exercise_id)
-                ->state(['position' => $nextPos])
-                ->create();
-        }
-
-        $nextDayExercise = $nextDay->dayExercises()->first();
+        $nextDayExercise = $nextDay->dayExercises()
+            ->where('exercise_id', $dayExercise->exercise_id)
+            ->firstOrFail();
 
         $before = ExerciseSet::where('day_exercise_id', $nextDayExercise->id)->count();
 
         $this->actingAs($user)
             ->patch(route('days.toggle', ['day' => $day]))
-            // ->assertRedirect(route('days.show', ['mesocycle' => $day->mesocycle_id, 'day' => $day->id]))
             ->assertRedirectBack()
             ->assertSessionHasNoErrors();
 
-        // Run this manually because tests cannot run after commit queues
+        // Run listener manually (after-commit queue)
         (new UpdateProgressTargets)->handle(new DayFinished($day->id));
 
         $after = ExerciseSet::where('day_exercise_id', $nextDayExercise->id)->count();
-        $this->assertGreaterThan($before, $after, 'Expected a new set to be created on next week same exercise.');
+
+        // EXPECTATION: after equals the number of FINISHED sets on the source day
+        $finishedCount = $dayExercise->sets()->whereNotNull('finished_at')->count();
+
+        $this->assertSame(
+            $finishedCount,
+            $after,
+            'Next week should have targets for each finished set of the current day.'
+        );
+
+        // If you prefer a looser check, keep:
+        // $this->assertGreaterThan($before, $after);
     }
 }
