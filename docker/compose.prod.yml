@@ -133,21 +133,21 @@ services:
         restart: unless-stopped
         networks: [appnet]
         volumes:
-            - ./docker/cloudflare/config.yaml:/etc/cloudflared/config.yaml:ro
-
+            # ✅ correct path
+            - ./docker/cloudflared/config.yaml:/etc/cloudflared/config.yaml:ro
         command:
-            [
-                "tunnel",
-                "--no-autoupdate",
-                "--config",
-                "/etc/cloudflared/config.yaml",
-                "run",
-                "--token",
-                "${CLOUDFLARE_TUNNEL_TOKEN}",
-            ]
+            - tunnel
+            - --no-autoupdate
+            - --config
+            - /etc/cloudflared/config.yaml
+            - run
+            - --token
+            - ${CLOUDFLARE_TUNNEL_TOKEN}
         logging:
-            driver: json-file
-            options: { max-size: "10m", max-file: "5" }
+        driver: json-file
+        options:
+            max-size: "10m"
+            max-file: "5"
 
     # One-shot helper (run with --profile certbot)
     certbot:
@@ -176,4 +176,3 @@ volumes:
     mysql-prod-data:
     certbot-htdocs:
     public-build:
-    cloudflare-credentials:
