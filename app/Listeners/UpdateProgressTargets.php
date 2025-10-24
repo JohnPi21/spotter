@@ -48,6 +48,8 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
                 ])->toArray();
             })->toArray();
 
+            if(empty($nextDayTargets)) return;
+
             ExerciseSet::whereIn('day_exercise_id', $nextDayExercises->pluck('id'))->delete();
 
             ExerciseSet::insert($nextDayTargets);
