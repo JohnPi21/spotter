@@ -153,15 +153,6 @@ services:
         driver: "json-file"
         options: { max-size: "10m", max-file: "5" }
 
-# ... (rest of the file)
-
-volumes:
-  mysql-prod-data:
-  certbot-htdocs:
-  public-build:
-  # New volume to persist the Tunnel credentials securely
-  cloudflare-credentials:
-
   # One-shot helper (run with --profile certbot)
   certbot:
     image: certbot/certbot
