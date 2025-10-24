@@ -129,29 +129,21 @@ services:
       options: { max-size: "10m", max-file: "5" }
 
   cloudflared:
-      image: cloudflare/cloudflared:latest
-      container_name: cloudflared
-      restart: unless-stopped
-      volumes:
-        - ./docker/cloudflare/config.yaml:/etc/cloudflared/config.yaml:ro
-      networks: [ appnet ]
-
-      environment:
-            # Inject the Token from the environment file
-            TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-
-      command: 
-            # Run the tunnel using the token and the config file
-            tunnel --config /etc/cloudflared/config.yaml run --token ${TUNNEL_TOKEN}
-
-      depends_on:
-        mysql:
-          condition: service_healthy
-        # nginx:
-        #   condition: service_healthy
-      logging:
-        driver: "json-file"
-        options: { max-size: "10m", max-file: "5" }
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    # If services are in Docker, keep the same network so names like "mysql" resolve
+    networks: [ appnet ]
+    env_file:
+      - ./docker/.env.prod
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    volumes:
+      - ./docker/cloudflare/config.yaml:/etc/cloudflared/config.yaml:ro
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yaml run --token ${TUNNEL_TOKEN}
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
 
   # One-shot helper (run with --profile certbot)
   certbot:
