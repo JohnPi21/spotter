@@ -132,13 +132,11 @@ services:
         image: cloudflare/cloudflared:latest
         restart: unless-stopped
         networks: [appnet]
-        volumes:
-            - ./cloudflared/config.yaml:/etc/cloudflared/config.yaml:ro
+        # volumes:
+        #     - ./cloudflared/config.yaml:/etc/cloudflared/config.yaml:ro
         command:
             - tunnel
             - --no-autoupdate
-            - --config
-            - /etc/cloudflared/config.yaml
             - run
             - --token
             - ${CLOUDFLARE_TUNNEL_TOKEN}
