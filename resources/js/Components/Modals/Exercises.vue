@@ -108,7 +108,7 @@ const filteredGroups = computed(() => {
 const filteredExercises = computed(() => {
     const exercises = exercisesByMuscle.find((mg) => mg.id == props.onlyOneMuscleGroup);
 
-    return (exercises?.exercises || []).filter((ex) => ex.name.toLowerCase().includes(search.value));
+    return (exercises?.exercises || []).filter((ex) => ex.name.toLowerCase().includes(search.value.toLowerCase()));
 });
 
 function select(exerciseID: number): void {

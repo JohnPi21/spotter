@@ -45,6 +45,6 @@ class DemoController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('mesocycles');
+        return redirect()->route('dashboard');
     }
 }
