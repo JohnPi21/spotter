@@ -53,7 +53,7 @@
             <!-- ===== Calendar ===== -->
             <div class="flex justify-between gap-1" v-if="showCalendar">
                 <div class="flex flex-1 flex-col items-center gap-1" v-for="(week, idx) in mesocycle.calendar">
-                    <p>WEEK {{ idx }}</p>
+                    <p>W {{ idx }}</p>
                     <Link
                         :href="route('days.show', { mesocycle: mesocycle.id, day: weekDay.id })"
                         class="flex w-full items-center justify-center gap-1 rounded-sm bg-main px-2 py-1 text-center"
@@ -129,7 +129,7 @@
 
             <div class="grid grid-cols-6 gap-5" v-for="(set, set_idx) in dayExercise.sets">
                 <div class="flex items-center justify-start">
-                    <UiDropdownMenu :idx="set_idx">
+                    <UiDropdownMenu :idx="set_idx" left="50px">
                         <template #header>
                             <div class="hover:cursor-pointer">
                                 <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
@@ -203,7 +203,6 @@ const props = defineProps<{
     mesocycle: Mesocycle;
     errors?: object;
 }>();
-console.log(props.mesocycle);
 
 const day = computed<Day>(() => props.mesocycle.day);
 const exercisesModal = ref<boolean>();
@@ -235,20 +234,27 @@ async function updateSet(set: ExerciseSet, dayExerciseID: number) {
         { ...set },
         {
             preserveState: true,
+            preserveScroll: true,
             onError: () => (set.status = false),
         }
     );
 }
 
 async function addSet(dayExerciseID: number) {
-    router.post(route("sets.store", { dayExercise: dayExerciseID }), {
-        preserveState: false,
-    });
+    router.post(
+        route("sets.store", { dayExercise: dayExerciseID }),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        }
+    );
 }
 
-async function removeSet(dayExerciseID:number, setID: number) {
+async function removeSet(dayExerciseID: number, setID: number) {
     router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
-        preserveState: false,
+        preserveState: true,
+        preserveScroll: true,
     });
 }
 
