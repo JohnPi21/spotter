@@ -1,15 +1,21 @@
 <template>
     <div class="mx-auto my-2 flex max-w-[768px] flex-col gap-6">
         <!-- Profile Box -->
-        <UiBox class="flex items-center justify-between">
-            <div class="flex gap-1 md:gap-2">
-                <div class="h-fit rounded-full border-2 border-layer-border p-3">
-                    <Icon icon="icon-park-outline:muscle" width="22px" />
+        <UiBox class="flex items-center justify-between rounded-xl bg-layer p-2">
+            <div class="flex items-center gap-2">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-xl bg-accent/20 blur-xl"></div>
+
+                        <div class="relative flex h-12 w-12 items-center justify-center rounded-xl bg-layer">
+                            <Icon icon="mdi:weight-lifter" width="30" class="text-accent" />
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex flex-col justify-center">
-                    <p>{{ $page.props.auth.user.name }}</p>
-                    <span class="block text-sm text-secondary max-[440px]:hidden">Joined: {{ dashboardStats.joinedAgo }}</span>
+                <div class="flex flex-col">
+                    <p class="text-lg font-semibold">{{ $page.props.auth.user.name }}</p>
+                    <span class="text-xs text-secondary">Joined: {{ dashboardStats.joinedAgo }}</span>
                 </div>
             </div>
 
@@ -26,8 +32,13 @@
                 >
                     <Icon icon="mdi:chart-line" class="h-10 w-10 text-accent" />
                     <h3 class="text-xl font-semibold">Your Progress Awaits</h3>
-                    <p class="max-w-[280px] text-sm text-secondary">After a few workouts, this chart will show your activity trends.</p>
-                    <Link :href="placeholderUrl" class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90">
+                    <p class="max-w-[280px] text-sm text-secondary">
+                        After a few workouts, this chart will show your activity trends.
+                    </p>
+                    <Link
+                        :href="placeholderUrl"
+                        class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90"
+                    >
                         Log a Workout
                     </Link>
                 </div>
@@ -39,26 +50,93 @@
         <!-- Last Workouts Section -->
         <div>
             <h2 class="mb-2 text-2xl">Last Workouts</h2>
-            <div class="relative">
+
+            <!-- MOBILE: phone-style cards -->
+            <div class="space-y-4 md:hidden">
+                <UiBox
+                    v-for="workout in lastWorkouts"
+                    :key="workout.dayID"
+                    class="relative overflow-hidden rounded-lg bg-layer/70 p-5 shadow-[0_24px_70px_rgba(0,0,0,.75)]"
+                >
+                    <Link
+                        :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayID })"
+                        class="block"
+                    >
+                        <!-- Top row: today / label / finishedAt -->
+                        <div
+                            class="mb-4 flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.15em] text-secondary"
+                        >
+                            <span>Day {{ workout.day }} • {{ workout.label }}</span>
+                            <span>{{ workout.finishedAt }}</span>
+                        </div>
+
+                        <!-- Middle “cards” like the exercises in screenshot -->
+                        <div class="space-y-2">
+                            <div class="rounded-2xl bg-layer px-3 py-2 text-sm">
+                                <p class="font-semibold">Exercises</p>
+                                <p class="text-secondary">{{ workout.exercisesCount }} total</p>
+                            </div>
+                            <div class="rounded-2xl bg-layer px-3 py-2 text-sm">
+                                <p class="font-semibold">Sets</p>
+                                <p class="text-secondary">{{ workout.setsCount }} sets</p>
+                            </div>
+                            <div class="rounded-2xl bg-layer px-3 py-2 text-sm">
+                                <p class="font-semibold">Muscle groups</p>
+                                <p class="text-secondary">{{ workout.muscleGroups.length }} groups</p>
+                            </div>
+                        </div>
+
+                        <!-- Highlight block (like “14 sets” in the screenshot) -->
+                        <div class="mt-4 rounded-2xl border border-layer-light bg-main/70 px-4 py-3">
+                            <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-secondary">
+                                Total volume
+                            </p>
+                            <p class="text-2xl font-semibold text-accent">
+                                {{ workout.totalValue }}
+                                <span class="ml-1 text-sm font-normal text-secondary">{{ workout.unit }}</span>
+                            </p>
+                        </div>
+
+                        <!-- Bottom row: small text + pill button -->
+                        <div class="mt-4 flex items-center justify-between text-[11px] text-secondary">
+                            <span>Tap to view full workout</span>
+                            <span class="rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold text-accent">
+                                Open
+                            </span>
+                        </div>
+                    </Link>
+                </UiBox>
+            </div>
+
+            <!-- Desktop -->
+            <div class="relative hidden md:block">
                 <div
                     class="absolute z-10 flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl bg-main/85 text-center"
                     v-if="!dashboardStats.lastWorkouts"
                 >
                     <Icon icon="mdi:dumbbell" class="h-10 w-10 text-accent" />
                     <h3 class="text-xl font-semibold">No Workouts Yet</h3>
-                    <p class="max-w-[280px] text-sm text-secondary">Your recent workouts will appear here once you start training.</p>
-                    <Link :href="placeholderUrl" class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90">
+                    <p class="max-w-[280px] text-sm text-secondary">
+                        Your recent workouts will appear here once you start training.
+                    </p>
+                    <Link
+                        :href="placeholderUrl"
+                        class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90"
+                    >
                         Begin Today
                     </Link>
                 </div>
+
                 <div class="flex flex-col gap-3" :class="{ 'p-2 blur-sm': !dashboardStats.lastWorkouts }">
-                    <UiBox v-for="workout in lastWorkouts" class="group hover:bg-layer-light">
+                    <UiBox v-for="workout in lastWorkouts" :key="workout.dayID" class="group hover:bg-layer-light">
                         <Link
                             :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayID })"
                             class="flex cursor-pointer flex-col items-center justify-between gap-4 p-4 min-[450px]:flex-row"
                         >
                             <div class="flex min-w-32 items-center gap-2">
-                                <div class="flex aspect-square h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white">
+                                <div
+                                    class="flex aspect-square h-12 w-12 items-center justify-center rounded-lg bg-accent text-xl font-bold text-white"
+                                >
                                     {{ workout.day }}
                                 </div>
                                 <div>
@@ -67,18 +145,26 @@
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-1 whitespace-nowrap text-sm text-secondary">
-                                <div class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer">
+                                <div
+                                    class="border-border-layer flex-1 rounded-md border border-layer-light bg-main px-2 py-1 group-hover:bg-layer"
+                                >
                                     <span>{{ workout.exercisesCount }}</span>
                                     exercises
                                 </div>
-                                <div class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer">
+                                <div
+                                    class="border-border-layer flex-1 rounded-md border border-layer-light bg-main px-2 py-1 group-hover:bg-layer"
+                                >
                                     <span>{{ workout.setsCount }}</span>
                                     sets
                                 </div>
-                                <div class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer">
+                                <div
+                                    class="border-border-layer flex-1 rounded-md border border-layer-light bg-main px-2 py-1 group-hover:bg-layer"
+                                >
                                     <span>{{ workout.totalValue }} {{ workout.unit }}</span>
                                 </div>
-                                <div class="border-border-layer flex-1 rounded-md border border-layer-light px-2 py-1 group-hover:bg-layer">
+                                <div
+                                    class="border-border-layer flex-1 rounded-md border border-layer-light bg-main px-2 py-1 group-hover:bg-layer"
+                                >
                                     <span>{{ workout.muscleGroups.length }}</span>
                                     Muscle Groups
                                 </div>
@@ -102,13 +188,22 @@
                 >
                     <Icon icon="mdi:trophy-outline" class="h-10 w-10 text-accent" />
                     <h3 class="text-xl font-semibold">Unlock Your Big 3</h3>
-                    <p class="max-w-[280px] text-sm text-secondary">Record your workouts to see your best Deadlift, Bench Press, and Squat.</p>
-                    <Link :href="placeholderUrl" class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90">
+                    <p class="max-w-[280px] text-sm text-secondary">
+                        Record your workouts to see your best Deadlift, Bench Press, and Squat.
+                    </p>
+                    <Link
+                        :href="placeholderUrl"
+                        class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition hover:opacity-90"
+                    >
                         Start Training
                     </Link>
                 </div>
                 <div class="flex flex-wrap gap-5" :class="{ 'p-2 blur-sm': !dashboardStats.bestLifts }">
-                    <UiBox v-for="(lift, idx) in bestLifts" :key="lift.exercise" class="min-w-25 flex flex-1 flex-col items-center rounded-xl p-5">
+                    <UiBox
+                        v-for="(lift, idx) in bestLifts"
+                        :key="lift.exercise"
+                        class="flex min-w-[200px] flex-1 flex-col items-center rounded-xl p-5"
+                    >
                         <div class="mb-2 rounded-xl bg-accent p-2">
                             <img :src="exerciseImages[lift.type]" width="60px" />
                         </div>
@@ -136,9 +231,9 @@ import { computed, ref, watch } from "vue";
 const tailwindColors = useTailwindColors();
 
 const exerciseImages = {
-    deadlift: new URL("@/assets/images/deadlift.png", import.meta.url).href,
-    bench: new URL("@/assets/images/bench.png", import.meta.url).href,
-    squat: new URL("@/assets/images/squat.png", import.meta.url).href,
+    deadlift: new URL("@/assets/images/dashboard/deadlift.png", import.meta.url).href,
+    bench: new URL("@/assets/images/dashboard/bench.png", import.meta.url).href,
+    squat: new URL("@/assets/images/dashboard/squat.png", import.meta.url).href,
 };
 type ExerciseKey = keyof typeof exerciseImages;
 

@@ -56,15 +56,14 @@
                     <p>W {{ idx }}</p>
                     <Link
                         :href="route('days.show', { mesocycle: mesocycle.id, day: weekDay.id })"
-                        class="flex w-full items-center justify-center gap-1 rounded-sm bg-main px-2 py-1 text-center"
-                        v-for="weekDay in week"
+                        class="flex w-full flex-col items-center justify-center rounded-sm border border-transparent bg-main px-2 py-1 text-center"
+                        v-for="(weekDay, dayIdx) in week"
                         :class="[
                             { 'bg-orange-700': isActiveDay(weekDay.id) },
-                            { 'border border-border-green opacity-50': weekDay.finished_at },
+                            { 'border !border-border-green opacity-50': weekDay.finished_at },
                         ]"
                     >
-                        <Icon icon="ep:success-filled" class="text-green" v-if="weekDay.finished_at" />
-                        {{ weekDay.label }}
+                        <p>D{{ dayIdx + 1 }}</p>
                     </Link>
                 </div>
             </div>

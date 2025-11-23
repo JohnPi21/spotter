@@ -20,12 +20,12 @@ export default {
                 main: "#0A0A0A", // Very dark background for the main page
                 layer: "#1A1A1A", // Slightly lighter for content sections
                 "layer-light": "#242424", // Lightest layer, for subtle distinction
-                input: "#2A2A2A", // Dark gray for input backgrounds
+                input: "#101010", // Dark gray for input backgrounds
 
                 // Border Colors
                 "main-border": "#0e0e0eb3", // Soft border color for containers and sections
                 "layer-border": "#333333", // Soft border color for containers and sections
-                "input-border": "#4E4E4E", // Neutral gray for input borders
+                "input-border": "#2d2d2d", // Neutral gray for input borders
                 "input-border-focus": "#6B7280", // Neutral gray for input borders
 
                 // Text Colors
