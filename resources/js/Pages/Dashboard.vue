@@ -70,7 +70,7 @@
                             <span>{{ workout.finishedAt }}</span>
                         </div>
 
-                        <!-- Middle “cards” like the exercises in screenshot -->
+                        <!-- Middle cards -->
                         <div class="space-y-2">
                             <div class="rounded-2xl bg-layer px-3 py-2 text-sm">
                                 <p class="font-semibold">Exercises</p>
@@ -86,7 +86,7 @@
                             </div>
                         </div>
 
-                        <!-- Highlight block (like “14 sets” in the screenshot) -->
+                        <!-- Highlight block -->
                         <div class="mt-4 rounded-2xl border border-layer-light bg-main/70 px-4 py-3">
                             <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-secondary">
                                 Total volume

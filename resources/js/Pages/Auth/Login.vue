@@ -5,7 +5,7 @@ import Checkbox from "@/Components/Input/Checkbox.vue";
 import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
 import InputPassword from "@/Components/Input/password.vue";
-import InputText from "@/Components/Input/text.vue";
+import TextInput from "@/Components/TextInput.vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 
@@ -53,7 +53,7 @@ const submit = () => {
         <div>
             <InputLabel for="email" value="Email" />
 
-            <InputText
+            <TextInput
                 id="email"
                 type="email"
                 class="mt-1 block w-full"

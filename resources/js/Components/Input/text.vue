@@ -24,7 +24,7 @@ defineExpose({ focus: () => input.value?.focus() });
         :type="type ?? 'text'"
         v-model="model"
         ref="input"
-        class="rounded-md border-input-border bg-input text-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+        class="ui-text-input rounded-md border-input-border bg-input text-gray-300 shadow-sm focus:border-accent focus:ring-accent"
     />
 </template>
 <style lang="css">
