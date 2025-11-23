@@ -1,6 +1,13 @@
 # ---------- Stage 1: PHP deps (Composer) ----------
-FROM composer:2 AS php-deps
+FROM php:8.3-cli AS php-deps
 WORKDIR /app
+
+# Install tools + Composer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git unzip curl && \
+    curl -sS https://getcomposer.org/installer | php -- \
+        --install-dir=/usr/local/bin --filename=composer && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy only composer files first for cache efficiency
 COPY composer.json composer.lock ./
@@ -38,10 +45,11 @@ RUN apt-get update && \
     && docker-php-ext-enable redis opcache \
     && rm -rf /var/lib/apt/lists/*
 
-# ⬇️ Add composer binary so CI can install dev deps at runtime
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# OPTIONAL: dacă chiar ai nevoie de composer în runtime
+# (altfel poți șterge linia asta și comentariul)
+COPY --from=php-deps /usr/local/bin/composer /usr/bin/composer
 
-# Reasonable OPcache defaults
+# OPcache config
 RUN { \
     echo "opcache.enable=1"; \
     echo "opcache.enable_cli=1"; \
@@ -50,7 +58,7 @@ RUN { \
     echo "opcache.jit_buffer_size=128M"; \
     } > /usr/local/etc/php/conf.d/opcache.ini
 
-# Enable php-fpm ping for container healthcheck
+# php-fpm ping
 RUN { \
     echo "[www]"; \
     echo "ping.path = /ping"; \
@@ -59,7 +67,6 @@ RUN { \
 # Copy app code and built assets
 COPY --from=php-deps /app /var/www/html
 COPY --from=build-assets /app/public/build /var/www/html/public/build
-# (manifest.json is inside /public/build already; no need to copy separately)
 
 # Permissions for Laravel writable dirs
 RUN mkdir -p storage bootstrap/cache && \
@@ -67,7 +74,6 @@ RUN mkdir -p storage bootstrap/cache && \
 
 EXPOSE 9000
 
-# Healthcheck hits php-fpm ping via fastcgi
 HEALTHCHECK --interval=10s --timeout=3s --retries=10 CMD \
     SCRIPT_NAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1
 
