@@ -11,9 +11,9 @@
                 </div>
 
                 <div class="flex items-center gap-4 text-sm">
-                    <a href="#how-it-works" class="text-secondary hover:text-primary">How it works</a>
-                    <a href="#features" class="text-secondary hover:text-primary">Features</a>
-                    <a href="#preview" class="text-secondary hover:text-primary">Preview</a>
+                    <a href="#how-it-works" class="hidden text-secondary hover:text-primary sm:block">How it works</a>
+                    <a href="#features" class="hidden text-secondary hover:text-primary sm:block">Features</a>
+                    <a href="#preview" class="hidden text-secondary hover:text-primary sm:block">Preview</a>
 
                     <!-- If user is logged in -->
                     <template v-if="user">
@@ -28,14 +28,14 @@
                     <!-- If NOT logged in -->
                     <template v-else>
                         <Link
-                            :href="route('login')"
+                            :href="route('register')"
                             class="hidden rounded-lg border border-layer-border px-3 py-1 text-secondary hover:bg-layer-light md:inline-block"
                         >
-                            Log in
+                            Register
                         </Link>
 
                         <Link
-                            :href="route('register')"
+                            :href="route('login')"
                             class="rounded-lg bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-wide text-main hover:bg-orange-hover"
                         >
                             Try Spotacus
@@ -46,14 +46,13 @@
         </header>
 
         <!-- HERO -->
-        <!-- HERO -->
         <section class="relative overflow-hidden bg-main">
             <!-- subtle glow -->
             <div
                 class="pointer-events-none absolute -right-40 top-[-80px] h-[420px] w-[420px] rounded-full bg-accent/20 blur-3xl"
             ></div>
             <div
-                class="relative mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 pb-20 pt-16 md:flex-row md:items-center md:pt-24"
+                class="relative mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 pb-20 pt-8 md:flex-row md:items-center md:pt-20"
             >
                 <!-- LEFT: TEXT -->
                 <div class="flex-1 space-y-6">
@@ -76,7 +75,7 @@
                     </p>
                     <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
                         <Link
-                            :href="route('register')"
+                            :href="route('login')"
                             class="inline-flex items-center justify-center rounded-lg bg-accent px-7 py-3 text-sm font-semibold text-main hover:bg-orange-hover"
                         >
                             Start free mesocycle
@@ -266,7 +265,7 @@
                     </p>
 
                     <Link
-                        :href="route('register')"
+                        :href="route('login')"
                         class="inline-flex items-center rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-main hover:bg-orange-hover"
                     >
                         Try Spotacus today
@@ -283,7 +282,7 @@
                     Start with one block, track your volume and progress, and see if this fits your style of training.
                 </p>
                 <Link
-                    :href="route('register')"
+                    :href="route('login')"
                     class="rounded-lg bg-accent px-10 py-4 font-semibold text-main hover:bg-orange-hover"
                 >
                     Get started
