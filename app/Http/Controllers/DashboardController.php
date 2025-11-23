@@ -46,8 +46,8 @@ class DashboardController extends Controller
             };
 
             return [
-                'exercise' => $row->exercise_name,
-                'value'    => $row->best_value,
+                'exercise' => preg_replace('/\s*\(.*?\)/', '', $row->exercise_name),
+                'value'    => number_format($row->best_value, 2),
                 'unit'     => $displayBy === 'weight' ? 'kg' : 'kg x reps',
                 'type'     => $type
             ];

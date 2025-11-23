@@ -44,7 +44,7 @@
 
                     <ButtonSecondary
                         @click="openExerciseModal(exercise)"
-                        :class="{ 'bg-layer-light': exercise.exerciseID }"
+                        :class="{ 'bg-layer !text-gray-400': exercise.exerciseID }"
                     >
                         <span v-if="!exercise.exerciseID">Select Exercise</span>
                         <span v-else>{{ exerciseStore?.exercises[exercise.exerciseID]?.name }}</span>

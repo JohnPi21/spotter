@@ -14,8 +14,7 @@ use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/', [Dashboard::class, 'index'])->name('dashboard');
-
+    Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
     Route::controller(MesocycleController::class)->group(function () {
         Route::get('/mesocycles', 'index')->name('mesocycles');
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
@@ -60,9 +59,12 @@ Route::middleware('auth')->group(function () {
             // 'exercisesByMuscle' => MuscleGroup::with('exercises')->get(),
         ]);
     });
+
+    Route::get('/boom', fn() => throw new \RuntimeException('Test Sentry'));
 });
 
-Route::get('/boom', fn() => throw new \RuntimeException('Test Sentry'));
+
+Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'time' => now()], 200);
