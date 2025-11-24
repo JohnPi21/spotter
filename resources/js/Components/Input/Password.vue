@@ -20,7 +20,7 @@
 </template>
 <script setup lang="ts">
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
-import InputText from "@/Components/Input/text.vue";
+import InputText from "@/Components/Input/Text.vue";
 import { Icon } from "@iconify/vue";
 import { ref } from "vue";
 

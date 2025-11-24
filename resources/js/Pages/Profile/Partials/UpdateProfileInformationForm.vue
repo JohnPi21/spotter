@@ -2,7 +2,7 @@
 import PrimaryButton from "@/Components/Button/Primary.vue";
 import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
-import InputText from "@/Components/Input/text.vue";
+import InputText from "@/Components/Input/Text.vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
 
 defineProps<{

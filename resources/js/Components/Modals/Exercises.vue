@@ -66,7 +66,7 @@
 </template>
 <script setup lang="ts">
 import ButtonPrimary from "@/Components/Button/Primary.vue";
-import InputText from "@/Components/Input/text.vue";
+import InputText from "@/Components/Input/Text.vue";
 import Modal from "@/Components/Modal.vue";
 import ModalsHeader from "@/Components/Modals/Header.vue";
 import Collapsible from "@/Components/Ui/Collapsible.vue";
