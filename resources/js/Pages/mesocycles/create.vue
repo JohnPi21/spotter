@@ -4,13 +4,13 @@
             <InputText v-model="meso.name" placeholder="Untitled Meso" />
             <InputError :message="errors['name']" />
         </div>
-        <ButtonPrimary :disabled="loading" @click="submit">Create Meso</ButtonPrimary>
+        <ButtonPrimary :disabled="loading" @click="submit">Create Mesocycle</ButtonPrimary>
     </div>
 
     <!-- <UiErrors :errors="errors" /> -->
     <InputError :message="errors['days']" />
 
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2" v-if="days.length > 0">
         <UiBox class="flex h-fit flex-1 flex-col gap-2 lg:max-w-[350px]" v-for="(day, dayIdx) in days" :key="dayIdx">
             <div class="flex items-center justify-between gap-3">
                 <InputText v-model="day.label" />
@@ -57,6 +57,7 @@
             <ModalExercise
                 v-model="exerciseModal.show"
                 :only-one-muscle-group="exerciseModal?.exercise?.muscleGroup"
+                :pre-selected="exerciseModal?.exercise?.exerciseID"
                 @select="(exerciseID: number) => setExerciseID(exerciseID)"
             />
 
@@ -82,25 +83,33 @@
         </Modal>
     </div>
 
-    <div class="mt-2 flex flex-col gap-2">
+    <div class="flex items-center justify-center" v-else>
+        <ButtonSecondary class="h-fit min-w-40" @click="addDay()" v-if="days.length < 7">
+            <Icon icon="ic:baseline-plus" width="21px" />
+            Add Day
+        </ButtonSecondary>
+    </div>
+
+    <UiBox class="mt-5 flex flex-col-reverse items-center justify-between !gap-4 md:flex-row" v-if="days.length > 0">
         <div class="flex w-full flex-col md:w-fit">
             <InputLabel value="Number of Weeks" />
-            <InputText v-model="meso.weeksDuration" placeholder="Weeks Duration" />
+            <InputRange :min="3" :max="12" v-model="meso.weeksDuration" />
             <InputError :message="errors['weeksDuration']" />
         </div>
 
-        <ButtonPrimary class="h-fit w-full min-w-44" @click="addDay()" v-if="days.length < 7">
+        <ButtonSecondary class="h-fit w-full min-w-40 md:w-fit" @click="addDay()" v-if="days.length < 7">
             <Icon icon="ic:baseline-plus" width="21px" />
             Add Day
-        </ButtonPrimary>
-    </div>
+        </ButtonSecondary>
+    </UiBox>
 </template>
 <script setup lang="ts">
 import ButtonPrimary from "@/Components/Button/Primary.vue";
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
-import InputText from "@/Components/Input/text.vue";
+import InputRange from "@/Components/Input/Range.vue";
+import InputText from "@/Components/Input/Text.vue";
 import Modal from "@/Components/Modal.vue";
 import ModalExercise from "@/Components/Modals/Exercises.vue";
 import ModalHeader from "@/Components/Modals/Header.vue";
@@ -121,17 +130,6 @@ const meso = ref<MesoForm>({
 const exerciseStore = useExerciseStore();
 const showMuscleModal = ref<boolean>(false);
 const loading = ref<boolean>(false);
-const exerciseModal = ref<{
-    show: boolean;
-    exercise: ExerciseForm;
-}>({
-    show: false,
-    exercise: {
-        exerciseID: 0,
-        muscleGroup: 0,
-    },
-});
-
 const days: DayForm[] = reactive([]);
 
 function addDay() {
@@ -170,9 +168,25 @@ function submit() {
     });
 }
 
+// ========= EXERCISE MODAL =============
+const exerciseModal = ref<{
+    show: boolean;
+    exercise: ExerciseForm;
+}>({
+    show: false,
+    exercise: {
+        exerciseID: 0,
+        muscleGroup: 0,
+    },
+});
+
 function setExerciseID(id: number) {
     exerciseModal.value.exercise.exerciseID = id;
     exerciseModal.value.show = false;
+    exerciseModal.value.exercise = {
+        exerciseID: 0,
+        muscleGroup: 0,
+    };
 }
 
 function openExerciseModal(exercise: ExerciseForm) {
@@ -180,6 +194,7 @@ function openExerciseModal(exercise: ExerciseForm) {
     exerciseModal.value.show = true;
 }
 
+// ============= TS TYPES =============
 type DayForm = {
     label: string;
     exercises: {
@@ -199,3 +214,9 @@ type ExerciseForm = {
     exerciseID: Exercise["id"];
 };
 </script>
+
+<style lang="css" scoped>
+:deep(.slider) {
+    @apply w-full md:w-fit;
+}
+</style>

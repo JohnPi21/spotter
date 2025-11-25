@@ -43,7 +43,7 @@
                         v-for="(exercise, eIdx) in filteredExercises"
                         :key="eIdx"
                         @click="select(exercise.id)"
-                        :class="[selected == exercise.id ? 'bg-layer-light text-primary' : 'text-secondary']"
+                        :class="[selected == exercise.id ? 'bg-input text-primary' : 'text-secondary']"
                         class="flex cursor-pointer items-center justify-between border-b border-main-border p-2 transition last:border-b-0 hover:bg-layer-light hover:text-primary"
                     >
                         <div class="flex flex-col gap-1">
@@ -55,7 +55,7 @@
                             </span>
                         </div>
 
-                        <Icon icon="ri:checkbox-circle-fill" v-if="selected == eIdx" class="text-text-green" />
+                        <Icon icon="ri:checkbox-circle-fill" v-if="selected == exercise.id" class="text-text-green" />
                     </li>
                 </ul>
             </div>
@@ -66,18 +66,19 @@
 </template>
 <script setup lang="ts">
 import ButtonPrimary from "@/Components/Button/Primary.vue";
-import InputText from "@/Components/Input/text.vue";
+import InputText from "@/Components/Input/Text.vue";
 import Modal from "@/Components/Modal.vue";
 import ModalsHeader from "@/Components/Modals/Header.vue";
 import Collapsible from "@/Components/Ui/Collapsible.vue";
 import { useExerciseStore } from "@/stores/exerciseStore";
 import { Icon } from "@iconify/vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const showModal = defineModel<boolean>();
 
 const props = defineProps<{
     onlyOneMuscleGroup: number | string | undefined;
+    preSelected?: number | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -87,8 +88,16 @@ const emit = defineEmits<{
 const exercisesStore = useExerciseStore();
 
 const exercisesByMuscle = exercisesStore.exercisesByMuscle;
-const selected = ref<number>();
+const selected = ref<number | undefined>(props.preSelected);
 const search = ref<string>("");
+
+watch(
+    () => props.preSelected,
+    (newVal) => {
+        selected.value = newVal;
+    },
+    { immediate: true }
+);
 
 const filteredGroups = computed(() => {
     return exercisesByMuscle

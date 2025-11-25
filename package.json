@@ -4,7 +4,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc && vite build && vite build --ssr",
-        "lint": "eslint resources/js --fix"
+        "lint": "eslint resources/js --fix",
+        "type-check": "vue-tsc --noEmit --watch"
     },
     "devDependencies": {
         "@eslint/css": "^0.7.0",
