@@ -57,6 +57,7 @@
             <ModalExercise
                 v-model="exerciseModal.show"
                 :only-one-muscle-group="exerciseModal?.exercise?.muscleGroup"
+                :pre-selected="exerciseModal?.exercise?.exerciseID"
                 @select="(exerciseID: number) => setExerciseID(exerciseID)"
             />
 
@@ -129,17 +130,6 @@ const meso = ref<MesoForm>({
 const exerciseStore = useExerciseStore();
 const showMuscleModal = ref<boolean>(false);
 const loading = ref<boolean>(false);
-const exerciseModal = ref<{
-    show: boolean;
-    exercise: ExerciseForm;
-}>({
-    show: false,
-    exercise: {
-        exerciseID: 0,
-        muscleGroup: 0,
-    },
-});
-
 const days: DayForm[] = reactive([]);
 
 function addDay() {
@@ -178,9 +168,25 @@ function submit() {
     });
 }
 
+// ========= EXERCISE MODAL =============
+const exerciseModal = ref<{
+    show: boolean;
+    exercise: ExerciseForm;
+}>({
+    show: false,
+    exercise: {
+        exerciseID: 0,
+        muscleGroup: 0,
+    },
+});
+
 function setExerciseID(id: number) {
     exerciseModal.value.exercise.exerciseID = id;
     exerciseModal.value.show = false;
+    exerciseModal.value.exercise = {
+        exerciseID: 0,
+        muscleGroup: 0,
+    };
 }
 
 function openExerciseModal(exercise: ExerciseForm) {
@@ -188,6 +194,7 @@ function openExerciseModal(exercise: ExerciseForm) {
     exerciseModal.value.show = true;
 }
 
+// ============= TS TYPES =============
 type DayForm = {
     label: string;
     exercises: {
