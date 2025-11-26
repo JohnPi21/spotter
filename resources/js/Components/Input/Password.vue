@@ -24,7 +24,7 @@ import InputText from "@/Components/Input/Text.vue";
 import { Icon } from "@iconify/vue";
 import { ref } from "vue";
 
-const model = defineModel<string | number | null>(undefined);
+const model = defineModel<string | number | undefined>(undefined);
 const viewPassword = ref<boolean>(false);
 
 defineProps<{
