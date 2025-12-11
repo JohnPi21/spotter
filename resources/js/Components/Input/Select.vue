@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-interface Option {
-    value: string | number;
-    label: string;
-}
-
 const props = defineProps<{
-    options: readonly (string | number | Option)[];
+    options: readonly (string | number | DropdownOption)[];
     placeholder?: string;
     disabled?: boolean;
 }>();

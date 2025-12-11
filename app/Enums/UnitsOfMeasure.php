@@ -2,8 +2,10 @@
 
 namespace App\Enums;
 
-enum UnitOfMeasure: string
+enum UnitsOfMeasure: string
 {
+    use EnumHelpers;
+
     case KG = 'kg';
     case LB = 'lb';
 }

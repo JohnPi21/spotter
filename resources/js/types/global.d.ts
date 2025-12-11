@@ -13,11 +13,11 @@ declare global {
     type ExerciseSet = {
         id: number;
         day_exercise_id: number;
-        reps: number | null;
-        weight: number | null;
-        target_reps: number | null;
-        target_weight: number | null;
-        finished_at: string | null;
+        reps?: number;
+        weight?: number;
+        target_reps?: number;
+        target_weight?: number;
+        finished_at?: string;
         status: boolean;
         created_at: string;
         updated_at: string;

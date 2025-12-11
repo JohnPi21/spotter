@@ -1,7 +1,7 @@
 <template>
     <div class="mx-auto flex max-w-3xl flex-col gap-6">
         <!-- Header -->
-        <div class="mt-3 flex flex-col gap-2">
+        <div class="mt-3 flex flex-col gap-2" @click="log">
             <h1 class="text-xl font-semibold text-primary">AI Mesocycle Generator</h1>
             <p class="text-sm text-secondary">
                 Describe how you want to train and let the AI create a structured mesocycle for you.
@@ -55,6 +55,7 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <InputLabel value="Weeks Duration" />
+                        <!-- @TODO: send max and min from backend -->
                         <InputRange
                             v-model="form.weeksDuration"
                             :min="3"
@@ -131,8 +132,8 @@
 
                 <div class="grid gap-2 text-sm text-secondary md:grid-cols-2">
                     <label
-                        v-for="item in equipmentOptions"
-                        :key="item.value"
+                        v-for="(item, idx) in equipmentOptions"
+                        :key="`${item.value}-${idx}`"
                         class="flex cursor-pointer items-center gap-2 rounded-md border border-main-border bg-input px-3 py-2 hover:border-layer-border hover:text-primary"
                     >
                         <InputCheckbox v-model="form.equipment" :value="item.value" />
@@ -198,7 +199,14 @@ import InputSelect from "@/Components/Input/Select.vue";
 import InputText from "@/Components/Input/Text.vue";
 import UiBox from "@/Components/Ui/Box.vue";
 
-defineProps<{ errors: { [key: string]: string } }>();
+const props = defineProps<{
+    errors: { [key: string]: string };
+    experienceOptions: DropdownOption[];
+    primaryGoalOptions: DropdownOption[];
+    splitPreferenceOptions: DropdownOption[];
+    equipmentOptions: DropdownOption[];
+    sessionDurationOptions: number[];
+}>();
 
 type PrimaryGoal = "hypertrophy" | "strength" | "fat_loss" | "recomp";
 type SplitPreference = "full_body" | "upper_lower" | "push_pull_legs" | "bro_split" | "custom";
@@ -228,49 +236,17 @@ const form = useForm<AiMesocycleForm>({
     primaryGoal: "hypertrophy",
     splitPreference: "upper_lower",
     experienceLevel: "intermediate",
-    equipment: [],
+    equipment: [...props.equipmentOptions.map((opt) => String(opt.value))],
     injuries: "",
     notes: "",
 });
 
-// ---- OPTIONS CENTRALIZED HERE ----
-
-const sessionDurationOptions = [30, 45, 60, 75, 90];
-
-const experienceOptions = [
-    { value: "beginner", label: "Beginner" },
-    { value: "intermediate", label: "Intermediate" },
-    { value: "advanced", label: "Advanced" },
-] as const;
-
-const primaryGoalOptions = [
-    { value: "hypertrophy", label: "Hypertrophy (muscle gain)" },
-    { value: "strength", label: "Strength" },
-    { value: "fat_loss", label: "Fat loss" },
-    { value: "recomp", label: "Recomposition" },
-] as const;
-
-const splitPreferenceOptions = [
-    { value: "full_body", valueShort: "Full Body", label: "Full Body" },
-    { value: "upper_lower", valueShort: "Upper / Lower", label: "Upper / Lower" },
-    { value: "push_pull_legs", valueShort: "Push / Pull / Legs", label: "Push / Pull / Legs" },
-    { value: "bro_split", valueShort: "Bodypart Split", label: "Bodypart Split" },
-    { value: "custom", valueShort: "Let AI decide", label: "Let AI decide" },
-] as const;
-
-const equipmentOptions = [
-    { value: "barbell", label: "Barbell + Plates" },
-    { value: "dumbbells", label: "Dumbbells" },
-    { value: "machines", label: "Machines" },
-    { value: "cables", label: "Cable stack" },
-    { value: "kettlebells", label: "Kettlebells" },
-    { value: "bands", label: "Bands" },
-    { value: "bodyweight", label: "Bodyweight only" },
-    { value: "home_gym", label: "Limited home gym" },
-];
+function log() {
+    console.log(form);
+}
 
 function submit() {
-    form.post("/mesocycles/ai-generate", {
+    form.post(route("mesocycles.ai.generate"), {
         preserveScroll: true,
     });
 }

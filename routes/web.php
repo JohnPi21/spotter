@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiMesocycleController;
 use App\Http\Controllers\DayExerciseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MesocycleController;
@@ -24,6 +25,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/mesocycles/{id}', 'update')->name('mesocycles.update');
         Route::patch('/mesocycles/{mesocycle}', 'activate')->name('mesocycles.activate');
         Route::delete('/mesocycles/{mesocycle}', 'destroy')->name('mesocycles.destroy');
+    });
+
+    Route::controller(AiMesocycleController::class)->group(function () {
+        Route::get('/mesocycles/ai/create', 'create')->name('mesocycles.ai.create');
+        Route::post('/mesocycles/ai/generate', 'generate')->name('mesocycles.ai.generate');
     });
 
     Route::controller(MesoDayController::class)->group(function () {

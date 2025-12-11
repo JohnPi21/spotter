@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\UnitOfMeasure;
+use App\Enums\UnitsOfMeasure;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +41,7 @@ class StoreMesocycleRequest extends FormRequest
     {
         return [
             'name'                              => ['required', 'string'],
-            'unit'                              => ['sometimes', Rule::enum(UnitOfMeasure::class)],
+            'unit'                              => ['sometimes', Rule::enum(UnitsOfMeasure::class)],
             'weeksDuration'                     => ['required', 'integer', 'min:3', 'max:12'],
             'days'                              => ['required', 'array', 'min:1', 'max:7'],
             'days.*.label'                      => ['required', 'string', 'min:1', 'max:64'],
