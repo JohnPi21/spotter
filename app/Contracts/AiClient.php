@@ -2,12 +2,13 @@
 
 namespace App\Contracts;
 
+use Prism\Prism\Contracts\Schema;
+
 interface AiClient
 {
-    // make all methods take params
-    public function text();
+    public function text(string $prompt, string $systemPrompt): string;
 
-    public function structured();
+    public function structured(string $prompt, string $systemPrompt, Schema $schema): array;
 
     public function chat();
 }
