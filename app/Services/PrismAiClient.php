@@ -41,6 +41,8 @@ class PrismAiClient implements AiClient
 
     public function structured(string $prompt, string $systemPrompt, Schema $schema): array
     {
+        $start = microtime(true);
+
         $response = Prism::structured()
             ->using($this->provider, $this->model)
             ->withPrompt($prompt)
@@ -53,7 +55,9 @@ class PrismAiClient implements AiClient
             ]);
         // ->asStructured();
 
-        // $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
+        $ms = (microtime(true) - $start) * 1000;
+
+        $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
         // dd($response);
 
         // return $response->structured;

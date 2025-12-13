@@ -24,7 +24,7 @@ class AppException extends HttpException
         return new self(403, $msg, error: 'FORBIDDEN');
     }
 
-    public static function unprocessable(string $msg = 'Invalid data.'): self
+    public static function unprocessable(string $msg = 'Unprocessable content'): self
     {
         return new self(422, $msg, error: 'UNPROCESSABLE');
     }

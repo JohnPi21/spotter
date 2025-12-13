@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AppException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Illuminate\Auth\AuthenticationException;
 use Sentry\Laravel\Integration;
+use App\Exceptions\DomainException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,9 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         Integration::handles($exceptions);
 
+        $exceptions->render(function (DomainException $e, Request $request) {
+            throw new AppException(status: $e->httpStatus(), error: $e->errorCode(), message: $e->getMessage());
+        });
 
         $exceptions->render(function (\App\Exceptions\AppException $e, Request $request) {
-            // Prefer explicit status over getCode()
             $status = $e->getStatusCode();
 
             $payload = ['status' => $status, 'message' => $e->getMessage(), 'error' => $e->error];
