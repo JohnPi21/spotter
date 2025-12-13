@@ -4,10 +4,11 @@ namespace App\Ai\Agents;
 
 use App\Contracts\AiClient;
 use App\Data\Mesocycle\CreateAiMesocycleData;
+use App\Data\Mesocycle\CreateMesocycleData;
 use App\Enums\UnitsOfMeasure;
+use App\Exceptions\InvalidMesocycleException;
 use App\Models\Exercise;
 use App\Models\MuscleGroup;
-use App\Services\PrismAiClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Prism\Prism\Schema\NumberSchema;
@@ -18,10 +19,8 @@ use Prism\Prism\Schema\EnumSchema;
 
 class MesocycleAgent
 {
-    // For now we will use PRISM CLASSES to build this schema
-    public ObjectSchema $schema;
-    public string $systemPrompt;
-    public string $prompt;
+    private ObjectSchema $schema;
+    private string $systemPrompt;
 
     public function __construct(public AiClient $aiClient)
     {
@@ -107,27 +106,42 @@ class MesocycleAgent
             requiredFields: ['name', 'unit', 'weeksDuration', 'days'],
         );
 
-        $this->systemPrompt = "
-            You are a coach for Spotacus.app. Provide a mesocycle structure based on the schema attached and the user personal preferences.
-            You can also find the exercises supported by the app and the msucle groups. 'm' field from exercises references the id from muscle groups.
-        ";
+        $this->systemPrompt = <<<SYSTEM_PROMPT
+        You are an expert strength and hypertrophy coach working for Spotacus.app.
+
+        Your task is to design safe, realistic, and well-balanced workout mesocycles.
+        You think in terms of training splits, weekly volume, fatigue management, and exercise selection.
+
+        You MUST:
+        - Follow the provided JSON schema strictly.
+        - Output ONLY valid JSON, no explanations or markdown.
+        - Use only the provided exercise IDs.
+        - Respect user constraints (experience level, goals, session duration).
+
+        You MUST NOT:
+        - Invent exercises or IDs.
+        - Add fields not defined in the schema.
+        - Explain your reasoning in text.
+        SYSTEM_PROMPT;
     }
 
 
     public function generate(CreateAiMesocycleData $dto)
     {
-        die;
-        // DTO with user preferences, EXERCISES + Muscle Groups, SYSTEM PROMPT, SCHEMA
-        $this->preparePrompt();
-        $response = $this->aiClient->structured('Generate a mesocycle based on the schema', 'You are a coach for Spotacus.app', $this->schema);
+        $prompt = $this->preparePrompt($dto);
+
+        $response = $this->aiClient->structured($prompt, $this->systemPrompt, $this->schema);
+
+        return $this->prepareMesoDto($response);
     }
 
-    public function preparePrompt(CreateAiMesocycleData $dto): string
+    private function preparePrompt(CreateAiMesocycleData $dto): string
     {
-        $data = $this->prepareExercises();
+        [$preparedExercises, $muscleGroups] = $this->prepareExercises($dto);
 
-        $exercisesJson    = json_encode($data['exercises'], JSON_UNESCAPED_UNICODE);
-        $muscleGroupsJson = json_encode($data['muscleGroups'], JSON_UNESCAPED_UNICODE);
+        $exercisesJson    = json_encode($preparedExercises, JSON_UNESCAPED_UNICODE);
+        $muscleGroupsJson = json_encode($muscleGroups, JSON_UNESCAPED_UNICODE);
+        $dtoJson = $dto->toJson();
 
         return <<<PROMPT
 # OBJECTIVE
@@ -137,16 +151,7 @@ The object will be used directly by the Spotacus app.
 # INPUT
 
 ## UserPreferences
-{
-  "name": "{$dto->name}",
-  "unit": "{$dto->unit->value}",
-  "weeksDuration": {$dto->weeksDuration},
-  "daysPerWeek": {$dto->daysPerWeek},
-  "sessionDuration": {$dto->sessionDuration},
-  "primaryGoal": "{$dto->primaryGoal->value}",
-  "splitPreference": "{$dto->splitPreference->value}",
-  "experienceLevel": "{$dto->experienceLevel->value}"
-}
+$dtoJson
 
 ## Exercises
 Array of all available exercises (app defaults + user custom):
@@ -174,7 +179,7 @@ MUSCLE_GROUPS = {$muscleGroupsJson}
    - "days" array MUST contain exactly {$dto->daysPerWeek} elements.
    - Each day:
      - "label" should reflect the splitPreference (e.g. "Upper 1", "Lower 1", "Push", "Pull", "Legs", "Full Body").
-     - "exercises" array length: 4–8 exercises, appropriate for ~{$dto->sessionDuration} minutes.
+     - "exercises" array length: 4–8 exercises, appropriate for ~{$dto->sessionDuration->value} minutes.
 
 3. Exercises
    - Use ONLY exercise IDs from EXERCISES.
@@ -201,18 +206,21 @@ MUSCLE_GROUPS = {$muscleGroupsJson}
 PROMPT;
     }
 
-    public function prepareExercises(): array
+    private function prepareExercises(CreateAiMesocycleData $dto): array
     {
-        $exercises = Cache::rememberForever('ai_exercises', function () {
-            return Exercise::select(['id', 'name', 'muscle_group_id'])->get()->map(function ($ex) {
+        $exercises =  Exercise::select(['id', 'name', 'muscle_group_id'])
+            ->whereIn('exercise_type', $dto->equipment)
+            ->where('user_id', null)
+            ->get()
+            ->map(function ($ex) {
                 return [
                     'i' => $ex->id,
                     'n' => $ex->name,
                     'm' => $ex->muscle_group_id
                 ];
             })->toArray();
-        });
 
+        // Muscle Groups
         $muscleGroups = Cache::rememberForever('ai_muscle_groups', function () {
             return MuscleGroup::select(['id', 'name'])->get()->map(fn($mg) => [
                 'i' => $mg->id,
@@ -221,20 +229,89 @@ PROMPT;
         });
 
         // User custom exercises
-        $customExercises = Exercise::select(['id', 'name', 'muscle_group_id'])->where('user_id', Auth::id())->get()->map(function ($ex) {
-            return [
-                'i' => $ex->id,
-                'n' => $ex->name,
-                'm' => $ex->muscle_group_id
-            ];
-        })->toArray();
+        $customExercises = Exercise::select(['id', 'name', 'muscle_group_id'])
+            ->where('user_id', Auth::id())
+            ->get()
+            ->map(function ($ex) {
+                return [
+                    'i' => $ex->id,
+                    'n' => $ex->name,
+                    'm' => $ex->muscle_group_id
+                ];
+            })->toArray();
 
         $exercises = array_merge($exercises, $customExercises);
 
-        return [
-            'exercises' => $exercises,
-            'muscleGroups' => $muscleGroups
-        ];
+        return [$exercises, $muscleGroups];
+    }
+
+    private function prepareMesoDto(string $aiResponse): CreateMesocycleData
+    {
+        try {
+            $aiResponse = json_decode($aiResponse, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            report($e);
+            throw new InvalidMesocycleException('AI generated an invalid mesocycle JSON');
+        }
+
+        if (!isset($aiResponse['days']) || !is_array($aiResponse['days'])) {
+            throw new InvalidMesocycleException("AI mesocycle doesn't contain days.");
+        }
+
+        $generatedExerciseIds = collect($aiResponse['days'])
+            ->flatMap(fn($d) => $d['exercises'] ?? [])
+            ->pluck('exerciseID')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $exercisesByMuscleGroup = $this->exerciseLookup($generatedExerciseIds->toArray());
+
+        foreach ($aiResponse['days'] as &$day) {
+            if (! isset($day['exercises']) || !is_array($day['exercises'])) {
+                throw new InvalidMesocycleException('Day is missing exercises array');
+            };
+
+            foreach ($day['exercises'] as &$exercise) {
+                if (! isset($exercise['exerciseID'])) {
+                    throw new InvalidMesocycleException('Exercise is missing exercise ID');
+                }
+
+                $muscleID = $exercisesByMuscleGroup->get($exercise['exerciseID'])?->muscle_group_id;
+
+                if ($muscleID === null) {
+                    throw new InvalidMesocycleException("Unknown exercise ID {$exercise['exerciseID']}");
+                }
+                $exercise['muscleGroup'] = $muscleID;
+            }
+        }
+
+        unset($day, $exercise);
+
+        try {
+            $mesocycleDto = CreateMesocycleData::from($aiResponse);
+        } catch (\Throwable $th) {
+            report($th);
+            throw new InvalidMesocycleException('DTO creation failed. Invalid Mesocycle data.');
+        }
+
+        return $mesocycleDto;
+    }
+
+    /*
+    * @var int[] $ids
+    */
+    private function exerciseLookup(array $ids)
+    {
+        return Exercise::select(['id', 'muscle_group_id'])
+            ->whereIn('id', $ids)
+            ->where(
+                fn($q) =>
+                $q->where('user_id', Auth::id())
+                    ->whereNull('user_id')
+            )
+            ->get()
+            ->keyBy('id');
     }
 
     // RAW JSON SCHEMA

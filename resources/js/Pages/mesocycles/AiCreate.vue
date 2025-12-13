@@ -208,10 +208,6 @@ const props = defineProps<{
     sessionDurationOptions: number[];
 }>();
 
-type PrimaryGoal = "hypertrophy" | "strength" | "fat_loss" | "recomp";
-type SplitPreference = "full_body" | "upper_lower" | "push_pull_legs" | "bro_split" | "custom";
-type ExperienceLevel = "beginner" | "intermediate" | "advanced";
-
 interface AiMesocycleForm {
     [key: string]: any;
     name: string;
@@ -219,9 +215,9 @@ interface AiMesocycleForm {
     weeksDuration: number;
     daysPerWeek: number;
     sessionDuration: number;
-    primaryGoal: PrimaryGoal;
-    splitPreference: SplitPreference;
-    experienceLevel: ExperienceLevel;
+    primaryGoal: string;
+    splitPreference: string;
+    experienceLevel: string;
     equipment: string[];
     injuries: string;
     notes: string;
@@ -234,7 +230,7 @@ const form = useForm<AiMesocycleForm>({
     daysPerWeek: 4,
     sessionDuration: 60,
     primaryGoal: "hypertrophy",
-    splitPreference: "upper_lower",
+    splitPreference: "upper-lower",
     experienceLevel: "intermediate",
     equipment: [...props.equipmentOptions.map((opt) => String(opt.value))],
     injuries: "",
