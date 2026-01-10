@@ -21,6 +21,8 @@ class MesocycleAgent
 {
     private ObjectSchema $schema;
     private string $systemPrompt;
+    private string $promptVersion = '';
+    private string $systemPromptVersion = '';
 
     public function __construct(public AiClient $aiClient)
     {
@@ -308,7 +310,7 @@ PROMPT;
             ->where(
                 fn($q) =>
                 $q->where('user_id', Auth::id())
-                    ->whereNull('user_id')
+                    ->orWhereNull('user_id')
             )
             ->get()
             ->keyBy('id');
