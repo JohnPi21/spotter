@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
         Route::get('/mesocycles/current-day', 'currentActiveDay')->name('mesocycles.current');
         Route::post('/mesocycles', 'store')->name('mesocycles.store');
-        Route::get('/mesocycles/{id}/edit', 'edit')->name('mesocycles.edit');
+        Route::get('/mesocycles/{mesocycle}/edit', 'edit')->name('mesocycles.edit');
         Route::put('/mesocycles/{id}', 'update')->name('mesocycles.update');
         Route::patch('/mesocycles/{mesocycle}', 'activate')->name('mesocycles.activate');
         Route::delete('/mesocycles/{mesocycle}', 'destroy')->name('mesocycles.destroy');
@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::controller(DayExerciseController::class)->group(function () {
         Route::post('/day/{day}/exercises', 'store')->name('dayExercises.store');
         Route::patch('/day/{day}/reorder', 'updateOrder')->name('dayExercises.reorder');
+        Route::patch('/day/{day}/replace', 'replace')->name('dayExercises.replace');
         Route::delete('day/{day}/exercises/{dayExercise}', 'destroy')->name('dayExercise.destroy')->scopeBindings();
     });
 

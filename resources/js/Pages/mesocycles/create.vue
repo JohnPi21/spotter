@@ -68,19 +68,11 @@
             <InputError :message="errors[`days.${dayIdx}.exercises`]" />
         </UiBox>
 
-        <Modal :show="showMuscleModal" @close="showMuscleModal = false">
-            <ModalHeader title="Choose muscle group" @close="showMuscleModal = false" />
-            <ul>
-                <li
-                    v-for="(muscle, idx) in exerciseStore.muscleGroups"
-                    :key="idx"
-                    @click="addMuscleGroup(idx)"
-                    class="flex cursor-pointer items-center justify-between border-b border-main-border p-2 text-secondary transition last:border-b-0 hover:bg-layer-light hover:text-primary"
-                >
-                    {{ muscle.name }}
-                </li>
-            </ul>
-        </Modal>
+        <ModalMuscleGroups
+            v-model="showMuscleModal"
+            :muscle-groups="exerciseStore.muscleGroups"
+            @select="addMuscleGroup"
+        />
     </div>
 
     <div class="flex items-center justify-center" v-else>
@@ -110,9 +102,8 @@ import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
 import InputRange from "@/Components/Input/Range.vue";
 import InputText from "@/Components/Input/Text.vue";
-import Modal from "@/Components/Modal.vue";
 import ModalExercise from "@/Components/Modals/Exercises.vue";
-import ModalHeader from "@/Components/Modals/Header.vue";
+import ModalMuscleGroups from "@/Components/Modals/MuscleGroups.vue";
 import UiBox from "@/Components/Ui/Box.vue";
 import { useExerciseStore } from "@/stores/exerciseStore";
 import { Icon } from "@iconify/vue";

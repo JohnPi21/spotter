@@ -2,12 +2,12 @@
     <Modal :show="showModal" @close="showModal = false">
         <ModalsHeader title="Exercises" class="border-b border-layer-border p-2" @close="showModal = false" />
 
-        <div class="flex flex-col p-2">
+        <div class="flex max-h-[80vh] flex-col overflow-hidden p-2">
             <InputText class="w-full" placeholder="Search exercise" v-model="search" />
 
-            <div class="scrollbar flex max-h-[68vh] flex-col overflow-y-scroll">
+            <div class="scrollbar mt-2 flex flex-1 flex-col overflow-y-auto">
                 <Collapsible
-                    class="border-b border-main-border"
+                    class="flex-none border-b border-main-border"
                     :title="muscle.name"
                     v-for="(muscle, mIdx) in filteredGroups"
                     v-if="!props.onlyOneMuscleGroup"
@@ -72,6 +72,7 @@ import ModalsHeader from "@/Components/Modals/Header.vue";
 import Collapsible from "@/Components/Ui/Collapsible.vue";
 import { useExerciseStore } from "@/stores/exerciseStore";
 import { Icon } from "@iconify/vue";
+import { storeToRefs } from "pinia";
 import { computed, ref, watch } from "vue";
 
 const showModal = defineModel<boolean>();
@@ -85,9 +86,8 @@ const emit = defineEmits<{
     (e: "select", id: number): void;
 }>();
 
-const exercisesStore = useExerciseStore();
+const { exercisesByMuscle } = storeToRefs(useExerciseStore());
 
-const exercisesByMuscle = exercisesStore.exercisesByMuscle;
 const selected = ref<number | undefined>(props.preSelected);
 const search = ref<string>("");
 
@@ -100,7 +100,7 @@ watch(
 );
 
 const filteredGroups = computed(() => {
-    return exercisesByMuscle
+    return exercisesByMuscle.value
         .map((mg: MuscleGroup) => {
             const hasExercises =
                 mg.exercises?.filter((ex) => ex.name.toLowerCase().includes(search.value.toLowerCase())) || [];
@@ -115,7 +115,7 @@ const filteredGroups = computed(() => {
 });
 
 const filteredExercises = computed(() => {
-    const exercises = exercisesByMuscle.find((mg) => mg.id == props.onlyOneMuscleGroup);
+    const exercises = exercisesByMuscle.value.find((mg) => mg.id == props.onlyOneMuscleGroup);
 
     return (exercises?.exercises || []).filter((ex) => ex.name.toLowerCase().includes(search.value.toLowerCase()));
 });

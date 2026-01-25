@@ -96,10 +96,7 @@ const mesoDropdown = [
     },
 ];
 
-onMounted(() => {
-    console.log(props.mesocycles[0].last_day);
-    console.log(props.mesocycles);
-});
+onMounted(() => {});
 </script>
 
 <style scoped></style>
