@@ -117,10 +117,22 @@
 
             <div
                 v-if="dayExercise?.note"
-                class="flex items-center gap-2 rounded bg-layer-light px-2 py-1 text-sm text-secondary"
+                class="flex w-full items-center justify-between gap-2 rounded bg-layer-light px-2 py-1 text-sm text-secondary"
             >
-                <Icon icon="clarity:note-line" class="text-primary" width="25px" />
-                {{ dayExercise?.note }}
+                <div class="flex flex-1 items-start gap-2">
+                    <Icon icon="clarity:note-line" width="15px" class="mt-[2px] text-primary" />
+                </div>
+                <div class="break-words break-all">
+                    {{ dayExercise?.note }}
+                </div>
+                <button
+                    type="button"
+                    class="flex items-center text-secondary transition hover:text-red"
+                    @click="removeNote(dayExercise.id)"
+                    :disabled="isDayFinished"
+                >
+                    <Icon icon="material-symbols:delete-outline" width="16" />
+                </button>
             </div>
 
             <div class="grid grid-cols-6 gap-5">
@@ -228,7 +240,7 @@ const isDayFinished = computed<boolean>(() => {
 });
 const pendingExerciseAction = ref<ExerciseAction | null>(null);
 const { toggleDay } = useMesocycle();
-const { addExercise, moveDown, moveUp, removeExercise, replaceExercise, addNote } = useExercise(day);
+const { addExercise, moveDown, moveUp, removeExercise, replaceExercise, addNote, removeNote } = useExercise(day);
 const { updateSet, addSet, removeSet } = useSet();
 const { isActiveDay } = useDay();
 

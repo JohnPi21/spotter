@@ -48,6 +48,12 @@ export function useExercise(day: Ref) {
         });
     };
 
+    const removeNote = (dayExerciseID: number) => {
+        router.delete(route("dayExercises.deleteNote", { day: day.value.id }), {
+            data: { day_exercise_id: dayExerciseID },
+        });
+    };
+
     function getPosition(dayExerciseID: number): number {
         return day.value.day_exercises.findIndex((dayEx: Exercise) => dayEx.id == dayExerciseID);
     }
@@ -68,5 +74,6 @@ export function useExercise(day: Ref) {
         moveDown,
         moveUp,
         addNote,
+        removeNote,
     };
 }
