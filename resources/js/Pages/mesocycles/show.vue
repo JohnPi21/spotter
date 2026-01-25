@@ -279,8 +279,8 @@ const exerciseDropdownItems = [
     {
         icon: "ph:swap",
         label: "Replace",
-        action: (oldExerciseID: number) =>
-            openExerciseModal((newExerciseID: number) => replaceExercise(oldExerciseID, newExerciseID)),
+        action: (dayExerciseID: number) =>
+            openExerciseModal((newExerciseID: number) => replaceExercise(dayExerciseID, newExerciseID)),
     },
     {
         icon: "material-symbols:add",

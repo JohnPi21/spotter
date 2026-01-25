@@ -31,9 +31,15 @@ class DayExerciseController extends Controller
         return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }
 
-    public function replaceExercise(SwapDayExerciseRequest $request, MesoDay $day): RedirectResponse
+    public function replace(SwapDayExerciseRequest $request, MesoDay $day): RedirectResponse
     {
-        dd($day);
+        $day->ensureIsEditable();
+
+        $validated = $request->validated();
+
+        $day->dayExercises()->whereKey($validated['day_exercise_id'])->update([
+            'exercise_id' => $validated['new_exercise_id'],
+        ]);
 
         return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }

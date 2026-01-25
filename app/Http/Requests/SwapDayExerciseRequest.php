@@ -23,7 +23,7 @@ class SwapDayExerciseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'old_exercise_id' => ['required', 'exists:exercises,id'],
+            'day_exercise_id' => ['required', 'exists:day_exercises,id'],
             'new_exercise_id' => ['required', 'exists:exercises,id'],
         ];
     }

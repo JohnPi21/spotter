@@ -10,13 +10,10 @@ export function useExercise(day: Ref) {
         );
     };
 
-    const replaceExercise = (oldExerciseID: number, newExerciseID: number) => {
-        console.log("replacing", oldExerciseID, newExerciseID);
-        return;
-        router.post(route("dayExercises.replace"), {
-            old_exercise_id: oldExerciseID,
+    const replaceExercise = (dayExerciseID: number, newExerciseID: number) => {
+        router.patch(route("dayExercises.replace", { day: day.value.id }), {
+            day_exercise_id: dayExerciseID,
             new_exercise_id: newExerciseID,
-            day: day.value.id,
         });
     };
 
