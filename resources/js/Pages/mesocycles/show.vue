@@ -6,6 +6,7 @@
                 :only-one-muscle-group="0"
                 @select="(exerciseID: number) => exerciseSelected(exerciseID)"
             />
+            <ModalsExerciseNote v-model="noteModalOpen" :initial-note="noteModalInitial" @save="saveNote" />
 
             <div class="mb-2 flex items-center justify-between">
                 <div class="flex flex-col">
@@ -97,7 +98,7 @@
                                 :key="i"
                                 :class="item.class"
                                 @click="
-                                    item.action(dayExercise.id);
+                                    item.action(dayExercise.id, dayExercise.note);
                                     slotProps.toggle();
                                 "
                             >
@@ -112,6 +113,14 @@
             <div class="flex flex-col">
                 <h4>{{ dayExercise.exercise.name }}</h4>
                 <p class="text-sm text-secondary">{{ dayExercise.exercise.exercise_type }}</p>
+            </div>
+
+            <div
+                v-if="dayExercise?.note"
+                class="flex items-center gap-2 rounded bg-layer-light px-2 py-1 text-sm text-secondary"
+            >
+                <Icon icon="clarity:note-line" class="text-primary" width="25px" />
+                {{ dayExercise?.note }}
             </div>
 
             <div class="grid grid-cols-6 gap-5">
@@ -190,6 +199,7 @@ import ButtonPrimary from "@/Components/Button/Primary.vue";
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import Checkbox from "@/Components/Input/Checkbox.vue";
 import InputText from "@/Components/Input/Text.vue";
+import ModalsExerciseNote from "@/Components/Modals/ExerciseNote.vue";
 import ModalsExercises from "@/Components/Modals/Exercises.vue";
 import UiBox from "@/Components/Ui/Box.vue";
 import UiDropdownMenu from "@/Components/Ui/DropdownMenu.vue";
@@ -209,13 +219,16 @@ const props = defineProps<{
 
 const day = computed<Day>(() => props.mesocycle.day);
 const exercisesModal = ref<boolean>();
+const noteModalOpen = ref<boolean>(false);
+const noteModalExerciseId = ref<number | null>(null);
+const noteModalInitial = ref<string>("");
 const showCalendar = ref<boolean>(true);
 const isDayFinished = computed<boolean>(() => {
     return !!day.value.finished_at;
 });
 const pendingExerciseAction = ref<ExerciseAction | null>(null);
 const { toggleDay } = useMesocycle();
-const { addExercise, moveDown, moveUp, removeExercise, replaceExercise } = useExercise(day);
+const { addExercise, moveDown, moveUp, removeExercise, replaceExercise, addNote } = useExercise(day);
 const { updateSet, addSet, removeSet } = useSet();
 const { isActiveDay } = useDay();
 
@@ -223,6 +236,19 @@ onMounted(() => {});
 
 async function exerciseSelected(exerciseID: number) {
     pendingExerciseAction.value?.(exerciseID);
+}
+
+function openNoteModal(dayExerciseID: number, currentNote?: string | null): void {
+    noteModalExerciseId.value = dayExerciseID;
+    noteModalInitial.value = currentNote ?? "";
+    noteModalOpen.value = true;
+}
+
+function saveNote(note: string): void {
+    if (noteModalExerciseId.value == null) return;
+
+    addNote(noteModalExerciseId.value, note);
+    noteModalExerciseId.value = null;
 }
 
 function openExerciseModal(action: (exerciseID: number) => void): void {
@@ -263,8 +289,8 @@ const dropdownItems = [
 const exerciseDropdownItems = [
     {
         icon: "icon-park-outline:write",
-        label: "New Note",
-        action: () => console.log("New Note clicked"),
+        label: "Note",
+        action: (dayExerciseID: number, currentNote?: string | null) => openNoteModal(dayExerciseID, currentNote),
     },
     {
         icon: "mdi:arrow-up",

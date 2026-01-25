@@ -41,6 +41,13 @@ export function useExercise(day: Ref) {
         updateOrder();
     };
 
+    const addNote = (dayExerciseID: number, note: string) => {
+        router.put(route("dayExercises.saveNote", { day: day.value.id }), {
+            day_exercise_id: dayExerciseID,
+            note: note,
+        });
+    };
+
     function getPosition(dayExerciseID: number): number {
         return day.value.day_exercises.findIndex((dayEx: Exercise) => dayEx.id == dayExerciseID);
     }
@@ -60,5 +67,6 @@ export function useExercise(day: Ref) {
         replaceExercise,
         moveDown,
         moveUp,
+        addNote,
     };
 }
