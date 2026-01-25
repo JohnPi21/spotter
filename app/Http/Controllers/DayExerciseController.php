@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\DayExercise\CreateDayExercise;
 use App\Actions\DayExercise\ReorderDayExercises;
 use App\Http\Requests\StoreDayExerciseRequest;
+use App\Http\Requests\SwapDayExerciseRequest;
 use App\Http\Requests\UpdateDayExerciseOrderRequest;
 use App\Models\DayExercise;
 use App\Models\MesoDay;
@@ -26,6 +27,13 @@ class DayExerciseController extends Controller
     public function updateOrder(UpdateDayExerciseOrderRequest $request, MesoDay $day): RedirectResponse
     {
         app(ReorderDayExercises::class)->execute($day, $request->validated('order'));
+
+        return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
+    }
+
+    public function replaceExercise(SwapDayExerciseRequest $request, MesoDay $day): RedirectResponse
+    {
+        dd($day);
 
         return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }
