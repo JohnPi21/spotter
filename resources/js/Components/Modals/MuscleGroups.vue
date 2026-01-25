@@ -1,37 +1,60 @@
 <template>
-    <ModalsHeader title="Muscle Groups" />
-    <ul>
-        <li
-            v-for="(muscle, idx) in props"
-            :key="idx"
-            @click="select(idx)"
-            :class="[selected == idx ? 'bg-layer-light text-primary' : 'text-secondary']"
-            class="flex cursor-pointer items-center justify-between border-b border-main-border p-2 transition last:border-b-0 hover:bg-layer-light hover:text-primary"
-        >
-            {{ muscle }}
+    <Modal :show="showModal" @close="showModal = false">
+        <ModalsHeader title="Muscle Groups" class="border-b border-layer-border p-2" @close="showModal = false" />
+        <ul class="scrollbar max-h-[80vh] overflow-y-auto">
+            <li
+                v-for="muscle in groups"
+                :key="muscle.id"
+                @click="select(muscle.id)"
+                :class="[selected == muscle.id ? 'bg-layer-light text-primary' : 'text-secondary']"
+                class="flex cursor-pointer items-center justify-between border-b border-main-border p-2 transition last:border-b-0 hover:bg-layer-light hover:text-primary"
+            >
+                {{ muscle.name }}
 
-            <Icon icon="ri:checkbox-circle-fill" v-if="selected == idx" class="text-text-green" />
-        </li>
-    </ul>
-    <!-- <ButtonPrimary @click="modalStore.confirmClose(selected)" class="w-full mt-1">Select</ButtonPrimary> -->
-    <!-- <button class="bg-accent px-2 py-1 mt-1 rounded w-full" @click="modalStore.confirmClose(selected)">Select</button> -->
+                <Icon icon="ri:checkbox-circle-fill" v-if="selected == muscle.id" class="text-text-green" />
+            </li>
+        </ul>
+    </Modal>
 </template>
-<script setup>
-import ModalsHeader from "@components/Modals/Header.vue";
+<script setup lang="ts">
+import Modal from "@/Components/Modal.vue";
+import ModalsHeader from "@/Components/Modals/Header.vue";
 import { Icon } from "@iconify/vue";
-import { useModalStore } from "@stores/modalStore";
-import { ref } from "vue";
-// import ButtonPrimary from '@components/Button/Primary.vue';
+import { computed, ref, watch } from "vue";
 
-const modalStore = useModalStore();
+const showModal = defineModel<boolean>();
 
-const props = modalStore.data;
+const props = defineProps<{
+    muscleGroups: Record<number, MuscleGroup> | MuscleGroup[];
+    preSelected?: number;
+}>();
 
-const selected = ref(null);
+const emit = defineEmits<{
+    (e: "select", id: number): void;
+}>();
 
-function select(idx) {
-    selected.value = idx;
+const selected = ref<number | undefined>(props.preSelected);
 
-    modalStore.confirmClose(selected.value);
+watch(
+    () => props.preSelected,
+    (newVal) => {
+        selected.value = newVal;
+    },
+    { immediate: true }
+);
+
+const groups = computed(() => {
+    if (Array.isArray(props.muscleGroups)) {
+        return props.muscleGroups;
+    }
+
+    return Object.values(props.muscleGroups);
+});
+
+function select(id: number): void {
+    selected.value = id;
+    emit("select", id);
+    showModal.value = false;
+    selected.value = undefined;
 }
 </script>

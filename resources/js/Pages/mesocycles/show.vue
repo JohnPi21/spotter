@@ -4,7 +4,7 @@
             <ModalsExercises
                 v-model="exercisesModal"
                 :only-one-muscle-group="0"
-                @select="(exerciseID: number) => addExercise(exerciseID)"
+                @select="(exerciseID: number) => exerciseSelected(exerciseID)"
             />
 
             <div class="mb-2 flex items-center justify-between">
@@ -194,8 +194,12 @@ import ModalsExercises from "@/Components/Modals/Exercises.vue";
 import UiBox from "@/Components/Ui/Box.vue";
 import UiDropdownMenu from "@/Components/Ui/DropdownMenu.vue";
 import UiErrors from "@/Components/Ui/Errors.vue";
+import { useDay } from "@/Composables/useDay";
+import { useExercise } from "@/Composables/useExercise";
+import { useMesocycle } from "@/Composables/useMesocycle";
+import { useSet } from "@/Composables/useSet";
 import { Icon } from "@iconify/vue";
-import { Link, router, usePage } from "@inertiajs/vue3";
+import { Link } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 
 const props = defineProps<{
@@ -209,105 +213,24 @@ const showCalendar = ref<boolean>(true);
 const isDayFinished = computed<boolean>(() => {
     return !!day.value.finished_at;
 });
-
-function isActiveDay(dayID: number) {
-    const url = usePage().url.split("/");
-    const length = url.length - 1;
-
-    return Number(url[length]) === dayID;
-}
+const pendingExerciseAction = ref<ExerciseAction | null>(null);
+const { toggleDay } = useMesocycle();
+const { addExercise, moveDown, moveUp, removeExercise, replaceExercise } = useExercise(day);
+const { updateSet, addSet, removeSet } = useSet();
+const { isActiveDay } = useDay();
 
 onMounted(() => {});
 
-async function removeExercise(dayExerciseID: number) {
-    router.delete(route("dayExercise.destroy", { day: day.value.id, dayExercise: dayExerciseID }), {
-        preserveState: "errors",
-    });
+async function exerciseSelected(exerciseID: number) {
+    pendingExerciseAction.value?.(exerciseID);
 }
 
-async function updateSet(set: ExerciseSet, dayExerciseID: number) {
-    if (!set.status) return;
-
-    router.patch(
-        route("sets.update", { dayExercise: dayExerciseID, set: set.id }),
-        { ...set },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            onError: () => (set.status = false),
-        }
-    );
-}
-
-async function addSet(dayExerciseID: number) {
-    router.post(
-        route("sets.store", { dayExercise: dayExerciseID }),
-        {},
-        {
-            preserveScroll: true,
-            preserveState: true,
-        }
-    );
-}
-
-async function removeSet(dayExerciseID: number, setID: number) {
-    router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
-        preserveState: true,
-        preserveScroll: true,
-    });
-}
-
-// async function addComment() {
-//     console.log('addig comment');
-// }
-
-async function toggleDay(dayID: number) {
-    router.patch(route("days.toggle", { day: dayID }));
-}
-
-async function addExercise(exerciseID: number) {
-    router.post(
-        route("dayExercises.store", { day: day.value.id }),
-        { exercise_id: exerciseID },
-        { preserveState: false }
-    );
-}
-
-function getPosition(dayExerciseID: number): number {
-    return day.value.day_exercises.findIndex((dayEx) => dayEx.id == dayExerciseID);
-}
-
-async function moveUp(dayExerciseID: number): Promise<void> {
-    const position = getPosition(dayExerciseID);
-
-    if (position === -1 || position === 0) return;
-
-    swap(day.value.day_exercises, position, position - 1);
-}
-
-async function moveDown(dayExerciseID: number) {
-    const position = getPosition(dayExerciseID);
-
-    if (position === -1 || position === day.value.day_exercises.length - 1) return;
-
-    swap(day.value.day_exercises, position, position + 1);
-
-    updateOrder();
-}
-
-function swap<T>(arr: T[], from: number, to: number) {
-    [arr[from], arr[to]] = [arr[to], arr[from]];
-}
-
-async function updateOrder() {
-    const order = day.value.day_exercises.map((ex) => ex.id);
-
-    router.patch(route("dayExercises.reorder", { day: day.value.id }), { order });
-}
-
-function addExerciseModal(): void {
+function openExerciseModal(action: (exerciseID: number) => void): void {
+    pendingExerciseAction.value = action;
     exercisesModal.value = true;
 }
+
+type ExerciseAction = (dayExerciseID: number) => void;
 
 const dropdownItems = [
     {
@@ -328,7 +251,7 @@ const dropdownItems = [
             {
                 icon: "material-symbols:add",
                 label: "Add Exercise",
-                action: () => addExerciseModal(),
+                action: () => openExerciseModal((exerciseID: number) => addExercise(exerciseID)),
             },
             { icon: "hugeicons:weight-scale", label: "Bodyweight" },
             { icon: "carbon:reset", label: "Reset" },
@@ -356,7 +279,8 @@ const exerciseDropdownItems = [
     {
         icon: "ph:swap",
         label: "Replace",
-        action: () => console.log("Replace clicked"),
+        action: (dayExerciseID: number) =>
+            openExerciseModal((newExerciseID: number) => replaceExercise(dayExerciseID, newExerciseID)),
     },
     {
         icon: "material-symbols:add",
@@ -372,7 +296,7 @@ const exerciseDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (dayExerciseID: number) => removeExercise(dayExerciseID),
+        action: (dayExerciseID: number) => removeExercise(dayExerciseID, day.value),
     },
 ];
 
