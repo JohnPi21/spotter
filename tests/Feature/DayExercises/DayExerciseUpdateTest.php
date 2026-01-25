@@ -104,4 +104,28 @@ class DayExerciseUpdateTest extends TestCase
             ->assertRedirectBack();
         // ->assertSessionHasErrors();
     }
+
+    public function test_user_can_save_note_for_day_exercise()
+    {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
+        $user = User::factory()->create();
+        $meso = Mesocycle::factory()->for($user)->withFullStructure()->create();
+        $day = $meso->days()->first();
+        $dayExercise = $day->dayExercises()->first();
+
+        $payload = [
+            'day_exercise_id' => $dayExercise->id,
+            'note' => 'Focus on form and tempo.',
+        ];
+
+        $this->actingAs($user)
+            ->put(route('dayExercises.saveNote', $day), $payload)
+            ->assertRedirect(route('days.show', [$meso, $day]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('day_exercises', [
+            'id' => $dayExercise->id,
+            'note' => $payload['note'],
+        ]);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\DayExercise\CreateDayExercise;
 use App\Actions\DayExercise\ReorderDayExercises;
+use App\Http\Requests\SaveNoteRequest;
 use App\Http\Requests\StoreDayExerciseRequest;
 use App\Http\Requests\SwapDayExerciseRequest;
 use App\Http\Requests\UpdateDayExerciseOrderRequest;
@@ -55,5 +56,18 @@ class DayExerciseController extends Controller
         $dayExercise->delete();
 
         return redirect()->route('days.show', ['mesocycle' => $dayExercise->day->mesocycle, 'day' => $dayExercise->day]);
+    }
+
+    public function saveNote(SaveNoteRequest $request, MesoDay $day): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $dayExercise = $day->dayExercises()->whereKey($validated['day_exercise_id']);
+
+        $dayExercise->update([
+            'note' => $validated['note'],
+        ]);
+
+        return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }
 }
