@@ -16,6 +16,7 @@ use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
 use Prism\Prism\Schema\ArraySchema;
 use Prism\Prism\Schema\EnumSchema;
+use App\Services\PrismAiClient;
 
 class MesocycleAgent
 {
@@ -24,6 +25,9 @@ class MesocycleAgent
     private string $promptVersion = '';
     private string $systemPromptVersion = '';
 
+    /**
+     * @param PrismAiClient $aiClient
+     */
     public function __construct(public AiClient $aiClient)
     {
         // --------------------
@@ -210,6 +214,7 @@ PROMPT;
 
     private function prepareExercises(CreateAiMesocycleData $dto): array
     {
+        // Default Exercises (can't cash because of equipment filter) 
         $exercises =  Exercise::select(['id', 'name', 'muscle_group_id'])
             ->whereIn('exercise_type', $dto->equipment)
             ->where('user_id', null)
@@ -302,6 +307,7 @@ PROMPT;
 
     /*
     * @var int[] $ids
+    * @return \Illuminate\Support\Collection<int, Exercise>
     */
     private function exerciseLookup(array $ids)
     {

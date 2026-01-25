@@ -55,9 +55,15 @@ class PrismAiClient implements AiClient
             ]);
         // ->asStructured();
 
-        $ms = (microtime(true) - $start) * 1000;
 
-        $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
+        Log::channel('openai')->info("$this->provider request", [
+            'type'      => AiRequestEnum::STRUCTURED,
+            'model'     => $this->model,
+            'payload'   => [$prompt, $systemPrompt, $schema],
+            'response'  => $response,
+        ]);
+
+        // $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
         // dd($response);
 
         // return $response->structured;
@@ -65,14 +71,4 @@ class PrismAiClient implements AiClient
     }
 
     public function chat() {}
-
-    private function conversationLog(AiRequestEnum $type, $payload, $response): void
-    {
-        Log::channel('openai')->info("$this->provider request", [
-            'type'      => $type,
-            'model'     => $this->model,
-            'payload'   => $payload,
-            'response'  => $response,
-        ]);
-    }
 }
