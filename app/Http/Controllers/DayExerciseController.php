@@ -60,12 +60,29 @@ class DayExerciseController extends Controller
 
     public function saveNote(SaveNoteRequest $request, MesoDay $day): RedirectResponse
     {
+        $day->ensureIsEditable();
+
         $validated = $request->validated();
 
         $dayExercise = $day->dayExercises()->whereKey($validated['day_exercise_id']);
 
         $dayExercise->update([
             'note' => $validated['note'],
+        ]);
+
+        return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
+    }
+
+    public function deleteNote(SaveNoteRequest $request, MesoDay $day): RedirectResponse
+    {
+        $day->ensureIsEditable();
+
+        $validated = $request->validated();
+
+        $dayExercise = $day->dayExercises()->whereKey($validated['day_exercise_id']);
+
+        $dayExercise->update([
+            'note' => null,
         ]);
 
         return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
