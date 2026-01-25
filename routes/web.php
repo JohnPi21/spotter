@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/day/{day}/reorder', 'updateOrder')->name('dayExercises.reorder');
         Route::patch('/day/{day}/replace', 'replace')->name('dayExercises.replace');
         Route::put('/day/{day}/save-note', 'saveNote')->name('dayExercises.saveNote');
+        Route::delete('/day/{day}/note', 'deleteNote')->name('dayExercises.deleteNote');
         Route::delete('day/{day}/exercises/{dayExercise}', 'destroy')->name('dayExercise.destroy')->scopeBindings();
     });
 

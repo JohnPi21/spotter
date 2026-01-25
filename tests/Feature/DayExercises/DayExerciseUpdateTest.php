@@ -128,4 +128,27 @@ class DayExerciseUpdateTest extends TestCase
             'note' => $payload['note'],
         ]);
     }
+
+    public function test_user_can_delete_note_for_day_exercise()
+    {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
+        $user = User::factory()->create();
+        $meso = Mesocycle::factory()->for($user)->withFullStructure()->create();
+        $day = $meso->days()->first();
+        $dayExercise = $day->dayExercises()->first();
+
+        $dayExercise->update(['note' => 'Delete me.']);
+
+        $this->actingAs($user)
+            ->delete(route('dayExercises.deleteNote', $day), [
+                'day_exercise_id' => $dayExercise->id,
+            ])
+            ->assertRedirect(route('days.show', [$meso, $day]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('day_exercises', [
+            'id' => $dayExercise->id,
+            'note' => null,
+        ]);
+    }
 }
