@@ -11,6 +11,7 @@ use App\Enums\SplitsEnum;
 use App\Enums\TrainingGoalsEnum;
 use App\Http\Requests\AiMesocycleRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class AiMesocycleController extends Controller
@@ -18,10 +19,10 @@ class AiMesocycleController extends Controller
     public function create()
     {
         return Inertia::render("mesocycles/AiCreate", [
-            'experienceOptions' => ExperienceEnum::options(),
-            'primaryGoalOptions' => TrainingGoalsEnum::options(),
+            'experienceOptions'      => ExperienceEnum::options(),
+            'primaryGoalOptions'     => TrainingGoalsEnum::options(),
             'splitPreferenceOptions' => SplitsEnum::options(),
-            'equipmentOptions' => EquipmentsEnum::options(),
+            'equipmentOptions'       => EquipmentsEnum::options(),
             'sessionDurationOptions' => SessionDurationEnum::values(),
         ]);
     }
@@ -31,7 +32,7 @@ class AiMesocycleController extends Controller
         $aiMesocycleDTO = CreateAiMesocycleData::from($request->validated());
 
         // pass to agenta
-        $schema = $agent->generate($aiMesocycleDTO);
+        $schema = $agent->generate(Auth::id(), $aiMesocycleDTO);
 
 
         // send user to preview page

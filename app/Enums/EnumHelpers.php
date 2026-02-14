@@ -13,6 +13,16 @@ trait EnumHelpers
     }
 
     /**
+     * Return an array of all labels formatted user friendly
+     *
+     * @return array
+     */
+    public function labels(): array
+    {
+        return array_map(fn(self $case) => [$case->label()], self::cases());
+    }
+
+    /**
      * Return an array of ['label' => ..., 'value' => ...] for selects.
      */
     public static function options(): array
