@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Data\Ai\AiCallContextData;
 use App\Enums\AiRequestEnum;
 use App\Enums\RequestStatusEnum;
 use Spatie\LaravelData\Data;
@@ -13,9 +14,10 @@ class AiRequestData extends Data
 {
     public function __construct(
         public Provider $provider,
-        public string $model,
-        public AiRequestEnum $type,
+        public string $aImodel,
+        // public AiRequestEnum $type,
         public RequestStatusEnum $status = RequestStatusEnum::PENDING,
-        public UuidInterface $request_uuid = Str::uuid(),
+        public UuidInterface $requestUuid = Str::uuid(),
+        public AiCallContextData $aiCallContextData,
     ) {}
 }

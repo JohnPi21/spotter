@@ -4,6 +4,7 @@ namespace App\Ai\Agents;
 
 use App\Ai\Prompts\MesocyclePrompt;
 use App\Contracts\AiClient;
+use App\Data\Ai\AiCallContextData;
 use App\Data\Mesocycle\CreateAiMesocycleData;
 use App\Data\Mesocycle\CreateMesocycleData;
 use App\Exceptions\InvalidMesocycleException;
@@ -32,8 +33,12 @@ class MesocycleAgent
         $prompt       = $this->promptGenerator->prompt($preparedExercises, $muscleGroups, $dto);
         $systemPrompt = $this->promptGenerator->systemPrompt();
         $schema       = $this->promptGenerator->schema();
+        $versionMeta  = $this->promptGenerator->getVersions();
 
-        $response = $this->aiClient->structured($prompt, $systemPrompt, $schema);
+        // Make sure we have all the info needed to construct the aireqeust
+        $aiCallContextData = AiCallContextData::from($prompt, $systemPrompt, $schema, $userId, get_class($this), ...$versionMeta);
+
+        $response = $this->aiClient->structured($aiCallContextData);
 
         return $this->prepareMesoDto($response);
     }

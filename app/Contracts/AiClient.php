@@ -2,13 +2,14 @@
 
 namespace App\Contracts;
 
+use App\Data\Ai\AiCallContextData;
 use Prism\Prism\Contracts\Schema;
 
 interface AiClient
 {
-    public function text(string $prompt, string $systemPrompt): string;
+    public function text(AiCallContextData $context): string;
 
-    public function structured(string $prompt, string $systemPrompt, Schema $schema): array;
+    public function structured(AiCallContextData $context): array;
 
     public function chat();
 }

@@ -15,6 +15,26 @@ class MesocyclePrompt
 {
     public function __construct() {}
 
+    //schema_key mesocycle.create
+    //schema_version 1.0.0
+    //schema_hash Hash::from($schema->toArray())
+    //prompt_version 1.0.0
+    //system_prompt_version: 1.0.0
+
+    public function getVersions(): array
+    {
+        $schema = $this->schema()->toArray();
+        ksort($schema);
+
+        return [
+            // 'schema_key'        => 'mesocycle.generate',
+            'schemaVersion'    => '1.0.0',
+            'schemaHash'       => hash('sha256', json_encode($schema)),
+            'promptVersion'    => '1.0.0',
+            'systemPromptVersion' => '1.0.0'
+        ];
+    }
+
     public function schema(): Schema
     {
         // --------------------

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\AiClient;
+use App\Data\Ai\AiCallContextData;
 use App\Data\AiRequestData;
 use App\Data\AiRequestDTOData;
 use App\Enums\AiRequestEnum;
@@ -30,12 +31,12 @@ class PrismAiClient implements AiClient
         $this->model    = config('ai.default_model');
     }
 
-    public function text(string $prompt, string $systemPrompt): string
+    public function text(AiCallContextData $context): string
     {
         $response = Prism::text()
             ->using($this->provider, $this->model)
-            ->withPrompt($prompt)
-            ->withSystemPrompt($systemPrompt)
+            ->withPrompt($context->prompt)
+            ->withSystemPrompt($context->systemPrompt)
             ->onComplete(
                 fn(PendingRequest $request, Collection $messages) =>
                 dd($request, $messages)
@@ -48,28 +49,22 @@ class PrismAiClient implements AiClient
 
 
     // CHECK Plan AI request logging strategy for strategy. Scroll 2 prompts up
-    public function structured(string $prompt, string $systemPrompt, Schema $schema): array
+    // public function structured(string $prompt, string $systemPrompt, Schema $schema): array
+    public function structured(AiCallContextData $aiCallContext): array
     {
-        // @TODO: move to DTO later
-        // $aiRequestDTO = $this->aiRequestDtoFactory(AiRequestEnum::STRUCTURED);
+        // @TODO: change AiRequestData to match exactly with the AiRequest create initial signature
+        // RUn migration btw
+        $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
 
-        // AiRequest::create($aiRequestDTO->toArray());
-
-        $aiRequest = AiRequest::create([
-            'request_uuid' => Str::uuid(),
-            'type'      => AiRequestEnum::STRUCTURED,
-            'provider'  => $this->provider,
-            'model'     => $this->model,
-            'status'    => RequestStatusEnum::PENDING
-        ]);
+        $aiRequest = AiRequest::create($payload->toArray());
 
         $start = microtime(true);
         try {
             $response = Prism::structured()
                 ->using($this->provider, $this->model)
-                ->withPrompt($prompt)
-                ->withSystemPrompt($systemPrompt)
-                ->withSchema($schema)
+                ->withPrompt($aiCallContext->prompt)
+                ->withSystemPrompt($aiCallContext->systemPrompt)
+                ->withSchema($aiCallContext->schema)
                 ->withClientOptions([
                     'schema' => [
                         'strict' => true
@@ -95,12 +90,12 @@ class PrismAiClient implements AiClient
         ]);
 
 
-        Log::channel('openai')->info("$this->provider request", [
-            'type'      => AiRequestEnum::STRUCTURED,
-            'model'     => $this->model,
-            'payload'   => [$prompt, $systemPrompt, $schema],
-            'response'  => $response,
-        ]);
+        // Log::channel('openai')->info("$this->provider request", [
+        //     'type'      => AiRequestEnum::STRUCTURED,
+        //     'model'     => $this->model,
+        //     'payload'   => [$prompt, $systemPrompt, $schema],
+        //     'response'  => $response,
+        // ]);
 
         // $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
         // dd($response);
@@ -111,12 +106,6 @@ class PrismAiClient implements AiClient
     }
 
     public function chat() {}
-
-
-    public function aiRequestDtoFactory(AiRequestEnum $type): AiRequestData
-    {
-        return new AiRequestData($this->provider, $this->model, $type);
-    }
 
 
     public function mockupResponse()
