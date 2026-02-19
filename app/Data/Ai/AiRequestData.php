@@ -15,9 +15,28 @@ class AiRequestData extends Data
     public function __construct(
         public Provider $provider,
         public string $aImodel,
-        // public AiRequestEnum $type,
+        public int $userId,
+        public string $callerClass,
+        public string $promptVersion,
+        public string $systemPromptVersion,
+
+        public ?string $schemaVersion,
+        public ?string $schemaHash,
         public RequestStatusEnum $status = RequestStatusEnum::PENDING,
         public UuidInterface $requestUuid = Str::uuid(),
-        public AiCallContextData $aiCallContextData,
     ) {}
+
+    public static function fromContext(Provider $provider, string $aiModel, AiCallContextData $context): self
+    {
+        return new self(
+            $provider,
+            $aiModel,
+            $context->userId,
+            $context->callerClass,
+            $context->promptVersion,
+            $context->systemPromptVersion,
+            $context?->schemaVersion,
+            $context?->schemaHash,
+        );
+    }
 }

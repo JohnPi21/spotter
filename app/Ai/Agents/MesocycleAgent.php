@@ -35,10 +35,9 @@ class MesocycleAgent
         $schema       = $this->promptGenerator->schema();
         $versionMeta  = $this->promptGenerator->getVersions();
 
-        // Make sure we have all the info needed to construct the aireqeust
         $aiCallContextData = AiCallContextData::from($prompt, $systemPrompt, $schema, $userId, get_class($this), ...$versionMeta);
 
-        $response = $this->aiClient->structured($aiCallContextData);
+        [$aiRequest, $response] = $this->aiClient->structured($aiCallContextData);
 
         return $this->prepareMesoDto($response);
     }

@@ -22,96 +22,81 @@ use Prism\Prism\Exceptions\PrismServerException;
 
 class PrismAiClient implements AiClient
 {
-    public Provider $provider;
-    public string $model;
+	public Provider $provider;
+	public string $model;
 
-    public function __construct()
-    {
-        $this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
-        $this->model    = config('ai.default_model');
-    }
+	public function __construct()
+	{
+		$this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
+		$this->model    = config('ai.default_model');
+	}
 
-    public function text(AiCallContextData $context): string
-    {
-        $response = Prism::text()
-            ->using($this->provider, $this->model)
-            ->withPrompt($context->prompt)
-            ->withSystemPrompt($context->systemPrompt)
-            ->onComplete(
-                fn(PendingRequest $request, Collection $messages) =>
-                dd($request, $messages)
-                // $this->conversationLog(AiRequestEnum::TEXT, $request)
-            )
-            ->asText();
+	public function text(AiCallContextData $context): string
+	{
+		$response = Prism::text()
+			->using($this->provider, $this->model)
+			->withPrompt($context->prompt)
+			->withSystemPrompt($context->systemPrompt)
+			->onComplete(
+				fn(PendingRequest $request, Collection $messages) =>
+				dd($request, $messages)
+				// $this->conversationLog(AiRequestEnum::TEXT, $request)
+			)
+			->asText();
 
-        return $response->text;
-    }
-
-
-    // CHECK Plan AI request logging strategy for strategy. Scroll 2 prompts up
-    // public function structured(string $prompt, string $systemPrompt, Schema $schema): array
-    public function structured(AiCallContextData $aiCallContext): array
-    {
-        // @TODO: change AiRequestData to match exactly with the AiRequest create initial signature
-        // RUn migration btw
-        $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
-
-        $aiRequest = AiRequest::create($payload->toArray());
-
-        $start = microtime(true);
-        try {
-            $response = Prism::structured()
-                ->using($this->provider, $this->model)
-                ->withPrompt($aiCallContext->prompt)
-                ->withSystemPrompt($aiCallContext->systemPrompt)
-                ->withSchema($aiCallContext->schema)
-                ->withClientOptions([
-                    'schema' => [
-                        'strict' => true
-                    ]
-                ]);
-            // ->asStructured();
-        } catch (PrismException $e) {
-
-            // @TODO: Set failed send extra data??? make logging inside model?? create the logger here? what to log exactly;
-
-            $aiRequest->setFailed();
-        } catch (\Throwable $th) {
-            $aiRequest->update([
-                'status' => RequestStatusEnum::FAILED,
-            ]);
-        }
-
-        // @TODO: complete success path
-        $time = microtime(true) - $start;
-
-        $aiRequest->fill([
-            'latency_ms' => $time,
-        ]);
+		return $response->text;
+	}
 
 
-        // Log::channel('openai')->info("$this->provider request", [
-        //     'type'      => AiRequestEnum::STRUCTURED,
-        //     'model'     => $this->model,
-        //     'payload'   => [$prompt, $systemPrompt, $schema],
-        //     'response'  => $response,
-        // ]);
+	public function structured(AiCallContextData $aiCallContext): array
+	{
+		$payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
 
-        // $this->conversationLog(AiRequestEnum::STRUCTURED, [$prompt, $systemPrompt, $schema], $response);
-        // dd($response);
+		$aiRequest = AiRequest::create($payload->toArray());
 
-        // return $response->structured;
-        return [];
-        return $response;
-    }
+		$start = microtime(true);
+		try {
+			$response = Prism::structured()
+				->using($this->provider, $this->model)
+				->withPrompt($aiCallContext->prompt)
+				->withSystemPrompt($aiCallContext->systemPrompt)
+				->withSchema($aiCallContext->schema)
+				->withClientOptions([
+					'schema' => [
+						'strict' => true
+					]
+				]);
+			// ->asStructured();
 
-    public function chat() {}
+			$response = $this->mockupResponse();
+		} catch (PrismException $e) {
+			// @TODO: Set failed send extra data??? make logging inside model?? create the logger here? what to log exactly;
+			$aiRequest->setFailed($e, 'transport');
+		}
+		// @TODO: complete success path
+		$time = microtime(true) - $start;
+
+		$usage = $response['usage'];
+		$aiRequest->fill([
+			'latency_ms' => $time,
+			'usage' => json_encode($usage),
+			'prompt_tokens' => $usage['promptTokens'],
+			'completion_tokens' => $usage['completionTokens'],
+			'total_tokens' => $usage['promptTokens'] + $usage['completionTokens'],
+			'finish_reason' => $response['finishReason'],
+			'status' => RequestStatusEnum::SUCCESS,
+		])->save();
+
+		return [$aiRequest, $response];
+	}
+
+	public function chat() {}
 
 
-    public function mockupResponse()
-    {
-        return json_decode(
-            '{
+	public function mockupResponse()
+	{
+		return json_decode(
+			'{
   "name": "4-week Strength/Hypertrophy Mesocycle",
   "unit": "kg",
   "weeksDuration": 4,
@@ -180,6 +165,6 @@ class PrismAiClient implements AiClient
   "toolResults": [],
   "additionalContent": []
 }'
-        );
-    }
+		);
+	}
 }

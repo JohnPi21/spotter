@@ -49,6 +49,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasActiveMesocycle(): bool
     {
-        return (bool) Mesocycle::mine()->active()->exists();
+        return (bool) Mesocycle::query()->mine()->active()->exists();
     }
 }
