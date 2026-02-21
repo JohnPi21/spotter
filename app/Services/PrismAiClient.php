@@ -4,99 +4,100 @@ namespace App\Services;
 
 use App\Contracts\AiClient;
 use App\Data\Ai\AiCallContextData;
-use App\Data\AiRequestData;
-use App\Data\AiRequestDTOData;
-use App\Enums\AiRequestEnum;
+use App\Data\Ai\AiRequestData;
+use App\Enums\RequestStatusEnum;
+use App\Exceptions\AppException;
 use App\Models\AiRequest;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
-use Prism\Prism\Contracts\Schema;
-use Prism\Prism\Facades\Prism;
 use Prism\Prism\Enums\Provider;
-use Prism\Prism\Text\PendingRequest;
-use App\Enums\RequestStatusEnum;
-use Illuminate\Support\Str;
 use Prism\Prism\Exceptions\PrismException;
-use Prism\Prism\Exceptions\PrismRateLimitedException;
-use Prism\Prism\Exceptions\PrismServerException;
+use Prism\Prism\Facades\Prism;
+use Prism\Prism\Text\PendingRequest;
 
 class PrismAiClient implements AiClient
 {
-	public Provider $provider;
-	public string $model;
+    public Provider $provider;
 
-	public function __construct()
-	{
-		$this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
-		$this->model    = config('ai.default_model');
-	}
+    public string $model;
 
-	public function text(AiCallContextData $context): string
-	{
-		$response = Prism::text()
-			->using($this->provider, $this->model)
-			->withPrompt($context->prompt)
-			->withSystemPrompt($context->systemPrompt)
-			->onComplete(
-				fn(PendingRequest $request, Collection $messages) =>
-				dd($request, $messages)
-				// $this->conversationLog(AiRequestEnum::TEXT, $request)
-			)
-			->asText();
+    public function __construct()
+    {
+        $this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
+        $this->model = config('ai.default_model');
+    }
 
-		return $response->text;
-	}
+    public function text(AiCallContextData $context): string
+    {
+        $response = Prism::text()
+            ->using($this->provider, $this->model)
+            ->withPrompt($context->prompt)
+            ->withSystemPrompt($context->systemPrompt)
+            ->onComplete(
+                fn(PendingRequest $request, Collection $messages) => dd($request, $messages)
+                // $this->conversationLog(AiRequestEnum::TEXT, $request)
+            )
+            ->asText();
 
+        return $response->text;
+    }
 
-	public function structured(AiCallContextData $aiCallContext): array
-	{
-		$payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
+    public function structured(AiCallContextData $aiCallContext): array
+    {
+        $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
 
-		$aiRequest = AiRequest::create($payload->toArray());
+        $aiRequest = AiRequest::create($payload->toArray());
 
-		$start = microtime(true);
-		try {
-			$response = Prism::structured()
-				->using($this->provider, $this->model)
-				->withPrompt($aiCallContext->prompt)
-				->withSystemPrompt($aiCallContext->systemPrompt)
-				->withSchema($aiCallContext->schema)
-				->withClientOptions([
-					'schema' => [
-						'strict' => true
-					]
-				]);
-			// ->asStructured();
+        $start = hrtime(true);
+        try {
+            $response = Prism::structured()
+                ->using($this->provider, $this->model)
+                ->withPrompt($aiCallContext->prompt)
+                ->withSystemPrompt($aiCallContext->systemPrompt)
+                ->withSchema($aiCallContext->schema)
+                ->withClientOptions([
+                    'schema' => [
+                        'strict' => true,
+                    ],
+                ]);
+            // ->asStructured();
+            // throw new PrismException('F up');
 
-			$response = $this->mockupResponse();
-		} catch (PrismException $e) {
-			// @TODO: Set failed send extra data??? make logging inside model?? create the logger here? what to log exactly;
-			$aiRequest->setFailed($e, 'transport');
-		}
-		// @TODO: complete success path
-		$time = microtime(true) - $start;
+            $response = $this->mockupResponse();
+        } catch (PrismException $e) {
+            // TODO: Set failed send extra data??? log data / error here
+            // stop the request here with an exception
+            // Implement retry in case of 429 too many requests
+            $aiRequest->setFailed($e, 'transport');
+            throw new AppException(500, $e->getMessage());
+        }
+        //@TODO: complete success path
+        $latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
 
-		$usage = $response['usage'];
-		$aiRequest->fill([
-			'latency_ms' => $time,
-			'usage' => json_encode($usage),
-			'prompt_tokens' => $usage['promptTokens'],
-			'completion_tokens' => $usage['completionTokens'],
-			'total_tokens' => $usage['promptTokens'] + $usage['completionTokens'],
-			'finish_reason' => $response['finishReason'],
-			'status' => RequestStatusEnum::SUCCESS,
-		])->save();
+        $usage = $response->usage;
+        $aiRequest->fill([
+            'latency_ms' => $latencyMs,
+            'usage_json' => json_encode($usage),
+            'prompt_tokens' => $usage->promptTokens,
+            'completion_tokens' => $usage->completionTokens,
+            'total_tokens' => $usage->promptTokens + $usage->completionTokens,
+            'finish_reason' => $response->finishReason,
+            'status' => RequestStatusEnum::SUCCESS,
+            'meta_id' => $response->meta->id,
+        ])->save();
 
-		return [$aiRequest, $response];
-	}
+        dd($aiRequest->refresh());
 
-	public function chat() {}
+        // @TODO: test the response, handle the errors and retries
+        // Divide schema validation from within the schema and Domain logic validation
+        return [$aiRequest, $response];
+    }
 
+    public function chat() {}
 
-	public function mockupResponse()
-	{
-		return json_decode(
-			'{
+    public function mockupResponse()
+    {
+        return json_decode(
+            '{
   "name": "4-week Strength/Hypertrophy Mesocycle",
   "unit": "kg",
   "weeksDuration": 4,
@@ -165,6 +166,6 @@ class PrismAiClient implements AiClient
   "toolResults": [],
   "additionalContent": []
 }'
-		);
-	}
+        );
+    }
 }

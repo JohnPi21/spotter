@@ -11,18 +11,17 @@ use App\Exceptions\InvalidMesocycleException;
 use App\Models\Exercise;
 use App\Models\MuscleGroup;
 use Illuminate\Support\Facades\Cache;
-use App\Services\PrismAiClient;
-use App\Models\User;
 
 class MesocycleAgent
 {
     public int $userId;
 
+    public const CREATE_MESOCYCLE = 'CREATE_MESOCYCLE';
+
     /**
-     * @param PrismAiClient $aiClient
+     * @param  PrismAiClient  $aiClient
      */
     public function __construct(public AiClient $aiClient, public MesocyclePrompt $promptGenerator) {}
-
 
     public function generate(int $userId, CreateAiMesocycleData $dto)
     {
@@ -30,23 +29,34 @@ class MesocycleAgent
 
         [$preparedExercises, $muscleGroups] = $this->prepareExercises($dto);
 
-        $prompt       = $this->promptGenerator->prompt($preparedExercises, $muscleGroups, $dto);
+        $prompt = $this->promptGenerator->prompt($preparedExercises, $muscleGroups, $dto);
         $systemPrompt = $this->promptGenerator->systemPrompt();
-        $schema       = $this->promptGenerator->schema();
-        $versionMeta  = $this->promptGenerator->getVersions();
+        $schema = $this->promptGenerator->schema();
+        $versionMeta = $this->promptGenerator->getVersions();
 
-        $aiCallContextData = AiCallContextData::from($prompt, $systemPrompt, $schema, $userId, get_class($this), ...$versionMeta);
+        $aiCallContextData = new AiCallContextData(
+            prompt: $prompt,
+            systemPrompt: $systemPrompt,
+            schema: $schema,
+            userId: $userId,
+            callerClass: get_class($this),
+            operationKey: self::CREATE_MESOCYCLE,
+            schemaVersion: $versionMeta->schema_version,
+            schemaHash: $versionMeta->schema_hash,
+            promptVersion: $versionMeta->prompt_version,
+            systemPromptVersion: $versionMeta->system_prompt_version
+        );
 
+        // Test the response
         [$aiRequest, $response] = $this->aiClient->structured($aiCallContextData);
 
         return $this->prepareMesoDto($response);
     }
 
-
     private function prepareExercises(CreateAiMesocycleData $dto): array
     {
-        // Default Exercises (can't cash because of equipment filter) 
-        $exercises =  Exercise::select(['id', 'name', 'muscle_group_id'])
+        // Default Exercises (can't cash because of equipment filter)
+        $exercises = Exercise::select(['id', 'name', 'muscle_group_id'])
             ->whereIn('exercise_type', $dto->equipment)
             ->where('user_id', null)
             ->get()
@@ -54,15 +64,15 @@ class MesocycleAgent
                 return [
                     'i' => $ex->id,
                     'n' => $ex->name,
-                    'm' => $ex->muscle_group_id
+                    'm' => $ex->muscle_group_id,
                 ];
             })->toArray();
 
         // Muscle Groups
         $muscleGroups = Cache::rememberForever('ai_muscle_groups', function () {
-            return MuscleGroup::select(['id', 'name'])->get()->map(fn($mg) => [
+            return MuscleGroup::select(['id', 'name'])->get()->map(fn ($mg) => [
                 'i' => $mg->id,
-                'n' => $mg->name
+                'n' => $mg->name,
             ])->toArray();
         });
 
@@ -74,7 +84,7 @@ class MesocycleAgent
                 return [
                     'i' => $ex->id,
                     'n' => $ex->name,
-                    'm' => $ex->muscle_group_id
+                    'm' => $ex->muscle_group_id,
                 ];
             })->toArray();
 
@@ -82,7 +92,6 @@ class MesocycleAgent
 
         return [$exercises, $muscleGroups];
     }
-
 
     private function prepareMesoDto(string $aiResponse): CreateMesocycleData
     {
@@ -93,12 +102,12 @@ class MesocycleAgent
             throw new InvalidMesocycleException('AI generated an invalid mesocycle JSON');
         }
 
-        if (!isset($aiResponse['days']) || !is_array($aiResponse['days'])) {
+        if (! isset($aiResponse['days']) || ! is_array($aiResponse['days'])) {
             throw new InvalidMesocycleException("AI mesocycle doesn't contain days.");
         }
 
         $generatedExerciseIds = collect($aiResponse['days'])
-            ->flatMap(fn($d) => $d['exercises'] ?? [])
+            ->flatMap(fn ($d) => $d['exercises'] ?? [])
             ->pluck('exerciseID')
             ->filter()
             ->unique()
@@ -107,9 +116,9 @@ class MesocycleAgent
         $exercisesByMuscleGroup = $this->exerciseLookup($generatedExerciseIds->toArray());
 
         foreach ($aiResponse['days'] as &$day) {
-            if (! isset($day['exercises']) || !is_array($day['exercises'])) {
+            if (! isset($day['exercises']) || ! is_array($day['exercises'])) {
                 throw new InvalidMesocycleException('Day is missing exercises array');
-            };
+            }
 
             foreach ($day['exercises'] as &$exercise) {
                 if (! isset($exercise['exerciseID'])) {
@@ -146,11 +155,10 @@ class MesocycleAgent
         return Exercise::select(['id', 'muscle_group_id'])
             ->whereIn('id', $ids)
             ->where(
-                fn($q) =>
-                $q->where('user_id', $this->userId)
+                fn ($q) => $q->where('user_id', $this->userId)
                     ->orWhereNull('user_id')
             )
             ->get()
             ->keyBy('id');
     }
-};
+}

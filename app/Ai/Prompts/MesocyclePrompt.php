@@ -3,35 +3,36 @@
 namespace App\Ai\Prompts;
 
 use App\Data\Mesocycle\CreateAiMesocycleData;
-use Prism\Prism\Schema\ObjectSchema;
-use Prism\Prism\Schema\NumberSchema;
-use Prism\Prism\Schema\StringSchema;
+use App\Enums\UnitsOfMeasure;
+use Prism\Prism\Contracts\Schema;
 use Prism\Prism\Schema\ArraySchema;
 use Prism\Prism\Schema\EnumSchema;
-use Prism\Prism\Contracts\Schema;
-use App\Enums\UnitsOfMeasure;
+use Prism\Prism\Schema\NumberSchema;
+use Prism\Prism\Schema\ObjectSchema;
+use Prism\Prism\Schema\StringSchema;
+use stdClass;
 
 class MesocyclePrompt
 {
     public function __construct() {}
 
-    //schema_key mesocycle.create
-    //schema_version 1.0.0
-    //schema_hash Hash::from($schema->toArray())
-    //prompt_version 1.0.0
-    //system_prompt_version: 1.0.0
+    // schema_key mesocycle.create
+    // schema_version 1.0.0
+    // schema_hash Hash::from($schema->toArray())
+    // prompt_version 1.0.0
+    // system_prompt_version: 1.0.0
 
-    public function getVersions(): array
+    public function getVersions(): stdClass
     {
         $schema = $this->schema()->toArray();
         ksort($schema);
 
-        return [
+        return (object) [
             // 'schema_key'        => 'mesocycle.generate',
-            'schemaVersion'    => '1.0.0',
-            'schemaHash'       => hash('sha256', json_encode($schema)),
-            'promptVersion'    => '1.0.0',
-            'systemPromptVersion' => '1.0.0'
+            'schema_version' => '1.0.0',
+            'schema_hash' => hash('sha256', json_encode($schema)),
+            'prompt_version' => '1.0.0',
+            'system_prompt_version' => '1.0.0',
         ];
     }
 
@@ -96,7 +97,7 @@ class MesocyclePrompt
                     name: 'unit',
                     description: 'Unit of measure for progression',
                     options: array_map(
-                        fn(UnitsOfMeasure $unit) => $unit->value,
+                        fn (UnitsOfMeasure $unit) => $unit->value,
                         UnitsOfMeasure::cases(),
                     ),
                 ),
@@ -122,9 +123,9 @@ class MesocyclePrompt
 
     public function prompt(array $exercises, array $muscleGroups, CreateAiMesocycleData $dto): string
     {
-        $exercisesJson    = json_encode($exercises, JSON_UNESCAPED_UNICODE);
+        $exercisesJson = json_encode($exercises, JSON_UNESCAPED_UNICODE);
         $muscleGroupsJson = json_encode($muscleGroups, JSON_UNESCAPED_UNICODE);
-        $dtoJson          = $dto->toJson();
+        $dtoJson = $dto->toJson();
 
         return <<<PROMPT
         # OBJECTIVE
@@ -191,7 +192,7 @@ class MesocyclePrompt
 
     public function systemPrompt(): string
     {
-        return <<<SYSTEM_PROMPT
+        return <<<'SYSTEM_PROMPT'
         You are an expert strength and hypertrophy coach working for Spotacus.app.
 
         Your task is to design safe, realistic, and well-balanced workout mesocycles.
@@ -209,7 +210,6 @@ class MesocyclePrompt
         - Explain your reasoning in text.
         SYSTEM_PROMPT;
     }
-
 
     // RAW JSON SCHEMA
     // public array $schema = [
