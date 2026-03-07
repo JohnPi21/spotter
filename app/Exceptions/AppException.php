@@ -9,7 +9,7 @@ class AppException extends HttpException
     public ?string $error;
 
     public function __construct(
-        int $status = 400,
+        int $status = 500,
         string $message = 'Something went wrong',
         ?string $error = null,
         ?\Throwable $previous = null,

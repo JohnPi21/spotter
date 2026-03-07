@@ -8,11 +8,15 @@ use App\Data\Ai\AiRequestData;
 use App\Enums\RequestStatusEnum;
 use App\Exceptions\AppException;
 use App\Models\AiRequest;
+use Exception;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Collection;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Text\PendingRequest;
+use Prism\Prism\Exceptions\PrismRateLimitedException;
+use stdClass;
 
 class PrismAiClient implements AiClient
 {
@@ -41,6 +45,8 @@ class PrismAiClient implements AiClient
         return $response->text;
     }
 
+
+
     public function structured(AiCallContextData $aiCallContext): array
     {
         $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
@@ -49,26 +55,18 @@ class PrismAiClient implements AiClient
 
         $start = hrtime(true);
         try {
-            $response = Prism::structured()
-                ->using($this->provider, $this->model)
-                ->withPrompt($aiCallContext->prompt)
-                ->withSystemPrompt($aiCallContext->systemPrompt)
-                ->withSchema($aiCallContext->schema)
-                ->withClientOptions([
-                    'schema' => [
-                        'strict' => true,
-                    ],
-                ]);
-            // ->asStructured();
-            // throw new PrismException('F up');
+            $response = $this->buildStructuredRequest($aiCallContext);
 
-            $response = $this->mockupResponse();
+            throw new PrismException('F up');
+        } catch (PrismRateLimitedException $e) {
+            // TODO: impelent retry
+
         } catch (PrismException $e) {
             // TODO: Set failed send extra data??? log data / error here
             // stop the request here with an exception
             // Implement retry in case of 429 too many requests
             $aiRequest->setFailed($e, 'transport');
-            throw new AppException(500, $e->getMessage());
+            throw new AppException(500, 'Ai');
         }
         //@TODO: complete success path
         $latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
@@ -93,6 +91,62 @@ class PrismAiClient implements AiClient
     }
 
     public function chat() {}
+
+    private function buildStructuredRequest(AiCallContextData $context): stdClass
+    {
+        $response = Prism::structured()
+            ->using($this->provider, $this->model)
+            ->withPrompt($context->prompt)
+            ->withSystemPrompt($context->systemPrompt)
+            ->withSchema($context->schema)
+            ->withClientOptions([
+                'schema' => [
+                    'strict' => true,
+                ],
+            ]);
+        // ->asStructured();
+
+        $response = $this->mockupResponse();
+
+        return $response;
+    }
+
+    // TODO: implement an api endpoint that returns RateLimit with header so i can test this.
+    private function retryAfterRateLimit(callable $callback, int $maxAttempts = 3, int $attempt = 1)
+    {
+        if ($attempt > $maxAttempts) {
+            throw AppException::tooManyRequests();
+        }
+
+        try {
+            return $callback();
+        } catch (RequestException $e) {
+            $retryAfterSeconds = null;
+
+            if ($e->getResponse()?->getStatusCode() == 429) {
+                $retryAfterHeader = $e->getResponse()?->getHeader('Retry-After');
+
+                // TODO: learn about HTTP retry after header
+                // TODO Also implement date
+                if (isset($retryAfterHeader[0]) && is_numeric($retryAfterHeader[0])) {
+                    $retryAfterSeconds = (int) $retryAfterHeader[0];
+                }
+            } else {
+                throw new AppException();
+            }
+
+            sleep($this->calculateBackoffSeconds($attempt, $retryAfterSeconds));
+
+            return $this->retryAfterRateLimit($callback, $maxAttempts, ++$attempt);
+        }
+    }
+
+    private function calculateBackoffSeconds(int $attempt, ?int $retryAfterSeconds = null): int
+    {
+        if ($retryAfterSeconds) return $retryAfterSeconds;
+
+        return min($attempt ** 2, 10);
+    }
 
     public function mockupResponse()
     {
