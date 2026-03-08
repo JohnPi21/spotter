@@ -64,8 +64,11 @@ class PrismAiClient implements AiClient
 			throw new PrismRateLimitedException([], 50);
 			// throw new PrismException('F up', 503);
 			$response = $this->retrier->retry(
-				$this->buildStructuredRequest($aiCallContext),
-				when: fn(Throwable $e) => $e instanceof PrismRateLimitedException
+				fn() => $this->buildStructuredRequest($aiCallContext),
+				when: fn(Throwable $e) => $e instanceof PrismRateLimitedException,
+				retryAfterCallback: function (Throwable $e) {
+					if ($e instanceof PrismRateLimitedException) return $e->retryAfter;
+				}
 			);
 		} catch (Throwable $e) {
 			// TODO: Set failed send extra data??? log data / error here
