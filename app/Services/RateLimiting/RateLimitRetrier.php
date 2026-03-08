@@ -6,6 +6,7 @@ use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Client\ConnectionException;
+use Throwable;
 
 class RateLimitRetrier
 {
@@ -13,6 +14,8 @@ class RateLimitRetrier
      * @var array<int, int>
      */
     private array $retryCodes = [408, 429, 500, 502, 503, 504];
+
+    private int $maxSecondsToWait = 96;
 
     /**
      * Retry a callback with backoff
@@ -22,12 +25,12 @@ class RateLimitRetrier
      * @param integer $maxSecondsToWait
      * @return mixed
      */
-    public function retry(callable $callback, int $maxAttempts = 3, int $maxSecondsToWait = 96): mixed
+    public function retry(callable $callback, int $maxAttempts = 3, ?callable $when): mixed
     {
         // 1 < $maxAttempts < 10;
         // 7 attempts => 128 seconds at most wait time
         $maxAttempts = min(max($maxAttempts, 1), 7);
-        $maxMicroToWait = $maxSecondsToWait * 1_000_000;
+        $maxMicroToWait = $this->maxSecondsToWait * 1_000_000;
         $lastException = null;
 
         for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
@@ -54,7 +57,7 @@ class RateLimitRetrier
                     throw $e;
                 }
 
-                $retryAfterMicro = $this->getRetryAfterHeaderInMicro($response);
+                $retryAfterMicro = $this->returnRetryAfterInMicro($response->header('Retry-After'));
 
                 if ($retryAfterMicro !== null) {
                     if ($retryAfterMicro < $maxMicroToWait) {
@@ -88,17 +91,11 @@ class RateLimitRetrier
     /**
      * Get Retry-After header value in microseconds if available
      *
-     * @param \Illuminate\Http\Client\Response|null $response
+     * @param 
      * @return integer|null
      */
-    public function getRetryAfterHeaderInMicro(?\Illuminate\Http\Client\Response $response): ?int
+    public function returnRetryAfterInMicro(int|string $retryAfter): ?int
     {
-        if (! $response) {
-            return null;
-        }
-
-        $retryAfter = $response->header('Retry-After');
-
         if (is_numeric($retryAfter) && $retryAfter > 0) return (int) $retryAfter * 1_000_000;
 
         try {
