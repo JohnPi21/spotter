@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./vendor/bin/sail --dirty || exit 1
+git add -A

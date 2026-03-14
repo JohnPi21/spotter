@@ -19,7 +19,7 @@ class AiMesocycleController extends Controller
     {
         return Inertia::render('mesocycles/AiCreate', [
             'experienceOptions' => ExperienceEnum::options(),
-            'primaryGoalOptions' => TrainingGoalsEnum::options(),
+            "primaryGoalOptions" => TrainingGoalsEnum::options(),
             'splitPreferenceOptions' => SplitsEnum::options(),
             'equipmentOptions' => EquipmentsEnum::options(),
             'sessionDurationOptions' => SessionDurationEnum::values(),
