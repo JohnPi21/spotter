@@ -2,6 +2,8 @@
 
 echo "Running pre commit hooks"
 
+echo "";
+
 echo "Running Pint:"
 
 ./vendor/bin/pint --dirty || exit 1
