@@ -14,9 +14,8 @@ class CreateMesoDay
 
     /**
      * @template DayTemplateData
-     * @param DayTemplateData[] $days
-     * @param int $mesocycleId
-     * @param int $weeksDuration
+     *
+     * @param  DayTemplateData[]  $days
      * @return void
      */
     public function execute(array $days, int $mesocycleId, int $weeksDuration)
@@ -27,11 +26,11 @@ class CreateMesoDay
 
             foreach ($days as $idx => $day) {
                 $mesoDays[] = [
-                    "mesocycle_id" => $mesocycleId,
-                    "week"         => $i,
-                    "day_order"    => $idx + 1,
-                    "label"        => $day->label,
-                    "position"     => $idx,
+                    'mesocycle_id' => $mesocycleId,
+                    'week' => $i,
+                    'day_order' => $idx + 1,
+                    'label' => $day->label,
+                    'position' => $idx,
                 ];
             }
         }

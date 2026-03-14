@@ -2,8 +2,8 @@
 
 namespace App\Actions\DayExercise;
 
-use Illuminate\Support\Facades\DB;
 use App\Data\Mesocycle\DayTemplateData;
+use Illuminate\Support\Facades\DB;
 
 class CreateManyDayExercises
 {
@@ -14,7 +14,8 @@ class CreateManyDayExercises
 
     /**
      * @template DayTemplateData
-     * @param DayTemplateData[] $daysDTO
+     *
+     * @param  DayTemplateData[]  $daysDTO
      * @return void
      */
     public function execute(array $daysDTO, array $existingDaysIds)
@@ -26,9 +27,9 @@ class CreateManyDayExercises
         foreach ($existingDaysIds as $dayIdx => $dayId) {
             foreach ($daysDTO[$dayIdx % $daysPerWeek]->exercises as $pos => $exercise) {
                 $dayExercises[] = [
-                    "meso_day_id" => $dayId,
-                    "exercise_id" => $exercise->exerciseID,
-                    "position"    => $pos + 1,
+                    'meso_day_id' => $dayId,
+                    'exercise_id' => $exercise->exerciseID,
+                    'position' => $pos + 1,
                 ];
             }
         }

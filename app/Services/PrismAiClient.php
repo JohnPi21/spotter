@@ -19,110 +19,110 @@ use Throwable;
 
 class PrismAiClient implements AiClient
 {
-	public Provider $provider;
+    public Provider $provider;
 
-	public string $model;
+    public string $model;
 
-	public function __construct(private RateLimitRetrier $retrier)
-	{
-		$this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
-		$this->model = config('ai.default_model');
-	}
+    public function __construct(private RateLimitRetrier $retrier)
+    {
+        $this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
+        $this->model = config('ai.default_model');
+    }
 
-	public function text(AiCallContextData $context): string
-	{
-		$response = Prism::text()
-			->using($this->provider, $this->model)
-			->withPrompt($context->prompt)
-			->withSystemPrompt($context->systemPrompt)
-			->onComplete(
-				fn(PendingRequest $request, Collection $messages) => dd($request, $messages)
-				// $this->conversationLog(AiRequestEnum::TEXT, $request)
-			)
-			->asText();
+    public function text(AiCallContextData $context): string
+    {
+        $response = Prism::text()
+            ->using($this->provider, $this->model)
+            ->withPrompt($context->prompt)
+            ->withSystemPrompt($context->systemPrompt)
+            ->onComplete(
+                fn (PendingRequest $request, Collection $messages) => dd($request, $messages)
+                // $this->conversationLog(AiRequestEnum::TEXT, $request)
+            )
+            ->asText();
 
-		return $response->text;
-	}
+        return $response->text;
+    }
 
-	public function structured(AiCallContextData $aiCallContext): array
-	{
-		$payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
+    public function structured(AiCallContextData $aiCallContext): array
+    {
+        $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
 
-		$aiRequest = AiRequest::create($payload->toArray());
+        $aiRequest = AiRequest::create($payload->toArray());
 
-		$start = hrtime(true);
+        $start = hrtime(true);
 
-		try {
-			$response = $this->retrier->run(
-				function ($attempt) use ($aiCallContext) {
-					if ($attempt < 2) {
-						throw new PrismRateLimitedException([], 3);
-					}
-					// throw new PrismException('F up', 503);
-					$this->buildStructuredRequest($aiCallContext);
-				},
-				3,
-				when: fn(Throwable $e) => $e instanceof PrismRateLimitedException,
-				retryAfterCallback: function (Throwable $e) {
-					if ($e instanceof PrismRateLimitedException) {
-						return $e->retryAfter;
-					}
-				}
-			);
-		} catch (Throwable $e) {
-			// TODO: Set failed send extra data??? log data / error here
-			$aiRequest->setFailed($e, 'TRANSPORT');
+        try {
+            $response = $this->retrier->run(
+                function ($attempt) use ($aiCallContext) {
+                    if ($attempt < 2) {
+                        throw new PrismRateLimitedException([], 3);
+                    }
+                    // throw new PrismException('F up', 503);
+                    $this->buildStructuredRequest($aiCallContext);
+                },
+                3,
+                when: fn (Throwable $e) => $e instanceof PrismRateLimitedException,
+                retryAfterCallback: function (Throwable $e) {
+                    if ($e instanceof PrismRateLimitedException) {
+                        return $e->retryAfter;
+                    }
+                }
+            );
+        } catch (Throwable $e) {
+            // TODO: Set failed send extra data??? log data / error here
+            $aiRequest->setFailed($e, 'TRANSPORT');
 
-			// Don't throw here, handle it and return a silent error to the user with "Provider didn't respond"
-			throw $e;
-		}
-		// @TODO: complete success path
-		$latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
+            // Don't throw here, handle it and return a silent error to the user with "Provider didn't respond"
+            throw $e;
+        }
+        // @TODO: complete success path
+        $latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
 
-		$usage = $response->usage;
-		$aiRequest->fill([
-			'latency_ms' => $latencyMs,
-			'usage_json' => json_encode($usage),
-			'prompt_tokens' => $usage->promptTokens,
-			'completion_tokens' => $usage->completionTokens,
-			'total_tokens' => $usage->promptTokens + $usage->completionTokens,
-			'finish_reason' => $response->finishReason,
-			'status' => RequestStatusEnum::SUCCESS,
-			'meta_id' => $response->meta->id,
-		])->save();
+        $usage = $response->usage;
+        $aiRequest->fill([
+            'latency_ms' => $latencyMs,
+            'usage_json' => json_encode($usage),
+            'prompt_tokens' => $usage->promptTokens,
+            'completion_tokens' => $usage->completionTokens,
+            'total_tokens' => $usage->promptTokens + $usage->completionTokens,
+            'finish_reason' => $response->finishReason,
+            'status' => RequestStatusEnum::SUCCESS,
+            'meta_id' => $response->meta->id,
+        ])->save();
 
-		dd($aiRequest->refresh());
+        dd($aiRequest->refresh());
 
-		// @TODO: test the response, handle the errors and retries
-		// Divide schema validation from within the schema and Domain logic validation
-		return [$aiRequest, $response];
-	}
+        // @TODO: test the response, handle the errors and retries
+        // Divide schema validation from within the schema and Domain logic validation
+        return [$aiRequest, $response];
+    }
 
-	public function chat() {}
+    public function chat() {}
 
-	private function buildStructuredRequest(AiCallContextData $context): stdClass
-	{
-		$response = Prism::structured()
-			->using($this->provider, $this->model)
-			->withPrompt($context->prompt)
-			->withSystemPrompt($context->systemPrompt)
-			->withSchema($context->schema)
-			->withClientOptions([
-				'schema' => [
-					'strict' => true,
-				],
-			]);
-		// ->asStructured();
+    private function buildStructuredRequest(AiCallContextData $context): stdClass
+    {
+        $response = Prism::structured()
+            ->using($this->provider, $this->model)
+            ->withPrompt($context->prompt)
+            ->withSystemPrompt($context->systemPrompt)
+            ->withSchema($context->schema)
+            ->withClientOptions([
+                'schema' => [
+                    'strict' => true,
+                ],
+            ]);
+        // ->asStructured();
 
-		$response = $this->mockupResponse();
+        $response = $this->mockupResponse();
 
-		return $response;
-	}
+        return $response;
+    }
 
-	public function mockupResponse()
-	{
-		return json_decode(
-			'{
+    public function mockupResponse()
+    {
+        return json_decode(
+            '{
   "name": "4-week Strength/Hypertrophy Mesocycle",
   "unit": "kg",
   "weeksDuration": 4,
@@ -191,6 +191,6 @@ class PrismAiClient implements AiClient
   "toolResults": [],
   "additionalContent": []
 }'
-		);
-	}
+        );
+    }
 }

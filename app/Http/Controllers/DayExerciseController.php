@@ -21,7 +21,7 @@ class DayExerciseController extends Controller
 
         return redirect()->route('days.show', [
             'mesocycle' => $day->mesocycle,
-            'day'       => $day,
+            'day' => $day,
         ]);
     }
 

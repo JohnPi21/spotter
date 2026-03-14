@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreMesocycleRequest;
-use App\Models\Mesocycle;
 use App\Actions\Mesocycle\ActivateMesocycle;
 use App\Actions\Mesocycle\CreateMesocycle;
 use App\Actions\Mesocycle\ResolveActiveMesocycleDay;
 use App\Data\Mesocycle\CreateMesocycleData;
+use App\Http\Requests\StoreMesocycleRequest;
+use App\Models\Mesocycle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Inertia\Inertia;
 use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Inertia;
 use Log;
 
 class MesocycleController extends Controller implements HasMiddleware
 {
-
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -27,7 +26,6 @@ class MesocycleController extends Controller implements HasMiddleware
         ];
     }
 
-
     public function index(): \Inertia\Response
     {
         $mesocycles = Mesocycle::query()->mine()->with(['days:id,finished_at,mesocycle_id'])->get();
@@ -35,8 +33,8 @@ class MesocycleController extends Controller implements HasMiddleware
         Log::info('Mesocycle last day', [$mesocycles->first()?->last_day]);
 
         return Inertia::render('mesocycles/index', [
-            'title'     => 'Mesocycles',
-            'mesocycles' => $mesocycles
+            'title' => 'Mesocycles',
+            'mesocycles' => $mesocycles,
         ]);
     }
 
@@ -44,15 +42,14 @@ class MesocycleController extends Controller implements HasMiddleware
     public function show(Mesocycle $mesocycle): \Inertia\Response
     {
         $mesocycle->load([
-            'days.dayExercises' => ['exercise.muscleGroup', 'sets']
+            'days.dayExercises' => ['exercise.muscleGroup', 'sets'],
         ]);
 
         return Inertia::render('mesocycles/show', [
-            'title'     => 'Mesocycle',
-            'mesocycle' => $mesocycle
+            'title' => 'Mesocycle',
+            'mesocycle' => $mesocycle,
         ]);
     }
-
 
     public function create(): \Inertia\Response
     {
@@ -82,11 +79,10 @@ class MesocycleController extends Controller implements HasMiddleware
         return to_route('mesocycles');
     }
 
-
     public function currentActiveDay(ResolveActiveMesocycleDay $resolve): RedirectResponse
     {
         [$currentDayId, $mesocycleId] = $resolve->execute();
 
-        return to_route("days.show", ['mesocycle' => $mesocycleId, 'day' => $currentDayId]);
+        return to_route('days.show', ['mesocycle' => $mesocycleId, 'day' => $currentDayId]);
     }
 }

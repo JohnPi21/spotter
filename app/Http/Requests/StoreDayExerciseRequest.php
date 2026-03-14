@@ -12,7 +12,7 @@ class StoreDayExerciseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->route()->day->loadMissing(['mesocycle', 'dayExercises' => fn($q) => $q->orderBy('position')]);
+        $this->route()->day->loadMissing(['mesocycle', 'dayExercises' => fn ($q) => $q->orderBy('position')]);
 
         return Gate::allows('owns', $this->route()->day->mesocycle);
     }

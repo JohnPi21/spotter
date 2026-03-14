@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class ExerciseSet extends Model
 {
@@ -17,17 +16,15 @@ class ExerciseSet extends Model
 
     protected $casts = [
         'target_weight' => 'decimal:2',
-        'weight'        => 'decimal:2',
-        'target_reps'   => 'int',
-        'reps'          => 'int'
+        'weight' => 'decimal:2',
+        'target_reps' => 'int',
+        'reps' => 'int',
     ];
 
     public function dayExercise(): BelongsTo
     {
         return $this->belongsTo(DayExercise::class);
     }
-
-
 
     public function day(): BelongsTo
     {

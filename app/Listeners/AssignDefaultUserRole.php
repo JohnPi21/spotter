@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Enums\RolesEnum;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Auth\Events\Registered;
 
 class AssignDefaultUserRole

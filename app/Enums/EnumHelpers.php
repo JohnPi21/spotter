@@ -14,12 +14,10 @@ trait EnumHelpers
 
     /**
      * Return an array of all labels formatted user friendly
-     *
-     * @return array
      */
     public function labels(): array
     {
-        return array_map(fn(self $case) => [$case->label()], self::cases());
+        return array_map(fn (self $case) => [$case->label()], self::cases());
     }
 
     /**
@@ -28,7 +26,7 @@ trait EnumHelpers
     public static function options(): array
     {
         return array_map(
-            fn(self $case) => [
+            fn (self $case) => [
                 'label' => $case->label(),
                 'value' => $case->value,
             ],
@@ -41,7 +39,7 @@ trait EnumHelpers
      */
     public static function values(): array
     {
-        return array_map(fn(self $case) => $case->value, self::cases());
+        return array_map(fn (self $case) => $case->value, self::cases());
     }
 
     /**
@@ -53,6 +51,7 @@ trait EnumHelpers
         foreach (self::cases() as $case) {
             $map[$case->value] = $case->label();
         }
+
         return $map;
     }
 }

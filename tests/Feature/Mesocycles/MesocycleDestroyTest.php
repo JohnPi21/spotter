@@ -5,8 +5,8 @@ namespace Tests\Feature\Mesocycles;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
-use Tests\TestCase;
 use App\Models\User;
+use Tests\TestCase;
 
 class MesocycleDestroyTest extends TestCase
 {

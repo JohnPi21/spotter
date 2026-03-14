@@ -6,7 +6,7 @@ enum AiRequestEnum: string
 {
     use EnumHelpers;
 
-    case TEXT       = 'asText';
+    case TEXT = 'asText';
     case STRUCTURED = 'asStructured';
-    case CHAT       = 'asChat';
+    case CHAT = 'asChat';
 }

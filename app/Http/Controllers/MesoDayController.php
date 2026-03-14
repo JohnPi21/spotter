@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\AppException;
-use App\Models\DayExercise;
-use Inertia\Inertia;
-use App\Models\MesoDay;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use App\Actions\Mesocycle\MakeMesocycleCalendar;
 use App\Events\DayFinished;
+use App\Exceptions\AppException;
+use App\Models\MesoDay;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class MesoDayController extends Controller
 {
     public function show(int $mesocycle, MesoDay $day, MakeMesocycleCalendar $makeCalendarAction): \Inertia\Response
     {
 
-        $day->load(['dayExercises' => fn($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
+        $day->load(['dayExercises' => fn ($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
 
         Gate::authorize('view', $day);
 
@@ -33,7 +32,6 @@ class MesoDayController extends Controller
 
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
-
 
     public function toggleDay(MesoDay $day): RedirectResponse
     {

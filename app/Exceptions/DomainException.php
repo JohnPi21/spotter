@@ -10,6 +10,7 @@ abstract class DomainException extends RuntimeException
     {
         return 422;
     }
+
     public function errorCode(): string
     {
         return 'DOMAIN_ERROR';

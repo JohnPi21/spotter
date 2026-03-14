@@ -3,12 +3,11 @@
 namespace Tests\Feature\ExerciseSets;
 
 use App\Models\DayExercise;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Mesocycle;
 use App\Models\ExerciseSet;
+use App\Models\Mesocycle;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ExerciseSetStoreTest extends TestCase
 {

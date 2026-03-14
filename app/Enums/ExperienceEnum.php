@@ -6,7 +6,7 @@ enum ExperienceEnum: string
 {
     use EnumHelpers;
 
-    case BEGINNER       = 'beginner';
-    case INTERMEDIATE   = 'intermediate';
-    case ADVANCED       = 'advanced';
+    case BEGINNER = 'beginner';
+    case INTERMEDIATE = 'intermediate';
+    case ADVANCED = 'advanced';
 }

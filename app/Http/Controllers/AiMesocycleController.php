@@ -10,7 +10,6 @@ use App\Enums\SessionDurationEnum;
 use App\Enums\SplitsEnum;
 use App\Enums\TrainingGoalsEnum;
 use App\Http\Requests\AiMesocycleRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -18,11 +17,11 @@ class AiMesocycleController extends Controller
 {
     public function create()
     {
-        return Inertia::render("mesocycles/AiCreate", [
-            'experienceOptions'      => ExperienceEnum::options(),
-            'primaryGoalOptions'     => TrainingGoalsEnum::options(),
+        return Inertia::render('mesocycles/AiCreate', [
+            'experienceOptions' => ExperienceEnum::options(),
+            'primaryGoalOptions' => TrainingGoalsEnum::options(),
             'splitPreferenceOptions' => SplitsEnum::options(),
-            'equipmentOptions'       => EquipmentsEnum::options(),
+            'equipmentOptions' => EquipmentsEnum::options(),
             'sessionDurationOptions' => SessionDurationEnum::values(),
         ]);
     }
@@ -33,7 +32,6 @@ class AiMesocycleController extends Controller
 
         // pass to agenta
         $schema = $agent->generate(Auth::id(), $aiMesocycleDTO);
-
 
         // send user to preview page
         // return Inertia::render("Mesocycle/Edit");

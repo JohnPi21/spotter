@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Mesocycle;
-use App\Models\MesoDay;
 use App\Models\DayExercise;
 use App\Models\Exercise;
 use App\Models\ExerciseSet;
+use App\Models\Mesocycle;
+use App\Models\MesoDay;
+use Illuminate\Database\Seeder;
 
 class MesocycleSeeder extends Seeder
 {
@@ -33,11 +32,11 @@ class MesocycleSeeder extends Seeder
                             $date = now()->copy()->subDays($offset);
 
                             return [
-                                "label"         => "Day {$dayIndex}",
-                                'mesocycle_id'  => $meso->id,
-                                'week'          => $week,
-                                'created_at'    => $date,
-                                'finished_at'   => $date,
+                                'label' => "Day {$dayIndex}",
+                                'mesocycle_id' => $meso->id,
+                                'week' => $week,
+                                'created_at' => $date,
+                                'finished_at' => $date,
                             ];
                         })
                         ->create();
@@ -45,15 +44,14 @@ class MesocycleSeeder extends Seeder
                     $days->each(function ($day) use ($exerciseIDs) {
                         $dayExercises = DayExercise::factory()
                             ->count(rand(3, 6))
-                            ->sequence(fn() => [
+                            ->sequence(fn () => [
                                 'meso_day_id' => $day->id,
                                 'exercise_id' => $exerciseIDs->random(),
                             ])->create();
 
                         $dayExercises->each(
-                            fn($de) =>
-                            ExerciseSet::factory()->count(rand(1, 4))->create([
-                                'day_exercise_id' => $de->id
+                            fn ($de) => ExerciseSet::factory()->count(rand(1, 4))->create([
+                                'day_exercise_id' => $de->id,
                             ])
                         );
                     });

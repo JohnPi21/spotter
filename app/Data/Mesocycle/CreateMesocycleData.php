@@ -11,7 +11,7 @@ use Spatie\LaravelData\Optional;
 class CreateMesocycleData extends Data
 {
     /**
-     * @param array<int, \App\Data\Mesocycle\DayTemplateData> $days
+     * @param  array<int, \App\Data\Mesocycle\DayTemplateData>  $days
      */
     public function __construct(
         public string $name,

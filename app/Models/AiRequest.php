@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\RequestStatusEnum;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 
 class AiRequest extends Model
 {

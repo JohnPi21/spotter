@@ -2,9 +2,9 @@
 
 namespace App\Actions\Mesocycle;
 
+use App\Exceptions\AppException;
 use App\Models\Mesocycle;
 use Illuminate\Support\Facades\DB;
-use App\Exceptions\AppException;
 
 class ActivateMesocycle
 {

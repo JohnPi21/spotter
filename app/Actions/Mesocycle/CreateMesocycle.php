@@ -5,9 +5,9 @@ namespace App\Actions\Mesocycle;
 use App\Actions\DayExercise\CreateManyDayExercises;
 use App\Actions\MesoDay\CreateMesoDay;
 use App\Data\Mesocycle\CreateMesocycleData;
+use App\Models\DayExercise;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
-use App\Models\DayExercise;
 use Illuminate\Support\Facades\DB;
 
 class CreateMesocycle
@@ -21,12 +21,12 @@ class CreateMesocycle
     {
         DB::transaction(function () use ($mesoDTO, $userId) {
             $mesocycle = Mesocycle::create([
-                'name'            => $mesoDTO->name,
-                'unit'            => $mesoDTO->unit,
-                'weeks_duration'  => $mesoDTO->weeks_duration,
-                'days_per_week'   => count($mesoDTO->days),
-                'user_id'         => $userId,
-                'status'          => !!Mesocycle::userHasActiveMeso($userId),
+                'name' => $mesoDTO->name,
+                'unit' => $mesoDTO->unit,
+                'weeks_duration' => $mesoDTO->weeks_duration,
+                'days_per_week' => count($mesoDTO->days),
+                'user_id' => $userId,
+                'status' => (bool) Mesocycle::userHasActiveMeso($userId),
             ]);
 
             $this->createMesoDays->execute($mesoDTO->days, $mesocycle->id, $mesocycle->weeks_duration);

@@ -48,7 +48,7 @@ return [
     'ignore_transactions' => [
         // Ignore Laravel's default health URL
         '/up',
-        '/health'
+        '/health',
     ],
 
     // Breadcrumb specific configuration

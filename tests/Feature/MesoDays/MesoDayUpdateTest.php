@@ -6,11 +6,11 @@ use App\Events\DayFinished;
 use App\Listeners\UpdateProgressTargets;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class MesoDayUpdateTest extends TestCase
 {
@@ -77,7 +77,7 @@ class MesoDayUpdateTest extends TestCase
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
             'weight' => 50,
-            'reps'   => 8,
+            'reps' => 8,
             'finished_at' => now(),
         ]);
 

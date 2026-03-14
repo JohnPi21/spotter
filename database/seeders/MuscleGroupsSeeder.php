@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +26,7 @@ class MuscleGroupsSeeder extends Seeder
             ['id' => 11, 'name' => 'Forearms'],     // muscleGroupId 11
             ['id' => 12, 'name' => 'Abs'],           // muscleGroupId 12
             ['id' => 13, 'name' => 'Adductors'],     // muscleGroupId 13
-            ['id' => 14, 'name' => 'Abductors']      // muscleGroupId 14
+            ['id' => 14, 'name' => 'Abductors'],      // muscleGroupId 14
         ];
 
         DB::table('muscle_groups')->insert($muscleGroups);

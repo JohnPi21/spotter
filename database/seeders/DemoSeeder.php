@@ -3,22 +3,26 @@
 namespace Database\Seeders;
 
 use App\Enums\RolesEnum;
+use App\Models\DayExercise;
+use App\Models\ExerciseSet;
+use App\Models\Mesocycle;
+use App\Models\MesoDay;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\{Mesocycle, MesoDay, DayExercise, ExerciseSet, User};
 
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
         $user = User::create([
-            'name'              => 'Demo',
-            'email'             => 'demo-' . Str::random(8) . '@spotacus.com',
+            'name' => 'Demo',
+            'email' => 'demo-'.Str::random(8).'@spotacus.com',
             'email_verified_at' => now(),
-            'password'          => Hash::make(Str::random(16)),
-            'remember_token'    => Str::random(10),
-            'created_at'        => now()->subWeeks(5),
+            'password' => Hash::make(Str::random(16)),
+            'remember_token' => Str::random(10),
+            'created_at' => now()->subWeeks(5),
         ]);
 
         $user->assignRole(RolesEnum::GUEST);
@@ -39,7 +43,7 @@ class DemoSeeder extends Seeder
                 'Day 1' => [1, 26, 53, 130],
                 'Day 2' => [197, 159, 44, 78],
                 'Day 3' => [1, 26, 53, 130],
-                'Day 4' => [197, 159, 44, 78]
+                'Day 4' => [197, 159, 44, 78],
             ];
 
             $dayLabels = ['Day 1', 'Day 2', 'Day 3', 'Day 4'];
@@ -52,7 +56,7 @@ class DemoSeeder extends Seeder
                         'mesocycle_id' => $meso->id,
                         'week' => $week,
                         'day_order' => $idx + 1,
-                        'position'  => $idx,
+                        'position' => $idx,
                         'created_at' => now()->subWeeks(6 - $week),
                         'finished_at' => now()->subWeeks(6 - $week)->subDays(count($dayLabels) - $idx),
                     ]);
@@ -61,7 +65,7 @@ class DemoSeeder extends Seeder
                         $dayExercise = DayExercise::create([
                             'meso_day_id' => $day->id,
                             'exercise_id' => $exerciseID,
-                            'position' => $position
+                            'position' => $position,
                         ]);
 
                         $isBigLift = in_array($exerciseID, [1, 197]); // e.g., Squat/Bench
@@ -72,7 +76,7 @@ class DemoSeeder extends Seeder
                             ExerciseSet::create([
                                 'day_exercise_id' => $dayExercise->id,
                                 'weight' => $baseWeight + rand(-5, 5),
-                                'reps' => $reps
+                                'reps' => $reps,
                             ]);
                         }
                     }

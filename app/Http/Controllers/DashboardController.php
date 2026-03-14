@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use App\Models\MesoDay;
 use Illuminate\Http\Request;
@@ -29,8 +28,7 @@ class DashboardController extends Controller
             ->whereIn('day_exercises.exercise_id', [197, 26, 1]) // Squat / Benchpress / Deadlift
             ->whereHas(
                 'dayExercise.day.mesocycle',
-                fn($q) =>
-                $q->where('user_id', Auth::id())
+                fn ($q) => $q->where('user_id', Auth::id())
             )
             ->selectRaw("exercises.name as exercise_name, day_exercises.exercise_id, MAX($selectorBy) as best_value")
             ->groupBy('day_exercises.exercise_id', 'exercises.name')
@@ -40,16 +38,16 @@ class DashboardController extends Controller
             $name = strtolower($row->exercise_name);
             $type = match (true) {
                 str_contains($name, 'deadlift') => 'deadlift',
-                str_contains($name, 'bench')    => 'bench',
-                str_contains($name, 'squat')    => 'squat',
-                default                         => 'other'
+                str_contains($name, 'bench') => 'bench',
+                str_contains($name, 'squat') => 'squat',
+                default => 'other'
             };
 
             return [
                 'exercise' => preg_replace('/\s*\(.*?\)/', '', $row->exercise_name),
-                'value'    => number_format($row->best_value, 2),
-                'unit'     => $displayBy === 'weight' ? 'kg' : 'kg x reps',
-                'type'     => $type
+                'value' => number_format($row->best_value, 2),
+                'unit' => $displayBy === 'weight' ? 'kg' : 'kg x reps',
+                'type' => $type,
             ];
         });
 
@@ -59,7 +57,6 @@ class DashboardController extends Controller
             ->orderByDesc('finished_at')
             ->limit(3)
             ->get();
-
 
         $graphActivity = MesoDay::select('id', 'label', 'week', 'updated_at', 'finished_at')
             ->with(['dayExercises.sets'])
@@ -79,17 +76,16 @@ class DashboardController extends Controller
 
             return [
                 'volumeY' => $value,
-                'dateX'   => "{$day->label} " . $day?->finished_at?->isoFormat('DD.MM'),
+                'dateX' => "{$day->label} ".$day?->finished_at?->isoFormat('DD.MM'),
             ];
         });
 
         $graph['data'] = $graphMap->pluck('volumeY');
         $graph['labels'] = $graphMap->pluck('dateX');
 
-
         $lastWorkouts = $lastMesoDays->map(function ($mesoDay) use ($displayBy) {
             $finishDate = Carbon::parse($mesoDay->finished_at);
-            $setsCount = $mesoDay->dayExercises->sum(fn($dayExercise) => $dayExercise->sets->count());
+            $setsCount = $mesoDay->dayExercises->sum(fn ($dayExercise) => $dayExercise->sets->count());
 
             $muscleGroups = $mesoDay->dayExercises->pluck('exercise.muscleGroup.name')->unique()->values();
 
@@ -100,29 +96,29 @@ class DashboardController extends Controller
             });
 
             return [
-                'day'            => $finishDate->day,
-                'dayID'          => $mesoDay->id,
-                'finishedAt'     => $finishDate->diffForHumans(),
-                'label'          => $mesoDay->label,
+                'day' => $finishDate->day,
+                'dayID' => $mesoDay->id,
+                'finishedAt' => $finishDate->diffForHumans(),
+                'label' => $mesoDay->label,
                 'exercisesCount' => $mesoDay->dayExercises->count(),
-                'setsCount'      => $setsCount,
-                'totalValue'     => $totalValue,
-                'unit'           => $displayBy === 'weight' ? 'kg' : 'kg x reps',
-                'muscleGroups'   => $muscleGroups,
-                'mesocycle'      => $mesoDay->mesocycle_id
+                'setsCount' => $setsCount,
+                'totalValue' => $totalValue,
+                'unit' => $displayBy === 'weight' ? 'kg' : 'kg x reps',
+                'muscleGroups' => $muscleGroups,
+                'mesocycle' => $mesoDay->mesocycle_id,
             ];
         });
 
         $dashboardStats = [
-            'joinedAgo'     => Auth::user()->created_at->diffForHumans(),
-            'bestLifts'     => $mappedLifts->count(),
-            'activity'      => $graph['data']->count(),
-            'lastWorkouts'  => $lastWorkouts->count(),
+            'joinedAgo' => Auth::user()->created_at->diffForHumans(),
+            'bestLifts' => $mappedLifts->count(),
+            'activity' => $graph['data']->count(),
+            'lastWorkouts' => $lastWorkouts->count(),
         ];
 
         $payload = [
-            'displayBy'     => $displayBy,
-            'dashboardStats' => $dashboardStats
+            'displayBy' => $displayBy,
+            'dashboardStats' => $dashboardStats,
         ];
 
         if ($mappedLifts->isNotEmpty()) {

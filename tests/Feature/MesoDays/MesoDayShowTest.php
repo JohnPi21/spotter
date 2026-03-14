@@ -7,10 +7,10 @@ use App\Models\Exercise;
 use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
 
 class MesoDayShowTest extends TestCase
 {
@@ -24,12 +24,11 @@ class MesoDayShowTest extends TestCase
         $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
         $day = $mesocycle->days->first();
 
-
         $this->actingAs($user)->get(route('days.show', ['mesocycle' => $mesocycle->id, 'day' => $day->id]))
             ->assertOk()
             ->assertSessionHasNoErrors()
             ->assertInertia(
-                fn(Assert $page) => $page
+                fn (Assert $page) => $page
                     ->component('mesocycles/show')
                     ->has('mesocycle')
                     ->where('mesocycle.id', $mesocycle->id)
@@ -86,12 +85,11 @@ class MesoDayShowTest extends TestCase
         $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
         $day = $mesocycle->days->first();
 
-
         $this->actingAs($user)->get(route('days.show', ['mesocycle' => $mesocycle->id, 'day' => $day->id]))
             ->assertOk()
             ->assertSessionHasNoErrors()
             ->assertInertia(
-                fn(Assert $page) => $page
+                fn (Assert $page) => $page
                     ->component('mesocycles/show')
                     ->has('mesocycle')
                     ->where('mesocycle.id', $mesocycle->id)
@@ -109,7 +107,6 @@ class MesoDayShowTest extends TestCase
 
         $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
         $day = $mesocycle->days->first();
-
 
         $this->actingAs($otherUser)->get(route('days.show', ['mesocycle' => $mesocycle->id, 'day' => $day->id]))->assertForbidden();
     }
