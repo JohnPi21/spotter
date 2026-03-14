@@ -10,6 +10,7 @@ use App\Data\Mesocycle\CreateMesocycleData;
 use App\Exceptions\InvalidMesocycleException;
 use App\Models\Exercise;
 use App\Models\MuscleGroup;
+use App\Services\PrismAiClient;
 use Illuminate\Support\Facades\Cache;
 
 class MesocycleAgent

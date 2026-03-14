@@ -27,6 +27,9 @@ class MesoDay extends Model
         return $this->belongsTo(Mesocycle::class);
     }
 
+    /**
+     * @return HasMany<DayExercise, $this>
+     */
     public function dayExercises(): HasMany
     {
         return $this->hasMany(DayExercise::class, 'meso_day_id', 'id');

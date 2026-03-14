@@ -7,4 +7,9 @@ echo "";
 echo "Running Pint:"
 
 ./vendor/bin/pint --dirty || exit 1
+
+echo "Running LaraStan:"
+
+./vendor/bin/phpstan analyse --memory-limit=2G || exit 1
+
 git add -A

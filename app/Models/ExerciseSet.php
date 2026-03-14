@@ -21,6 +21,9 @@ class ExerciseSet extends Model
         'reps' => 'int',
     ];
 
+    /**
+     * @return BelongsTo<DayExercise>
+     */
     public function dayExercise(): BelongsTo
     {
         return $this->belongsTo(DayExercise::class);

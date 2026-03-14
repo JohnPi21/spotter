@@ -25,7 +25,7 @@ class PrismAiClient implements AiClient
 
     public function __construct(private RateLimitRetrier $retrier)
     {
-        $this->provider = Provider::from(config('ai.default_provider')) ?? Provider::OpenAI;
+        $this->provider = Provider::from(config('ai.default_provider', Provider::OpenAI));
         $this->model = config('ai.default_model');
     }
 

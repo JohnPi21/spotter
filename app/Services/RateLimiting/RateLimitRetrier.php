@@ -33,8 +33,6 @@ class RateLimitRetrier
 
     /**
      * Retry a callback with backoff
-     *
-     * @param  int  $maxSecondsToWait
      */
     public function run(callable $callback, int $maxAttempts, ?callable $when, ?callable $retryAfterCallback): mixed
     {
