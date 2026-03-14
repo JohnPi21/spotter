@@ -22,6 +22,9 @@ class MesoDay extends Model
         'day_order' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<Mesocycle, $this>
+     */
     public function mesocycle(): BelongsTo
     {
         return $this->belongsTo(Mesocycle::class);
@@ -38,7 +41,7 @@ class MesoDay extends Model
     #[Scope]
     protected function ownedBy(Builder $query, int $userID)
     {
-        return $query->whereHas('mesocycle', fn ($q) => $q->where('user_id', $userID));
+        return $query->whereHas('mesocycle', fn($q) => $q->where('user_id', $userID));
     }
 
     public function ensureIsEditable(): void
@@ -69,7 +72,7 @@ class MesoDay extends Model
 
     public function canFinish(): bool
     {
-        return ! $this->dayExercises()->whereHas('sets', fn (Builder $q) => $q->whereNull('finished_at'))->exists();
+        return ! $this->dayExercises()->whereHas('sets', fn(Builder $q) => $q->whereNull('finished_at'))->exists();
     }
 
     public function weekOrderSiblings(): HasMany

@@ -15,21 +15,33 @@ class DayExercise extends Model
 
     protected $guarded = [];
 
+    /**
+     * @return BelongsTo<MesoDay>
+     */
     public function day(): BelongsTo
     {
         return $this->belongsTo(MesoDay::class, 'meso_day_id');
     }
 
+    /**
+     * @return hasMany<ExerciseSet, $this>
+     */
     public function sets()
     {
         return $this->hasMany(ExerciseSet::class);
     }
 
+    /**
+     * @return BelongsTo<Exercise>
+     */
     public function exercise(): BelongsTo
     {
         return $this->belongsTo(Exercise::class);
     }
 
+    /**
+     * @return Mesocycle|null
+     */
     public function mesocycle(): ?Mesocycle
     {
         return $this?->day->mesocycle;

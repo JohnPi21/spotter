@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property-read int|null $last_day
+ */
 class Mesocycle extends Model
 {
     use HasFactory;
@@ -27,6 +30,9 @@ class Mesocycle extends Model
 
     protected $appends = ['last_day'];
 
+    /**
+     * @return HasMany<MesoDay, $this>
+     */
     public function days(): HasMany
     {
         return $this->hasMany(MesoDay::class);
@@ -42,8 +48,7 @@ class Mesocycle extends Model
         return Attribute::make(get: function () {
             // If relation is loaded, use it
             if ($this->relationLoaded('days')) {
-                return $this->days
-                    ->firstWhere('finished_at', null)?->id
+                return $this->days->firstWhere('finished_at', null)->id
                     ?? $this->days->last()?->id;
             }
 

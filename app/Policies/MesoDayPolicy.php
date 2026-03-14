@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\MesoDay;
 use App\Models\User;
-use Illuminate\Http\Response;
+use Illuminate\Auth\Access\Response;
 
 class MesoDayPolicy
 {
