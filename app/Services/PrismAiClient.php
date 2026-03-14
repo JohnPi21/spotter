@@ -6,18 +6,14 @@ use App\Contracts\AiClient;
 use App\Data\Ai\AiCallContextData;
 use App\Data\Ai\AiRequestData;
 use App\Enums\RequestStatusEnum;
-use App\Exceptions\AppException;
 use App\Models\AiRequest;
-use GuzzleHttp\Exception\RequestException;
+use App\Services\RateLimiting\RateLimitRetrier;
 use Illuminate\Support\Collection;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Exceptions\PrismException;
+use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Text\PendingRequest;
-use Prism\Prism\Exceptions\PrismRateLimitedException;
-use App\Services\RateLimiting\RateLimitRetrier;
-use Exception;
-use Illuminate\Support\Facades\Http;
 use stdClass;
 use Throwable;
 
@@ -48,8 +44,6 @@ class PrismAiClient implements AiClient
 		return $response->text;
 	}
 
-
-
 	public function structured(AiCallContextData $aiCallContext): array
 	{
 		$payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
@@ -58,25 +52,31 @@ class PrismAiClient implements AiClient
 
 		$start = hrtime(true);
 
-		Http::retry();
-
 		try {
-			throw new PrismRateLimitedException([], 50);
-			// throw new PrismException('F up', 503);
-			$response = $this->retrier->retry(
-				fn() => $this->buildStructuredRequest($aiCallContext),
+			$response = $this->retrier->run(
+				function ($attempt) use ($aiCallContext) {
+					if ($attempt < 2) {
+						throw new PrismRateLimitedException([], 3);
+					}
+					// throw new PrismException('F up', 503);
+					$this->buildStructuredRequest($aiCallContext);
+				},
+				3,
 				when: fn(Throwable $e) => $e instanceof PrismRateLimitedException,
 				retryAfterCallback: function (Throwable $e) {
-					if ($e instanceof PrismRateLimitedException) return $e->retryAfter;
+					if ($e instanceof PrismRateLimitedException) {
+						return $e->retryAfter;
+					}
 				}
 			);
 		} catch (Throwable $e) {
 			// TODO: Set failed send extra data??? log data / error here
 			$aiRequest->setFailed($e, 'TRANSPORT');
 
+			// Don't throw here, handle it and return a silent error to the user with "Provider didn't respond"
 			throw $e;
 		}
-		//@TODO: complete success path
+		// @TODO: complete success path
 		$latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
 
 		$usage = $response->usage;
@@ -111,8 +111,8 @@ class PrismAiClient implements AiClient
 				'schema' => [
 					'strict' => true,
 				],
-			])
-			->asStructured();
+			]);
+		// ->asStructured();
 
 		$response = $this->mockupResponse();
 

@@ -14,9 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(AiClient::class, function () {
-            return new PrismAiClient();
-        });
+        $this->app->bind(AiClient::class, PrismAiClient::class);
     }
 
     /**

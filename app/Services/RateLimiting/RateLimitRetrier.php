@@ -3,9 +3,10 @@
 namespace App\Services\RateLimiting;
 
 use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
-use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class RateLimitRetrier
@@ -17,10 +18,9 @@ class RateLimitRetrier
 
     private int $maxSecondsToWait = 96;
 
-
     // TODO: AT some point in time I should refactor this
     // First: this class should just be a retriar, it should not have concepts of different possible exceptions
-    // - I should create a RetryResolver that checks the exception types, is extensible and can be injected / extended from ouside if and when I want an 
+    // - I should create a RetryResolver that checks the exception types, is extensible and can be injected / extended from ouside if and when I want an
     // exception to be rehandled.
     // This class should only have the following steps
     // - execute callback
@@ -34,12 +34,9 @@ class RateLimitRetrier
     /**
      * Retry a callback with backoff
      *
-     * @param callable $callback
-     * @param integer $maxAttempts
-     * @param integer $maxSecondsToWait
-     * @return mixed
+     * @param  int  $maxSecondsToWait
      */
-    public function retry(callable $callback, int $maxAttempts = 3, ?callable $when, ?callable $retryAfterCallback): mixed
+    public function run(callable $callback, int $maxAttempts, ?callable $when, ?callable $retryAfterCallback): mixed
     {
         // 1 < $maxAttempts < 10;
         // 7 attempts => 128 seconds at most wait time
@@ -49,9 +46,10 @@ class RateLimitRetrier
 
         for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
             try {
-                return $callback();
+                return $callback($attempt);
             } catch (Throwable $e) {
                 $lastException = $e;
+                Log::warning('Attempt: ', [$attempt, $e]);
 
                 // Retry Connection exception because it never got to the server
                 if ($e instanceof ConnectionException) {
@@ -59,6 +57,7 @@ class RateLimitRetrier
 
                     if ($timeToWait < $maxMicroToWait) {
                         usleep($timeToWait);
+
                         continue;
                     }
                 }
@@ -72,13 +71,13 @@ class RateLimitRetrier
                     }
                 }
 
-
                 if ($retryAfterCallback) {
                     // Get the retry timer
                     $retryAfter = call_user_func($retryAfterCallback, $e);
 
                     if ($retryAfter && $retryAfter < $this->maxSecondsToWait) {
                         sleep($retryAfter);
+
                         continue;
                     }
                 }
@@ -99,6 +98,7 @@ class RateLimitRetrier
                     if ($retryAfterMicro !== null) {
                         if ($retryAfterMicro < $maxMicroToWait) {
                             usleep($retryAfterMicro);
+
                             continue;
                         }
 
@@ -109,6 +109,7 @@ class RateLimitRetrier
 
                     if ($timeToWait < $maxMicroToWait) {
                         usleep($timeToWait);
+
                         continue;
                     }
 
@@ -123,23 +124,25 @@ class RateLimitRetrier
     protected function exponentialRetry(int $attempt): int
     {
         $jitter = random_int(50_000, 250_000);
+
         return ((2 ** $attempt) * 1_000_000) + $jitter;
     }
 
     /**
      * Get Retry-After header value in microseconds if available
-     *
-     * @param 
-     * @return integer|null
      */
     public function returnRetryAfterInMicro(int|string $retryAfter): ?int
     {
-        if (is_numeric($retryAfter) && $retryAfter > 0) return (int) $retryAfter * 1_000_000;
+        if (is_numeric($retryAfter) && $retryAfter > 0) {
+            return (int) $retryAfter * 1_000_000;
+        }
 
         try {
             $retryDate = Carbon::parse($retryAfter);
 
-            if ($retryDate->isPast()) return null;
+            if ($retryDate->isPast()) {
+                return null;
+            }
 
             return (int) now()->diffInMicroseconds($retryDate);
         } catch (InvalidFormatException $e) {
