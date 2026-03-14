@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
-./vendor/bin/sail --dirty || exit 1
+echo "Running pre commit hooks"
+
+echo "Running Pint:"
+
+./vendor/bin/pint --dirty || exit 1
 git add -A
