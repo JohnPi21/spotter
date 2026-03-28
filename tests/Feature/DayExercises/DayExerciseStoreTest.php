@@ -68,6 +68,7 @@ class DayExerciseStoreTest extends TestCase
 
     public function test_user_cannot_add_exercise_to_someone_elses_day()
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $other */
         [$owner, $other] = User::factory()->count(2)->create();
         $meso = Mesocycle::factory()->for($owner)->withFullStructure()->create();
         $day = $meso->days()->first();

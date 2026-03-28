@@ -17,8 +17,6 @@ class AppExceptionRenderTest extends TestCase
         $this->from('/mesocycles/ai/create')
             ->post('/test-app-exception')
             ->assertRedirect('/mesocycles/ai/create')
-            ->assertSessionHasErrors([
-                'error' => 'AI provider is not available',
-            ]);
+            ->assertSessionHas('error', 'AI provider is not available');
     }
 }
