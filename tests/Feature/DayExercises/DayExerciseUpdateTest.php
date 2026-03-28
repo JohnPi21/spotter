@@ -6,13 +6,10 @@ use App\Models\DayExercise;
 use App\Models\Exercise;
 use App\Models\Mesocycle;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\MysqlTestCase;
 
-class DayExerciseUpdateTest extends TestCase
+class DayExerciseUpdateTest extends MysqlTestCase
 {
-    use RefreshDatabase;
-
     public function test_user_can_reorder_their_day_exercises()
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
@@ -47,6 +44,7 @@ class DayExerciseUpdateTest extends TestCase
 
     public function test_user_cannot_reorder_someone_elses_day()
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $other */
         [$owner, $other] = User::factory()->count(2)->create();
         $meso = Mesocycle::factory()->for($owner)->withFullStructure()->create();
         $day = $meso->days()->first();
@@ -98,7 +96,6 @@ class DayExerciseUpdateTest extends TestCase
             ->actingAs($user)
             ->patch(route('dayExercises.reorder', $day), ['order' => $badOrder])
             ->assertRedirectBack();
-        // ->assertSessionHasErrors();
     }
 
     public function test_user_can_save_note_for_day_exercise()

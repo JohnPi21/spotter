@@ -62,6 +62,22 @@ return [
             ]) : [],
         ],
 
+        'mysql_testing' => [
+            'driver' => 'mysql',
+            'host' => env('DB_TEST_HOST', 'mysql'),
+            'port' => env('DB_TEST_PORT', '3306'),
+            'database' => env('DB_TEST_DATABASE', 'testing'),
+            'username' => env('DB_TEST_USERNAME', 'sail'),
+            'password' => env('DB_TEST_PASSWORD', 'password'),
+            'unix_socket' => env('DB_TEST_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
