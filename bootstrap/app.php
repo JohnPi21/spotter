@@ -54,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return ! $request->isMethod('GET')
-                ? back()->withErrors(['error' => $payload['message']])->withInput()
+                ? back()->with('error', $payload['message'])->withInput()
                 : Inertia::render('ErrorPage', $payload)->toResponse($request)->setStatusCode($status);
         });
 
@@ -64,7 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => $msg], 401);
             }
 
-            return redirect()->guest(route('login'))->withErrors(['error' => $msg]);
+            return redirect()->guest(route('login'))->with('error', $msg);
         });
 
         $exceptions->render(function (Illuminate\Session\TokenMismatchException $e, Request $request) {

@@ -24,7 +24,7 @@ class MesoDayController extends Controller
 
         $calendar = $makeCalendarAction->execute($mesocycle);
 
-        $mesocycle->calendar = $calendar;
+        $mesocycle->setAttribute('calendar', $calendar);
         $mesocycle->makeHidden('days');
         $day->makeHidden('mesocycle');
 
@@ -46,7 +46,7 @@ class MesoDayController extends Controller
 
             $day->update(['finished_at' => $day->finished_at ? null : now()]);
 
-            DayFinished::dispatchIf($day->finished_at, $day->id);
+            DayFinished::dispatchIf((bool) $day->finished_at, $day->id);
         });
 
         return redirect()->back()->with('day', $day->finished_at);

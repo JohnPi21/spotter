@@ -3,6 +3,7 @@
 namespace App\Actions\Mesocycle;
 
 use App\Models\Mesocycle;
+use App\Models\MesoDay;
 
 class MakeMesocycleCalendar
 {
@@ -12,7 +13,7 @@ class MakeMesocycleCalendar
     public function __construct() {}
 
     /**
-     * Invoke the class instance.
+     * @return array<int, list<MesoDay>>
      */
     public function execute(Mesocycle $mesocycle): array
     {

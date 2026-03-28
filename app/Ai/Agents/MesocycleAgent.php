@@ -40,7 +40,7 @@ class MesocycleAgent
             systemPrompt: $systemPrompt,
             schema: $schema,
             userId: $userId,
-            callerClass: get_class($this),
+            callerClass: $this::class,
             operationKey: self::CREATE_MESOCYCLE,
             schemaVersion: $versionMeta->schema_version,
             schemaHash: $versionMeta->schema_hash,

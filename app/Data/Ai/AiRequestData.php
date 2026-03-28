@@ -38,8 +38,8 @@ class AiRequestData extends Data
             $context->operationKey,
             $context->promptVersion,
             $context->systemPromptVersion,
-            $context?->schemaVersion,
-            $context?->schemaHash,
+            $context->schemaVersion,
+            $context->schemaHash,
             RequestStatusEnum::PENDING,
             Str::uuid(),
         );

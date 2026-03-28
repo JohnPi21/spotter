@@ -28,6 +28,7 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
         $day = MesoDay::with(['mesocycle:id,days_per_week,weeks_duration', 'dayExercises.sets'])->find($event->dayId);
 
         DB::transaction(function () use ($day) {
+            /** @var MesoDay */
             $nextDaySibling = $day->nextWeekSibling()->select('id')->first();
 
             $nextDayExercises = $nextDaySibling->dayExercises()

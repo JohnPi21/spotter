@@ -1,5 +1,6 @@
 <template>
     <div class="flex min-h-screen" v-if="page.props?.auth?.user">
+        <Toastr />
         <SideNav class="hidden md:block" />
         <Modal />
         <div
@@ -15,6 +16,7 @@
 import MobileNav from "@/Components/MobileNav.vue";
 import Modal from "@/Components/Modal.vue";
 import SideNav from "@/Components/SideNav.vue";
+import Toastr from "@/Components/Ui/Toastr.vue";
 import { useExerciseStore } from "@/stores/exerciseStore";
 import { usePage } from "@inertiajs/vue3";
 import { onMounted } from "vue";

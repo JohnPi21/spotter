@@ -16,7 +16,7 @@ class DayExercise extends Model
     protected $guarded = [];
 
     /**
-     * @return BelongsTo<MesoDay>
+     * @return BelongsTo<MesoDay, $this>
      */
     public function day(): BelongsTo
     {
@@ -32,19 +32,16 @@ class DayExercise extends Model
     }
 
     /**
-     * @return BelongsTo<Exercise>
+     * @return BelongsTo<Exercise, $this>
      */
     public function exercise(): BelongsTo
     {
         return $this->belongsTo(Exercise::class);
     }
 
-    /**
-     * @return Mesocycle|null
-     */
-    public function mesocycle(): ?Mesocycle
+    public function mesocycle(): Mesocycle
     {
-        return $this?->day->mesocycle;
+        return $this->day->mesocycle;
     }
 
     public function weekSiblings(): HasMany

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ExerciseSet;
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,9 +13,15 @@ class UpdateSetRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->route()->set->load('dayExercise.day.mesocycle:id,user_id');
+        $set = $this->route('set');
 
-        return Gate::allows('update', $this->route()->set);
+        if (! $set instanceof ExerciseSet) {
+            return false;
+        }
+
+        $set->load('dayExercise.day.mesocycle:id,user_id');
+
+        return Gate::allows('update', $set);
     }
 
     /**

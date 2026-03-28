@@ -5,4 +5,4 @@ echo "Running pre push hook:"
 echo ""
 
 echo "Running Tests"
-sail artisan test || exit 1;
+./vendor/bin/sail artisan test || exit 1;

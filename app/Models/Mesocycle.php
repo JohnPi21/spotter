@@ -43,7 +43,7 @@ class Mesocycle extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function lastDay(): Attribute
+    protected function lastDay(): Attribute
     {
         return Attribute::make(get: function () {
             // If relation is loaded, use it
@@ -68,9 +68,9 @@ class Mesocycle extends Model
     }
 
     #[Scope]
-    protected function ownedBy(Builder $query, ?int $userID): void
+    protected function ownedBy(Builder $query, ?int $userID): Builder
     {
-        $query->where('user_id', $userID);
+        return $query->where('user_id', $userID);
     }
 
     #[Scope]

@@ -6,11 +6,11 @@ use App\Contracts\AiClient;
 use App\Data\Ai\AiCallContextData;
 use App\Data\Ai\AiRequestData;
 use App\Enums\RequestStatusEnum;
+use App\Exceptions\AppException;
 use App\Models\AiRequest;
 use App\Services\RateLimiting\RateLimitRetrier;
 use Illuminate\Support\Collection;
 use Prism\Prism\Enums\Provider;
-use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Text\PendingRequest;
@@ -55,11 +55,7 @@ class PrismAiClient implements AiClient
         try {
             $response = $this->retrier->run(
                 function ($attempt) use ($aiCallContext) {
-                    if ($attempt < 2) {
-                        throw new PrismRateLimitedException([], 3);
-                    }
-                    // throw new PrismException('F up', 503);
-                    $this->buildStructuredRequest($aiCallContext);
+                    return $this->buildStructuredRequest($aiCallContext);
                 },
                 3,
                 when: fn (Throwable $e) => $e instanceof PrismRateLimitedException,
@@ -70,13 +66,10 @@ class PrismAiClient implements AiClient
                 }
             );
         } catch (Throwable $e) {
-            // TODO: Set failed send extra data??? log data / error here
             $aiRequest->setFailed($e, 'TRANSPORT');
 
-            // Don't throw here, handle it and return a silent error to the user with "Provider didn't respond"
-            throw $e;
+            throw new AppException(502, 'AI Provider is not available', 'AI_PROVIDER_UNAVAILABLE', $e);
         }
-        // @TODO: complete success path
         $latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
 
         $usage = $response->usage;
@@ -91,10 +84,8 @@ class PrismAiClient implements AiClient
             'meta_id' => $response->meta->id,
         ])->save();
 
-        dd($aiRequest->refresh());
+        $aiRequest->refresh();
 
-        // @TODO: test the response, handle the errors and retries
-        // Divide schema validation from within the schema and Domain logic validation
         return [$aiRequest, $response];
     }
 
@@ -130,7 +121,7 @@ class PrismAiClient implements AiClient
     {
       "label": "Push",
       "exercises": [
-        { "muscleGroup": 1, "exerciseID": 101 },
+        { "muscleGroup": 1, "exerciseID": 101 ,
         { "muscleGroup": 1, "exerciseID": 102 },
         { "muscleGroup": 2, "exerciseID": 201 },
         { "muscleGroup": 2, "exerciseID": 202 },

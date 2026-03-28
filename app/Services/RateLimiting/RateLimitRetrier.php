@@ -12,6 +12,8 @@ use Throwable;
 class RateLimitRetrier
 {
     /**
+     * Retry codes that will trigger a retry
+     *
      * @var array<int, int>
      */
     private array $retryCodes = [408, 429, 500, 502, 503, 504];
@@ -32,11 +34,23 @@ class RateLimitRetrier
     // Move that logic to another side
 
     /**
-     * Retry a callback with backoff
+     * Execute a callback and retry it when the caught exception is retryable.
+     *
+     * The callback receives the current zero-based attempt number. Attempts are
+     * clamped to the allowed internal range before execution starts.
+     *
+     * @param  callable(int $attempt): mixed  $callback  Callback to execute.
+     * @param  int  $maxAttempts  Requested number of attempts.
+     * @param  callable(Throwable): bool|null  $when  Optional predicate that decides whether
+     *                                                the caught exception should be retried.
+     * @param  callable(Throwable): int|null  $retryAfterCallback  Optional callback that returns
+     *                                                             the delay in seconds before the next retry.
+     *
+     * @throws Throwable Rethrows the last caught exception when retrying is not allowed
+     *                   or when all retry attempts are exhausted.
      */
     public function run(callable $callback, int $maxAttempts, ?callable $when, ?callable $retryAfterCallback): mixed
     {
-        // 1 < $maxAttempts < 10;
         // 7 attempts => 128 seconds at most wait time
         $maxAttempts = min(max($maxAttempts, 1), 7);
         $maxMicroToWait = $this->maxSecondsToWait * 1_000_000;
@@ -47,7 +61,7 @@ class RateLimitRetrier
                 return $callback($attempt);
             } catch (Throwable $e) {
                 $lastException = $e;
-                Log::warning('Attempt: ', [$attempt, $e]);
+                Log::warning('Attempt: ', ['attempt' => $attempt, 'exception' => $e]);
 
                 // Retry Connection exception because it never got to the server
                 if ($e instanceof ConnectionException) {
@@ -119,6 +133,9 @@ class RateLimitRetrier
         throw $lastException;
     }
 
+    /**
+     * Returns exponential number for given attempt + a jitter
+     */
     protected function exponentialRetry(int $attempt): int
     {
         $jitter = random_int(50_000, 250_000);
@@ -128,6 +145,8 @@ class RateLimitRetrier
 
     /**
      * Get Retry-After header value in microseconds if available
+     *
+     * @param  int|string  $retryAfter  Can be seconds or date string
      */
     public function returnRetryAfterInMicro(int|string $retryAfter): ?int
     {

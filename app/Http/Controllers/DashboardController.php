@@ -6,6 +6,7 @@ use App\Models\ExerciseSet;
 use App\Models\MesoDay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -22,6 +23,9 @@ class DashboardController extends Controller
 
         $selectorBy = $displayBy === 'weight' ? 'weight' : 'reps * weight';
 
+        /**
+         * @var Collection<int, object{exercise_name: string, best_value: numeric-string}> $bestLifts
+         */
         $bestLifts = ExerciseSet::query()
             ->join('day_exercises', 'exercise_sets.day_exercise_id', '=', 'day_exercises.id')
             ->join('exercises', 'day_exercises.exercise_id', '=', 'exercises.id')
@@ -45,7 +49,7 @@ class DashboardController extends Controller
 
             return [
                 'exercise' => preg_replace('/\s*\(.*?\)/', '', $row->exercise_name),
-                'value' => number_format($row->best_value, 2),
+                'value' => number_format((float) $row->best_value, 2),
                 'unit' => $displayBy === 'weight' ? 'kg' : 'kg x reps',
                 'type' => $type,
             ];
@@ -76,7 +80,7 @@ class DashboardController extends Controller
 
             return [
                 'volumeY' => $value,
-                'dateX' => "{$day->label} ".$day?->finished_at?->isoFormat('DD.MM'),
+                'dateX' => "{$day->label} ".$day->finished_at?->isoFormat('DD.MM'),
             ];
         });
 
