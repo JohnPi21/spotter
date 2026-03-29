@@ -14,7 +14,6 @@ use Prism\Prism\Enums\Provider;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Text\PendingRequest;
-use stdClass;
 use Throwable;
 
 class PrismAiClient implements AiClient
@@ -44,6 +43,9 @@ class PrismAiClient implements AiClient
         return $response->text;
     }
 
+    /**
+     * @return array{AiRequest, array}
+     */
     public function structured(AiCallContextData $aiCallContext): array
     {
         $payload = AiRequestData::fromContext($this->provider, $this->model, $aiCallContext);
@@ -72,16 +74,16 @@ class PrismAiClient implements AiClient
         }
         $latencyMs = intdiv(hrtime(true) - $start, 1_000_000);
 
-        $usage = $response->usage;
+        $usage = $response['usage'];
         $aiRequest->fill([
             'latency_ms' => $latencyMs,
             'usage_json' => json_encode($usage),
-            'prompt_tokens' => $usage->promptTokens,
-            'completion_tokens' => $usage->completionTokens,
-            'total_tokens' => $usage->promptTokens + $usage->completionTokens,
-            'finish_reason' => $response->finishReason,
+            'prompt_tokens' => $usage['promptTokens'],
+            'completion_tokens' => $usage['completionTokens'],
+            'total_tokens' => $usage['promptTokens'] + $usage['completionTokens'],
+            'finish_reason' => $response['finishReason'],
             'status' => RequestStatusEnum::SUCCESS,
-            'meta_id' => $response->meta->id,
+            'meta_id' => $response['meta']['id'],
         ])->save();
 
         $aiRequest->refresh();
@@ -91,7 +93,7 @@ class PrismAiClient implements AiClient
 
     public function chat() {}
 
-    private function buildStructuredRequest(AiCallContextData $context): stdClass
+    private function buildStructuredRequest(AiCallContextData $context): array
     {
         $response = Prism::structured()
             ->using($this->provider, $this->model)
@@ -110,7 +112,7 @@ class PrismAiClient implements AiClient
         return $response;
     }
 
-    public function mockupResponse()
+    public function mockupResponse(): array
     {
         return json_decode(
             '{
@@ -121,47 +123,47 @@ class PrismAiClient implements AiClient
     {
       "label": "Push",
       "exercises": [
-        { "muscleGroup": 1, "exerciseID": 101 ,
-        { "muscleGroup": 1, "exerciseID": 102 },
-        { "muscleGroup": 2, "exerciseID": 201 },
-        { "muscleGroup": 2, "exerciseID": 202 },
-        { "muscleGroup": 3, "exerciseID": 301 },
-        { "muscleGroup": 3, "exerciseID": 302 }
+        { "muscleGroup": 1, "exerciseID": 26 },
+        { "muscleGroup": 1, "exerciseID": 44 },
+        { "muscleGroup": 5, "exerciseID": 157 },
+        { "muscleGroup": 5, "exerciseID": 130 },
+        { "muscleGroup": 3, "exerciseID": 89 },
+        { "muscleGroup": 3, "exerciseID": 93 }
       ]
     },
     {
       "label": "Pull",
       "exercises": [
-        { "muscleGroup": 4, "exerciseID": 401 },
-        { "muscleGroup": 4, "exerciseID": 402 },
-        { "muscleGroup": 4, "exerciseID": 403 },
-        { "muscleGroup": 2, "exerciseID": 203 },
-        { "muscleGroup": 5, "exerciseID": 501 },
-        { "muscleGroup": 5, "exerciseID": 502 }
+        { "muscleGroup": 2, "exerciseID": 53 },
+        { "muscleGroup": 2, "exerciseID": 56 },
+        { "muscleGroup": 2, "exerciseID": 78 },
+        { "muscleGroup": 4, "exerciseID": 105 },
+        { "muscleGroup": 4, "exerciseID": 109 },
+        { "muscleGroup": 10, "exerciseID": 164 }
       ]
     },
     {
       "label": "Legs",
       "exercises": [
-        { "muscleGroup": 6, "exerciseID": 601 },
-        { "muscleGroup": 6, "exerciseID": 602 },
-        { "muscleGroup": 7, "exerciseID": 701 },
-        { "muscleGroup": 6, "exerciseID": 603 },
-        { "muscleGroup": 8, "exerciseID": 801 },
-        { "muscleGroup": 9, "exerciseID": 901 }
+        { "muscleGroup": 6, "exerciseID": 1 },
+        { "muscleGroup": 6, "exerciseID": 188 },
+        { "muscleGroup": 6, "exerciseID": 189 },
+        { "muscleGroup": 7, "exerciseID": 197 },
+        { "muscleGroup": 8, "exerciseID": 213 },
+        { "muscleGroup": 9, "exerciseID": 216 }
       ]
     },
     {
       "label": "Upper",
       "exercises": [
-        { "muscleGroup": 1, "exerciseID": 103 },
-        { "muscleGroup": 4, "exerciseID": 404 },
-        { "muscleGroup": 2, "exerciseID": 204 },
-        { "muscleGroup": 4, "exerciseID": 405 },
-        { "muscleGroup": 3, "exerciseID": 303 },
-        { "muscleGroup": 5, "exerciseID": 503 },
-        { "muscleGroup": 10, "exerciseID": 1001 },
-        { "muscleGroup": 10, "exerciseID": 1002 }
+        { "muscleGroup": 1, "exerciseID": 26 },
+        { "muscleGroup": 2, "exerciseID": 53 },
+        { "muscleGroup": 1, "exerciseID": 44 },
+        { "muscleGroup": 2, "exerciseID": 78 },
+        { "muscleGroup": 5, "exerciseID": 157 },
+        { "muscleGroup": 3, "exerciseID": 101 },
+        { "muscleGroup": 4, "exerciseID": 105 },
+        { "muscleGroup": 10, "exerciseID": 178 }
       ]
     }
   ],
@@ -181,7 +183,8 @@ class PrismAiClient implements AiClient
   "toolCalls": [],
   "toolResults": [],
   "additionalContent": []
-}'
+}',
+            true
         );
     }
 }

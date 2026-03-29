@@ -110,18 +110,24 @@ import { Icon } from "@iconify/vue";
 import { useForm } from "@inertiajs/vue3";
 import { reactive, ref } from "vue";
 
-defineProps<{ errors: { [key: string]: string } }>();
+const props = defineProps<{
+    errors: Record<string, string>;
+    name?: string;
+    unit?: string;
+    weeksDuration?: number;
+    days?: DayForm[];
+}>();
 
 const meso = ref<MesoForm>({
-    name: "",
-    unit: "kg",
-    weeksDuration: 4,
+    name: props.name ?? "",
+    unit: props.unit ?? "kg",
+    weeksDuration: props.weeksDuration ?? 4,
 });
 
 const exerciseStore = useExerciseStore();
 const showMuscleModal = ref<boolean>(false);
 const loading = ref<boolean>(false);
-const days: DayForm[] = reactive([]);
+const days = reactive<DayForm[]>(props.days ?? []);
 
 function addDay() {
     days.push({

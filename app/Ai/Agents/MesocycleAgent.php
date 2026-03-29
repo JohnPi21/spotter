@@ -94,14 +94,14 @@ class MesocycleAgent
         return [$exercises, $muscleGroups];
     }
 
-    private function prepareMesoDto(string $aiResponse): CreateMesocycleData
+    private function prepareMesoDto(array $aiResponse): CreateMesocycleData
     {
-        try {
-            $aiResponse = json_decode($aiResponse, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            report($e);
-            throw new InvalidMesocycleException('AI generated an invalid mesocycle JSON');
-        }
+        // try {
+        //     $aiResponse = json_decode($aiResponse, true, 512, JSON_THROW_ON_ERROR);
+        // } catch (\JsonException $e) {
+        //     report($e);
+        //     throw new InvalidMesocycleException('AI generated an invalid mesocycle JSON');
+        // }
 
         if (! isset($aiResponse['days']) || ! is_array($aiResponse['days'])) {
             throw new InvalidMesocycleException("AI mesocycle doesn't contain days.");

@@ -230,7 +230,7 @@ const form = useForm<AiMesocycleForm>({
     daysPerWeek: 4,
     sessionDuration: 60,
     primaryGoal: "hypertrophy",
-    splitPreference: "upper-lower",
+    splitPreference: "upper_lower",
     experienceLevel: "intermediate",
     equipment: [...props.equipmentOptions.map((opt) => String(opt.value))],
     injuries: "",
