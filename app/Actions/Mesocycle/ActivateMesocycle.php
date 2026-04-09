@@ -21,7 +21,7 @@ class ActivateMesocycle
         $affected = DB::update('
             UPDATE mesocycles
             SET status = 
-                CASE WHEN id = ? THEN ? ELSE ?  END
+                CASE WHEN id = ? THEN ? ELSE ?  END,
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
             AND EXISTS(

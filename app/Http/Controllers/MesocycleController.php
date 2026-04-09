@@ -56,18 +56,18 @@ class MesocycleController extends Controller implements HasMiddleware
         return Inertia::render('mesocycles/create');
     }
 
-    public function store(StoreMesocycleRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreMesocycleRequest $request, CreateMesocycle $createMesocycle): \Illuminate\Http\RedirectResponse
     {
         $mesoDTO = CreateMesocycleData::from($request->validated());
 
-        app(CreateMesocycle::class)->execute($mesoDTO, $request->user()->id);
+        $createMesocycle->execute($mesoDTO, $request->user()->id);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
 
     public function activate(Mesocycle $mesocycle, ActivateMesocycle $activateAction): RedirectResponse
     {
-        $activateAction($mesocycle);
+        $activateAction->execute($mesocycle);
 
         return to_route('mesocycles');
     }

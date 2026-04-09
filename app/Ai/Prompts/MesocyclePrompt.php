@@ -55,8 +55,21 @@ class MesocyclePrompt
                     description: 'An exercise ID from the provided exercises list',
                     minimum: 1,
                 ),
+
+                new NumberSchema(
+                    name: 'minReps',
+                    description: 'Minimum number of reps for this specific exercise',
+                    minimum: 1
+                ),
+
+                new NumberSchema(
+                    name: 'maxReps',
+                    description: 'Upper range number of reps for this specific exercise. This tells the user where to aim his 1 rep in reserve',
+                    minimum: 1,
+                    maximum: 30,
+                ),
             ],
-            requiredFields: ['exerciseID'],
+            requiredFields: ['exerciseID', 'minReps', 'maxReps'],
         );
 
         // -------------
@@ -109,6 +122,11 @@ class MesocyclePrompt
                     maximum: 12,
                 ),
 
+                new StringSchema(
+                    name: 'description',
+                    description: "Brief explanation of the split choice, exercise selection, and how it addresses the user's goals and  experience level",
+                ),
+
                 new ArraySchema(
                     name: 'days',
                     description: 'Workout days containing exercises and muscle groups',
@@ -117,7 +135,7 @@ class MesocyclePrompt
                     maxItems: 7,
                 ),
             ],
-            requiredFields: ['name', 'unit', 'weeksDuration', 'days'],
+            requiredFields: ['name', 'unit', 'weeksDuration', 'description', 'days'],
         );
     }
 
@@ -182,6 +200,11 @@ class MesocyclePrompt
         - Use the "m" field on exercises and MUSCLE_GROUPS to:
             - Ensure that major muscle groups are trained with appropriate frequency.
             - Avoid overloading the same muscle group on consecutive days.
+        
+        6. Short reasoning explanation
+        - Explain in max 5 paragraphs or 200 words:
+            - The main thought process that resulted in this mesocycle
+            - Some extra information the user should be aware about
 
         # OUTPUT
 

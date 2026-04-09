@@ -36,6 +36,8 @@ trait EnumHelpers
 
     /**
      * Just return all pure values: ['barbell','machine','freemotion',...]
+     *
+     * @return array<int, value-of<self>>
      */
     public static function values(): array
     {

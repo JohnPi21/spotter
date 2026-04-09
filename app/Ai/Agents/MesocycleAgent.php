@@ -132,6 +132,10 @@ class MesocycleAgent
                     throw new InvalidMesocycleException("Unknown exercise ID {$exercise['exerciseID']}");
                 }
                 $exercise['muscleGroup'] = $muscleID;
+
+                // Extract this into a method and also calculate the 1RM out of this?
+                // apply
+                // Make a new class that can do that
             }
         }
 
@@ -162,4 +166,37 @@ class MesocycleAgent
             ->get()
             ->keyBy('id');
     }
+
+    // private function checkForRepRange(array &$exercise): array
+    // {
+    //     if (! isset($exercise['minReps']) || ! isset($exercise['maxReps'])) {
+    //         return $exercise;
+    //     }
+    //
+    //     $minReps = $exercise['minReps'];
+    //     $maxReps = $exercise['maxReps'];
+    //
+    //     if (! is_numeric($minReps) || ! is_numeric($maxReps)) {
+    //         return $exercise;
+    //     }
+    //
+    //     if ((! is_int($exercise['minReps']) && $exercise['minReps']) || ! is_int($exercise['maxReps'])) {
+    //         $exercise['minReps'] = null;
+    //         $exercise['maxReps'] = null;
+    //
+    //         return $exercise;
+    //     }
+    //
+    //     return $exercise;
+    // }
+
+    // private function setEmptyReps
+
+    // private function calculate1RM(int $minReps, int $maxReps): int
+    // {
+    //     // Brzycki for reps <= 5 | 1RM = W × 36 / (37 - r)
+    //     // Epley for reps > 5 | 1RM = W (1 + r / 30)
+    //     // if($maxReps <= 5)
+    //     return 0;
+    // }
 }

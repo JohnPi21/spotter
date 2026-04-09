@@ -15,10 +15,9 @@ return new class extends Migration
         Schema::create('meso_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('sex');
             $table->foreignIdFor(User::class)->nullable();
-            $table->json('schema');
-            $table->boolean('ai_generated');
-            $table->foreignId('ai_requests_id')->nullable();
+            $table->tinyInteger('frequency');
             $table->timestamps();
         });
     }
