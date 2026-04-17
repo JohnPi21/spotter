@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ai_requests', function (Blueprint $table) {
-            $table->dropColumn('sex');
+        Schema::table('ai_requests', function (Blueprint $table) {
+            if (Schema::hasColumn('ai_requests', 'sex')) {
+                $table->dropColumnIfExists('sex');
+            }
 
             $table->json('schema');
             $table->boolean('ai_generated');

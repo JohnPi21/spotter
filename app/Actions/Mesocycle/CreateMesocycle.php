@@ -6,6 +6,7 @@ use App\Actions\DayExercise\CreateManyDayExercises;
 use App\Actions\MesoDay\CreateMesoDay;
 use App\Data\Mesocycle\CreateMesocycleData;
 use App\Models\DayExercise;
+use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,7 @@ class CreateMesocycle
                 return ['day_exercise_id' => $dayExId];
             }, $dayExercisesIds->toArray());
 
-            DB::table('exercise_sets')->insert($sets);
+            ExerciseSet::insert($sets);
         });
     }
 }

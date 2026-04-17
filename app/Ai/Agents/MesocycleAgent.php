@@ -133,9 +133,15 @@ class MesocycleAgent
                 }
                 $exercise['muscleGroup'] = $muscleID;
 
-                // Extract this into a method and also calculate the 1RM out of this?
-                // apply
-                // Make a new class that can do that
+                if (isset($exercise['sets']) && is_array($exercise['sets'])) {
+                    foreach ($exercise['sets'] as $set) {
+                        foreach (array_keys($set) as $key) {
+                            $this->checkForNull($set, $key);
+                        }
+                    }
+                }
+                // Make a new action to validate this
+                // Calculate 1RM out of this if needed
             }
         }
 
@@ -167,36 +173,24 @@ class MesocycleAgent
             ->keyBy('id');
     }
 
-    // private function checkForRepRange(array &$exercise): array
-    // {
-    //     if (! isset($exercise['minReps']) || ! isset($exercise['maxReps'])) {
-    //         return $exercise;
-    //     }
-    //
-    //     $minReps = $exercise['minReps'];
-    //     $maxReps = $exercise['maxReps'];
-    //
-    //     if (! is_numeric($minReps) || ! is_numeric($maxReps)) {
-    //         return $exercise;
-    //     }
-    //
-    //     if ((! is_int($exercise['minReps']) && $exercise['minReps']) || ! is_int($exercise['maxReps'])) {
-    //         $exercise['minReps'] = null;
-    //         $exercise['maxReps'] = null;
-    //
-    //         return $exercise;
-    //     }
-    //
-    //     return $exercise;
-    // }
+    private function checkForNull(array &$set, string $entity = 'minReps'): void
+    {
+        if (! isset($set[$entity])) {
+            $set[$entity] = null;
 
-    // private function setEmptyReps
+            return;
+        }
+
+        if (! is_numeric($set[$entity]) || filter_var($set[$entity], FILTER_VALIDATE_INT) === false) {
+            $set[$entity] = null;
+        }
+    }
 
     // private function calculate1RM(int $minReps, int $maxReps): int
     // {
-    //     // Brzycki for reps <= 5 | 1RM = W × 36 / (37 - r)
-    //     // Epley for reps > 5 | 1RM = W (1 + r / 30)
-    //     // if($maxReps <= 5)
+    // Brzycki for reps <= 5 | 1RM = W × 36 / (37 - r)
+    // Epley for reps > 5 | 1RM = W (1 + r / 30)
+    // if($maxReps <= 5)
     //     return 0;
     // }
 }

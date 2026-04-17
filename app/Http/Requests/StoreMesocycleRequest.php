@@ -40,11 +40,20 @@ class StoreMesocycleRequest extends FormRequest
             'name' => ['required', 'string'],
             'unit' => ['sometimes', Rule::enum(UnitsOfMeasure::class)],
             'weeksDuration' => ['required', 'integer', 'min:3', 'max:12'],
+
             'days' => ['required', 'array', 'min:1', 'max:7'],
             'days.*.label' => ['required', 'string', 'min:1', 'max:64'],
+
             'days.*.exercises' => ['required', 'array', 'min:1', 'max:32'],
             'days.*.exercises.*.muscleGroup' => ['required', 'integer', 'min:1'],
             'days.*.exercises.*.exerciseID' => ['required', 'integer', 'min:1'],
+            'days.*.exercises.*.oneRepMax' => ['sometimes', 'decimal:0,3', 'max:2048'],
+
+            'days.*.exercises.*.sets.*.minReps' => ['sometimes', 'integer', 'min:1'],
+            'days.*.exercises.*.sets.*.maxReps' => ['sometimes', 'integer', 'min:1'],
+            'days.*.exercises.*.sets.*.minRir' => ['sometimes', 'integer', 'min:0'],
+            'days.*.exercises.*.sets.*.maxRir' => ['sometimes', 'integer', 'min:0'],
+
             'exercisesIds' => [Rule::exists('exercises', 'id')],
             'muscleGroupsIds' => [Rule::exists('muscle_groups', 'id')],
         ];

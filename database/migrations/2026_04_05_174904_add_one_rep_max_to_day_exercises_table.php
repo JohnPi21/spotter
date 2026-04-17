@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('day_exercises', function (Blueprint $table) {
-            $table->unsignedSmallInteger('min_reps')->nullable();
-            $table->unsignedSmallInteger('max_reps')->nullable();
+            $table->decimal('one_rep_max', 7, 3)->nullable();
         });
     }
 

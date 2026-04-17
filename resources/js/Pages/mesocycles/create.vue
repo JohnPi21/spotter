@@ -26,31 +26,130 @@
 
             <template v-if="day.exercises.length > 0">
                 <UiBox
-                    class="flex flex-col gap-2 bg-layer-light"
+                    class="flex flex-col gap-3 bg-layer-light"
                     v-for="(exercise, exerciseIDx) in day.exercises"
                     :key="exerciseIDx"
                 >
-                    <div class="flex-center flex justify-between">
-                        <div class="rounded bg-orange-700 px-2">
+                    <!-- Muscle group + delete -->
+                    <div class="flex items-center justify-between">
+                        <span class="rounded bg-orange-700 px-2 text-xs">
                             {{ exerciseStore.muscleGroups[exercise.muscleGroup]?.name }}
-                        </div>
+                        </span>
                         <Icon
                             icon="material-symbols-light:delete-outline"
-                            width="22px"
-                            class="cursor-pointer transition hover:text-red"
+                            width="20px"
+                            class="cursor-pointer text-gray-500 transition hover:text-red"
                             @click="removeExercise(dayIdx, exerciseIDx)"
                         />
                     </div>
 
-                    <ButtonSecondary
-                        @click="openExerciseModal(exercise)"
-                        :class="{ 'bg-layer !text-gray-400': exercise.exerciseID }"
-                    >
-                        <span v-if="!exercise.exerciseID">Select Exercise</span>
-                        <span v-else>{{ exerciseStore?.exercises[exercise.exerciseID]?.name }}</span>
-                    </ButtonSecondary>
+                    <!-- Exercise selector -->
+                    <div class="flex flex-col gap-1">
+                        <ButtonSecondary
+                            @click="openExerciseModal(exercise)"
+                            :class="{ 'bg-layer !text-gray-400': exercise.exerciseID }"
+                            class="w-full"
+                        >
+                            <span v-if="!exercise.exerciseID">Select Exercise</span>
+                            <span v-else>{{ exerciseStore?.exercises[exercise.exerciseID]?.name }}</span>
+                        </ButtonSecondary>
+                        <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIDx}.exerciseID`]" />
+                    </div>
 
-                    <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIDx}.exerciseID`]" />
+                    <!-- Configure toggle -->
+                    <button
+                        type="button"
+                        class="flex items-center gap-1 self-start text-xs text-gray-500 transition hover:text-gray-300"
+                        @click="toggleConfig(exercise)"
+                    >
+                        <Icon
+                            icon="ic:baseline-chevron-right"
+                            width="14px"
+                            class="transition-transform"
+                            :class="{ 'rotate-90': openConfigs.has(exercise) }"
+                        />
+                        Configure
+                    </button>
+
+                    <!-- Collapsible config: 1RM + sets -->
+                    <template v-if="openConfigs.has(exercise)">
+                        <div class="flex flex-col gap-1" v-if="exercise.sets.length > 0">
+                            <div class="grid grid-cols-[18px_1fr_1fr_18px] gap-x-2 text-center text-xs text-gray-500">
+                                <span></span>
+                                <span>Reps</span>
+                                <span>RIR</span>
+                                <span></span>
+                            </div>
+                            <div
+                                v-for="(set, setIdx) in exercise.sets"
+                                :key="setIdx"
+                                class="grid grid-cols-[18px_1fr_1fr_18px] items-center gap-x-2"
+                            >
+                                <span class="text-center text-xs text-gray-500">{{ setIdx + 1 }}</span>
+                                <div class="flex items-center gap-1">
+                                    <InputText
+                                        type="number"
+                                        min="1"
+                                        v-model="set.minReps"
+                                        placeholder="1"
+                                        class="w-full text-center text-sm"
+                                    />
+                                    <span class="text-xs text-gray-500">–</span>
+                                    <InputText
+                                        type="number"
+                                        min="1"
+                                        v-model="set.maxReps"
+                                        placeholder="12"
+                                        class="w-full text-center text-sm"
+                                    />
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <InputText
+                                        type="number"
+                                        min="0"
+                                        v-model="set.minRir"
+                                        placeholder="1"
+                                        class="w-full text-center text-sm"
+                                    />
+                                    <span class="text-xs text-gray-500">–</span>
+                                    <InputText
+                                        type="number"
+                                        min="0"
+                                        v-model="set.maxRir"
+                                        placeholder="3"
+                                        class="w-full text-center text-sm"
+                                    />
+                                </div>
+                                <Icon
+                                    icon="material-symbols-light:delete-outline"
+                                    width="16px"
+                                    class="cursor-pointer text-gray-500 transition hover:text-red"
+                                    @click="removeSet(dayIdx, exerciseIDx, setIdx)"
+                                />
+                            </div>
+                        </div>
+
+                        <ButtonSecondary class="text-xs" @click="addSet(dayIdx, exerciseIDx)">
+                            <Icon icon="ic:baseline-plus" width="16px" />
+                            Add Set
+                        </ButtonSecondary>
+
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-2">
+                                <Icon icon="mdi:arm-flex" width="18px" class="text-accent opacity-75" />
+                                <InputText
+                                    type="number"
+                                    min="0"
+                                    step="0.001"
+                                    v-model="exercise.oneRepMax"
+                                    :placeholder="`1RM`"
+                                    class="w-20 text-center text-sm"
+                                />
+                                <Icon icon="mdi:arm-flex" width="18px" class="scale-x-[-1] text-accent opacity-75" />
+                            </div>
+                            <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIDx}.oneRepMax`]" />
+                        </div>
+                    </template>
                 </UiBox>
             </template>
 
@@ -128,6 +227,15 @@ const exerciseStore = useExerciseStore();
 const showMuscleModal = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const days = reactive<DayForm[]>(props.days ?? []);
+const openConfigs = reactive(new Set<object>());
+
+function toggleConfig(exercise: object) {
+    if (openConfigs.has(exercise)) {
+        openConfigs.delete(exercise);
+    } else {
+        openConfigs.add(exercise);
+    }
+}
 
 function addDay() {
     days.push({
@@ -152,8 +260,16 @@ function selectMuscleGroupDay(dayId: number) {
 }
 
 function addMuscleGroup(muscleGroupId: number) {
-    days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseID: 0 });
+    days[selectedDay.value].exercises.push({ muscleGroup: muscleGroupId, exerciseID: 0, oneRepMax: null, sets: [] });
     showMuscleModal.value = false;
+}
+
+function addSet(dayIdx: number, exerciseIdx: number) {
+    days[dayIdx].exercises[exerciseIdx].sets.push({ minReps: null, maxReps: null, minRir: null, maxRir: null });
+}
+
+function removeSet(dayIdx: number, exerciseIdx: number, setIdx: number) {
+    days[dayIdx].exercises[exerciseIdx].sets.splice(setIdx, 1);
 }
 
 function submit() {
@@ -192,11 +308,20 @@ function openExerciseModal(exercise: ExerciseForm) {
 }
 
 // ============= TS TYPES =============
+type SetForm = {
+    minReps: number | null;
+    maxReps: number | null;
+    minRir: number | null;
+    maxRir: number | null;
+};
+
 type DayForm = {
     label: string;
     exercises: {
         muscleGroup: number;
         exerciseID: number;
+        oneRepMax: number | null;
+        sets: SetForm[];
     }[];
 };
 

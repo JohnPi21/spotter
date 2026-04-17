@@ -15,6 +15,7 @@ class ExerciseTemplateData extends Data
         #[MapInputName(CamelCaseMapper::class)]
         public int $muscleGroup,
         public int $exerciseID,
+        public ?int $oneRepMax,
         public ?array $sets,
     ) {}
 }
