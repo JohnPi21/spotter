@@ -16,6 +16,6 @@ class ExerciseTemplateData extends Data
         public int $muscleGroup,
         public int $exerciseID,
         public ?int $oneRepMax,
-        public array $sets,
+        public array $sets = [],
     ) {}
 }
