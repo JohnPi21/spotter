@@ -135,19 +135,23 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-6 gap-5">
+            <div class="grid grid-cols-[24px_minmax(0,1fr)_minmax(0,1fr)_24px_24px] gap-3">
                 <div
                     class="flex h-fit w-fit cursor-pointer items-center self-center rounded-full bg-input p-1"
                     @click="addSet(dayExercise.id)"
                 >
                     <Icon icon="material-symbols:add" size="1rem" />
                 </div>
-                <div class="col-span-2 text-center">WEIGHT</div>
-                <div class="col-span-2 text-center">REPS</div>
+                <div class="text-center">WEIGHT</div>
+                <div class="text-center">REPS</div>
+                <div></div>
                 <div class="justify-self-end">LOG</div>
             </div>
 
-            <div class="grid grid-cols-6 gap-5" v-for="(set, set_idx) in dayExercise.sets">
+            <div
+                class="grid grid-cols-[24px_minmax(0,1fr)_minmax(0,1fr)_24px_24px] items-center gap-3"
+                v-for="(set, set_idx) in dayExercise.sets"
+            >
                 <div class="flex items-center justify-start">
                     <UiDropdownMenu :idx="set_idx" left="50px">
                         <template #header>
@@ -168,7 +172,7 @@
                     </UiDropdownMenu>
                 </div>
 
-                <div class="col-span-2">
+                <div>
                     <InputText
                         :placeholder="set?.target_weight ?? mesocycle.unit"
                         v-model="set.weight"
@@ -177,13 +181,33 @@
                         :disabled="isDayFinished"
                     />
                 </div>
-                <div class="col-span-2">
+                <div>
                     <InputText
-                        :placeholder="set?.target_reps != null ? `${set.target_reps}` : '3 RIR'"
+                        :placeholder="getRepsPlaceholder(set)"
                         v-model="set.reps"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-reps'"
                         :disabled="isDayFinished"
+                    />
+                </div>
+                <div class="flex justify-center">
+                    <Icon
+                        v-if="getSetStatus(set) === 'under'"
+                        icon="material-symbols:trending-down-rounded"
+                        class="text-yellow-400"
+                        width="18px"
+                    />
+                    <Icon
+                        v-else-if="getSetStatus(set) === 'hit'"
+                        icon="material-symbols:track-changes"
+                        class="text-green"
+                        width="18px"
+                    />
+                    <Icon
+                        v-else-if="getSetStatus(set) === 'over'"
+                        icon="material-symbols:trending-up-rounded"
+                        class="text-orange-500"
+                        width="18px"
                     />
                 </div>
                 <div class="flex items-center justify-end">
@@ -268,7 +292,76 @@ function openExerciseModal(action: (exerciseID: number) => void): void {
     exercisesModal.value = true;
 }
 
+type SetStatus = "under" | "hit" | "over";
 type ExerciseAction = (dayExerciseID: number) => void;
+
+function hasRepTarget(set: ExerciseSet): boolean {
+    return set.min_reps != null || set.max_reps != null;
+}
+
+function formatRange(min?: number, max?: number): string | null {
+    if (min == null && max == null) {
+        return null;
+    }
+
+    if (min != null && max != null) {
+        return min === max ? `${min}` : `${min}-${max}`;
+    }
+
+    return `${min ?? max}`;
+}
+
+function formatRir(set: ExerciseSet): string | null {
+    return formatRange(set.min_rir, set.max_rir);
+}
+
+function getRepsPlaceholder(set: ExerciseSet): string {
+    const repRange = formatRange(set.min_reps, set.max_reps);
+
+    if (repRange) {
+        const rirRange = formatRir(set);
+
+        return rirRange ? `${repRange} @ ${rirRange}` : repRange;
+    }
+
+    if (set.target_reps != null) {
+        return `${set.target_reps}`;
+    }
+
+    return "3 RIR";
+}
+
+function parseSetReps(reps?: number | string): number | null {
+    if (reps == null || reps === "") {
+        return null;
+    }
+
+    const parsedReps = Number(reps);
+
+    return Number.isFinite(parsedReps) ? parsedReps : null;
+}
+
+function getSetStatus(set: ExerciseSet): SetStatus | null {
+    if (!hasRepTarget(set)) {
+        return null;
+    }
+
+    const reps = parseSetReps(set.reps);
+
+    if (reps == null) {
+        return null;
+    }
+
+    if (set.min_reps != null && reps < set.min_reps) {
+        return "under";
+    }
+
+    if (set.max_reps != null && reps > set.max_reps) {
+        return "over";
+    }
+
+    return "hit";
+}
 
 const dropdownItems = [
     {

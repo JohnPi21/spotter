@@ -17,6 +17,11 @@ declare global {
         weight?: number;
         target_reps?: number;
         target_weight?: number;
+        min_reps?: number;
+        max_reps?: number;
+        min_rir?: number;
+        max_rir?: number;
+        percent_one_rep_max?: number;
         finished_at?: string;
         status: boolean;
         created_at: string;
