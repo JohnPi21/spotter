@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Gate;
 
 class DayExerciseController extends Controller
 {
+    public function __construct(private CreateDayExercise $createDayExercise, private ReorderDayExercises $reorderDayExercises) {}
+
     public function store(StoreDayExerciseRequest $request, MesoDay $day): RedirectResponse
     {
-        app(CreateDayExercise::class)->execute($request->validated('exercise_id'), $day);
+        $this->createDayExercise->execute($request->validated('exercise_id'), $day);
 
         return redirect()->route('days.show', [
             'mesocycle' => $day->mesocycle,
@@ -27,7 +29,7 @@ class DayExerciseController extends Controller
 
     public function updateOrder(UpdateDayExerciseOrderRequest $request, MesoDay $day): RedirectResponse
     {
-        app(ReorderDayExercises::class)->execute($day, $request->validated('order'));
+        $this->reorderDayExercises->execute($day, $request->validated('order'));
 
         return to_route('days.show', ['mesocycle' => $day->mesocycle, 'day' => $day]);
     }
