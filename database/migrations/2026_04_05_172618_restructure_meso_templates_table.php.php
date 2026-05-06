@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\MesoTemplate;
+use App\Models\AiRequest;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ai_requests', function (Blueprint $table) {
-            if (Schema::hasColumn('ai_requests', 'sex')) {
-                $table->dropColumnIfExists('sex');
+        Schema::table('meso_templates', function (Blueprint $table) {
+            if (Schema::hasColumn('meso_templates', 'sex')) {
+                $table->dropColumn('sex');
             }
 
-            $table->json('schema');
-            $table->boolean('ai_generated');
-            $table->foreignIdFor(MesoTemplate::class)->nullable();
+            $table->after('frequency', function () use ($table) {
+                $table->json('schema');
+                $table->boolean('ai_generated')->default(false);
+                $table->foreignIdFor(AiRequest::class)->nullable();
+            });
         });
     }
 

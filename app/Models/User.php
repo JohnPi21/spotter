@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -45,6 +46,16 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function mesocycles(): HasMany
+    {
+        return $this->hasMany(Mesocycle::class);
+    }
+
+    public function mesoTemplates(): HasMany
+    {
+        return $this->hasMany(MesoTemplate::class);
     }
 
     public function hasActiveMesocycle(): bool

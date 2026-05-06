@@ -64,6 +64,12 @@ class MesocycleController extends Controller implements HasMiddleware
 
         $mesoStatus = (bool) Mesocycle::userHasActiveMeso($userId);
 
+        $request->user()->mesoTemplates()->create([
+            'schema' => $mesoDTO->toJson(),
+            'name' => $mesoDTO->name,
+            'frequency' => $mesoDTO->weeks_duration,
+        ]);
+
         $createMesocycle->execute($mesoDTO, $userId, $mesoStatus);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
