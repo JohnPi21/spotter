@@ -27,13 +27,13 @@ class DemoSeeder extends Seeder
 
         $user->assignRole(RolesEnum::GUEST);
 
-        foreach (range(1, $user->id) as $userID) {
+        foreach (range(1, $user->id) as $userId) {
             $meso = Mesocycle::create([
                 'name' => 'Upper/Lower Hypertrophy',
                 'unit' => 'kg',
                 'days_per_week' => 4,
                 'weeks_duration' => 6,
-                'user_id' => $userID,
+                'user_id' => $userId,
                 'status' => \App\Models\Mesocycle::STATUS_ACTIVE,
                 'started_at' => now()->subWeeks(5),
                 'finished_at' => now(),
@@ -48,7 +48,7 @@ class DemoSeeder extends Seeder
 
             $dayLabels = ['Day 1', 'Day 2', 'Day 3', 'Day 4'];
 
-            for ($week = 1; $week <= $meso->weeks_duration; $week++) {
+            for ($week = 1; $week <= $meso->weeksDuration; $week++) {
 
                 foreach ($dayLabels as $idx => $label) {
                     $day = MesoDay::create([
@@ -61,14 +61,14 @@ class DemoSeeder extends Seeder
                         'finished_at' => now()->subWeeks(6 - $week)->subDays(count($dayLabels) - $idx),
                     ]);
 
-                    foreach ($exercises[$label] as $position => $exerciseID) {
+                    foreach ($exercises[$label] as $position => $exerciseId) {
                         $dayExercise = DayExercise::create([
                             'meso_day_id' => $day->id,
-                            'exercise_id' => $exerciseID,
+                            'exercise_id' => $exerciseId,
                             'position' => $position,
                         ]);
 
-                        $isBigLift = in_array($exerciseID, [1, 197]); // e.g., Squat/Bench
+                        $isBigLift = in_array($exerciseId, [1, 197]); // e.g., Squat/Bench
                         for ($i = 1; $i <= 3; $i++) {
                             $baseWeight = $isBigLift ? rand(50, 100) : rand(10, 50);
                             $reps = $baseWeight > 50 ? rand(3, 6) : rand(6, 12);

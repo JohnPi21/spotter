@@ -19,17 +19,17 @@ class DayExerciseFactory extends Factory
     public function definition(): array
     {
 
-        $exerciseIDs = Exercise::pluck('id');
+        $exerciseIds = Exercise::pluck('id');
 
         return [
             'meso_day_id' => MesoDay::factory(),
-            'exercise_id' => $exerciseIDs->random(),
+            'exercise_id' => $exerciseIds->random(),
             'position' => 1,
         ];
     }
 
-    public function exercise(int $exerciseID)
+    public function exercise(int $exerciseId)
     {
-        return $this->state(fn () => ['exercise_id' => $exerciseID]);
+        return $this->state(fn () => ['exercise_id' => $exerciseId]);
     }
 }

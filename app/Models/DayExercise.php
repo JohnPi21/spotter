@@ -50,10 +50,10 @@ class DayExercise extends Model
     }
 
     #[Scope]
-    protected function ownedBy(Builder $query, int $userID)
+    protected function ownedBy(Builder $query, int $userId)
     {
-        return $query->whereHas('day.mesocycle', function ($q) use ($userID) {
-            $q->where('user_id', $userID);
+        return $query->whereHas('day.mesocycle', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
         });
     }
 }

@@ -33,7 +33,7 @@ class AiMesocycleRequest extends FormRequest
 
             'unit' => ['required', 'string', Rule::enum(UnitsOfMeasure::class)],
 
-            'weeksDuration' => ['required', 'integer', 'min:3', 'max:12'],
+            'weeks_duration' => ['required', 'integer', 'min:3', 'max:12'],
             'daysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
 
             // must be one of sessionDurationOptions [30, 45, 60, 75, 90, 120]

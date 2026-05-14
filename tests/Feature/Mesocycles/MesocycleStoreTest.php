@@ -23,20 +23,20 @@ class MesocycleStoreTest extends TestCase
         return [
             'name' => Str::random(32),
             'unit' => 'kg',
-            'weeksDuration' => 5,
+            'weeks_duration' => 5,
             'days' => [
                 [
                     'label' => 'Day 1',
                     'exercises' => [[
                         'muscleGroup' => $muscleGroup->id,
-                        'exerciseID' => $exercise->id,
+                        'exerciseId' => $exercise->id,
                     ]],
                 ],
                 [
                     'label' => 'Day 2',
                     'exercises' => [[
                         'muscleGroup' => $muscleGroup->id,
-                        'exerciseID' => $exercise->id,
+                        'exerciseId' => $exercise->id,
                     ]],
                 ],
             ],
@@ -48,7 +48,7 @@ class MesocycleStoreTest extends TestCase
     {
         $payload['name'] = 22;
         $payload['days'][0]['label'] = '';
-        $payload['days'][0]['exercises'][0]['exerciseID'] = 9999;
+        $payload['days'][0]['exercises'][0]['exerciseId'] = 9999;
         $payload['days'][0]['exercises'][0]['muscleGroup'] = 10000;
 
         return $payload;
@@ -80,7 +80,7 @@ class MesocycleStoreTest extends TestCase
 
         $this->assertDatabaseHas('mesocycles', [
             'name' => $payload['name'],
-            'weeks_duration' => $payload['weeksDuration'],
+            'weeks_duration' => $payload['weeks_duration'],
         ]);
 
         $meso = Mesocycle::where('user_id', $user->id)->where('name', $payload['name'])->latest('id')->firstOrFail();

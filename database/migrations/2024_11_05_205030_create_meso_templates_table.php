@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('sex');
             $table->foreignIdFor(User::class)->nullable();
-            $table->tinyInteger('frequency');
+            $table->tinyInteger('frequency')->comment('Represents days per week');
             $table->timestamps();
         });
     }

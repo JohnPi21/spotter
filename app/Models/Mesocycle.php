@@ -43,6 +43,11 @@ class Mesocycle extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function mesoTemplate(): BelongsTo
+    {
+        return $this->belongsTo(MesoTemplate::class);
+    }
+
     protected function lastDay(): Attribute
     {
         return Attribute::make(get: function () {
@@ -68,9 +73,9 @@ class Mesocycle extends Model
     }
 
     #[Scope]
-    protected function ownedBy(Builder $query, ?int $userID): Builder
+    protected function ownedBy(Builder $query, ?int $userId): Builder
     {
-        return $query->where('user_id', $userID);
+        return $query->where('user_id', $userId);
     }
 
     #[Scope]

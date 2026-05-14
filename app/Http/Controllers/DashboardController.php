@@ -101,7 +101,7 @@ class DashboardController extends Controller
 
             return [
                 'day' => $finishDate->day,
-                'dayID' => $mesoDay->id,
+                'dayId' => $mesoDay->id,
                 'finishedAt' => $finishDate->diffForHumans(),
                 'label' => $mesoDay->label,
                 'exercisesCount' => $mesoDay->dayExercises->count(),

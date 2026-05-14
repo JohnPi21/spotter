@@ -5,9 +5,9 @@ namespace App\Listeners;
 use App\Events\DayFinished;
 use App\Models\ExerciseSet;
 use App\Models\MesoDay;
-use DB;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\DB;
 
 class UpdateProgressTargets implements ShouldQueueAfterCommit
 {
@@ -25,7 +25,7 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
      */
     public function handle(DayFinished $event): void
     {
-        $day = MesoDay::with(['mesocycle:id,days_per_week,weeks_duration', 'dayExercises.sets'])->find($event->dayId);
+        $day = MesoDay::with(['mesocycle:id,days_per_week,weeksDuration', 'dayExercises.sets'])->find($event->dayId);
 
         DB::transaction(function () use ($day) {
             /** @var MesoDay */

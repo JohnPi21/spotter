@@ -51,7 +51,7 @@ class MesocyclePrompt
                 //     minimum: 1,
                 // ),
                 new NumberSchema(
-                    name: 'exerciseID',
+                    name: 'exerciseId',
                     description: 'An exercise ID from the provided exercises list',
                     minimum: 1,
                 ),
@@ -69,7 +69,7 @@ class MesocyclePrompt
                     maximum: 30,
                 ),
             ],
-            requiredFields: ['exerciseID', 'minReps', 'maxReps'],
+            requiredFields: ['exerciseId', 'minReps', 'maxReps'],
         );
 
         // -------------
@@ -116,7 +116,7 @@ class MesocyclePrompt
                 ),
 
                 new NumberSchema(
-                    name: 'weeksDuration',
+                    name: 'weeks_duration',
                     description: 'Number of weeks',
                     minimum: 1,
                     maximum: 12,
@@ -135,7 +135,7 @@ class MesocyclePrompt
                     maxItems: 7,
                 ),
             ],
-            requiredFields: ['name', 'unit', 'weeksDuration', 'description', 'days'],
+            requiredFields: ['name', 'unit', 'weeks_duration', 'description', 'days'],
         );
     }
 
@@ -157,7 +157,7 @@ class MesocyclePrompt
 
         ## Exercises
         Array of all available exercises (app defaults + user custom):
-        - "i": exercise ID (must be used as "exerciseID" in the output)
+        - "i": exercise ID (must be used as "exerciseId" in the output)
         - "n": name
         - "m": muscle group ID
 
@@ -186,7 +186,7 @@ class MesocyclePrompt
         3. Exercises
         - Use ONLY exercise IDs from EXERCISES.
         - For each exercise in a day, output:
-            { "exerciseID": <value of "i" from EXERCISES> }
+            { "exerciseId": <value of "i" from EXERCISES> }
         - Avoid duplicating the same exercise too many times across the week unless it is a core movement.
 
         4. Programming logic
@@ -249,7 +249,7 @@ class MesocyclePrompt
     //             'description' => 'Unit of measure for progression',
     //             'enum' => UnitsOfMeasure::cases(),
     //         ],
-    //         'weeksDuration' => [
+    //         'weeks_duration' => [
     //             'type' => 'integer',
     //             'description' => 'Number of weeks',
     //             'minimum' => 1,
@@ -281,13 +281,13 @@ class MesocyclePrompt
     //                                     'description' => 'A muscle group ID from the provided muscle groups list',
     //                                     'minimum' => 1,
     //                                 ],
-    //                                 'exerciseID' => [
+    //                                 'exerciseId' => [
     //                                     'type' => 'integer',
     //                                     'description' => 'An exercise ID from the provided exercises list',
     //                                     'minimum' => 1,
     //                                 ],
     //                             ],
-    //                             'required' => ['muscleGroup', 'exerciseID'],
+    //                             'required' => ['muscleGroup', 'exerciseId'],
     //                         ],
     //                     ],
     //                 ],
@@ -295,6 +295,6 @@ class MesocyclePrompt
     //             ],
     //         ],
     //     ],
-    //     'required' => ['name', 'unit', 'weeksDuration', 'days'],
+    //     'required' => ['name', 'unit', 'weeks_duration', 'days'],
     // ];
 }

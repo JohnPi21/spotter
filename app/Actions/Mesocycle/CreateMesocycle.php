@@ -8,7 +8,9 @@ use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
+use App\Models\MesoTemplate;
 use Illuminate\Support\Facades\DB;
+use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
 
 // @TODO: check for bugs
 // Make the creation of dayExercises and sets reusable by receiving daysIds from outside and DayTemplate
@@ -22,12 +24,25 @@ class CreateMesocycle
 
             $daysPerWeek = count($mesoDTO->days);
 
+            // Get data as array with camelCase keys
+            $payload = $mesoDTO->transform(
+                TransformationContextFactory::create()->withoutPropertyNameMapping()
+            );
+
+            $mesoTemplate = MesoTemplate::create([
+                'schema' => json_encode($payload),
+                'name' => $mesoDTO->name,
+                'frequency' => $daysPerWeek,
+                'user_id' => $userId,
+            ]);
+
             $mesocycle = Mesocycle::create([
                 'name' => $mesoDTO->name,
                 'unit' => $mesoDTO->unit,
-                'weeks_duration' => $mesoDTO->weeks_duration,
+                'weeks_duration' => $mesoDTO->weeksDuration,
                 'days_per_week' => $daysPerWeek,
                 'user_id' => $userId,
+                'meso_template_id' => $mesoTemplate->id,
                 'status' => $status,
             ]);
 
@@ -47,7 +62,7 @@ class CreateMesocycle
     {
         $mesoDays = [];
 
-        for ($i = 1; $i <= $mesoDTO->weeks_duration; $i++) {
+        for ($i = 1; $i <= $mesoDTO->weeksDuration; $i++) {
             foreach ($mesoDTO->days as $idx => $day) {
                 $mesoDays[] = [
                     'mesocycle_id' => $mesocycleId,
@@ -89,7 +104,7 @@ class CreateMesocycle
             foreach ($mesoDTO->days[$orderInWeek]->exercises as $pos => $exercise) {
                 $dayExercises[] = [
                     'meso_day_id' => $dayId,
-                    'exercise_id' => $exercise->exerciseID,
+                    'exercise_id' => $exercise->exerciseId,
                     'one_rep_max' => $exercise->oneRepMax ?? null,
                     'position' => $pos + 1,
                 ];
@@ -116,18 +131,18 @@ class CreateMesocycle
     private function createSets(array $dayExercisesMap, $mesoDTO): void
     {
         $sets = [];
+        $emptyLoad = SetTemplateData::emptyPayload();
 
         foreach ($dayExercisesMap as $mi => $map) {
 
             $definedSets = $mesoDTO->days[$map['dayOrder']]->exercises[$map['position']]->sets;
 
             // Sets may have null values, we filter them here and check again
-            if ($definedSets) {
-                $definedSets = collect($definedSets)->filter(fn (SetTemplateData $item) => collect($item)->contains(fn ($value) => $value != null));
-            }
+            $definedSets = collect($definedSets)->filter(fn (SetTemplateData $item) => collect($item)->contains(fn ($value) => $value != null));
 
-            if (! $definedSets) {
+            if ($definedSets->isEmpty()) {
                 $sets[] = [
+                    ...$emptyLoad,
                     'day_exercise_id' => $map['dayExerciseId'],
                 ];
                 $dayExercisesMap[$mi]['setsCount'] = 1;
@@ -137,6 +152,7 @@ class CreateMesocycle
 
             foreach ($definedSets as $set) {
                 $sets[] = [
+                    ...$emptyLoad,
                     ...$set->toArray(),
                     'day_exercise_id' => $map['dayExerciseId'],
                 ];

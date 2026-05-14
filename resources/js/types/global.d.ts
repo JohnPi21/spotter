@@ -90,7 +90,7 @@ declare global {
         name: string;
         unit: string;
         days_per_week: number;
-        weeks_duration: number;
+        weeksDuration: number;
         user_id: number;
         notes: string | null;
         status: number;

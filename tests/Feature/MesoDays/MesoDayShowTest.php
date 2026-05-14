@@ -46,14 +46,14 @@ class MesoDayShowTest extends TestCase
 
     //     $days = MesoDay::factory()->for($mesocycle)->count($mesocycle->totalDays())->sequence(fn($sequence) => [
     //         'day_order' => $sequence->index % $mesocycle->days_per_week + 1,
-    //         'week'      => intdiv($sequence->index, $mesocycle->weeks_duration) + 1
+    //         'week'      => intdiv($sequence->index, $mesocycle->weeksDuration) + 1
     //     ])->create();
 
-    //     $exercisesID = Exercise::select('id')->limit(2)->pluck('id');
+    //     $exercisesId = Exercise::select('id')->limit(2)->pluck('id');
 
     //     foreach ($days as $day) {
     //         $dayExercise = DayExercise::factory()->for($day, 'day')->sequence(fn($sequence) => [
-    //             'exercise_id' => $exercisesID[$sequence->index]
+    //             'exercise_id' => $exercisesId[$sequence->index]
     //         ])->count(2)->create();
 
     //         $dayExercise->each(function ($dayEx) {

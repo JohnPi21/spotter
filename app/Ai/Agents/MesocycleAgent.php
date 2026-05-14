@@ -109,7 +109,7 @@ class MesocycleAgent
 
         $generatedExerciseIds = collect($aiResponse['days'])
             ->flatMap(fn ($d) => $d['exercises'] ?? [])
-            ->pluck('exerciseID')
+            ->pluck('exerciseId')
             ->filter()
             ->unique()
             ->values();
@@ -122,16 +122,16 @@ class MesocycleAgent
             }
 
             foreach ($day['exercises'] as &$exercise) {
-                if (! isset($exercise['exerciseID'])) {
+                if (! isset($exercise['exerciseId'])) {
                     throw new InvalidMesocycleException('Exercise is missing exercise ID');
                 }
 
-                $muscleID = $exercisesByMuscleGroup->get($exercise['exerciseID'])?->muscle_group_id;
+                $muscleId = $exercisesByMuscleGroup->get($exercise['exerciseId'])?->muscle_group_id;
 
-                if ($muscleID === null) {
-                    throw new InvalidMesocycleException("Unknown exercise ID {$exercise['exerciseID']}");
+                if ($muscleId === null) {
+                    throw new InvalidMesocycleException("Unknown exercise ID {$exercise['exerciseId']}");
                 }
-                $exercise['muscleGroup'] = $muscleID;
+                $exercise['muscleGroup'] = $muscleId;
 
                 if (isset($exercise['sets']) && is_array($exercise['sets'])) {
                     foreach ($exercise['sets'] as $set) {

@@ -207,7 +207,7 @@ CREATE TABLE `mesocycles` (
   `name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   `unit` varchar(4) COLLATE utf8mb4_unicode_ci NOT NULL,
   `days_per_week` tinyint unsigned NOT NULL,
-  `weeks_duration` tinyint unsigned NOT NULL,
+  `weeksDuration` tinyint unsigned NOT NULL,
   `user_id` bigint unsigned NOT NULL,
   `notes` json DEFAULT NULL,
   `status` tinyint unsigned NOT NULL,

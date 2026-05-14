@@ -20,7 +20,7 @@ class StoreMesocycleRequest extends FormRequest
     {
         $days = collect($this->input('days', []));
 
-        $exercisesIds = $days->flatMap->exercises->pluck('exerciseID')->filter()->unique()->toArray();
+        $exercisesIds = $days->flatMap->exercises->pluck('exerciseId')->filter()->unique()->toArray();
         $muscleGroupsIds = $days->flatMap->exercises->pluck('muscleGroup')->filter()->unique()->toArray();
 
         $this->merge([
@@ -46,7 +46,7 @@ class StoreMesocycleRequest extends FormRequest
 
             'days.*.exercises' => ['required', 'array', 'min:1', 'max:32'],
             'days.*.exercises.*.muscleGroup' => ['required', 'integer', 'min:1'],
-            'days.*.exercises.*.exerciseID' => ['required', 'integer', 'min:1'],
+            'days.*.exercises.*.exerciseId' => ['required', 'integer', 'min:1'],
             'days.*.exercises.*.oneRepMax' => ['sometimes', 'nullable', 'decimal:0,3', 'max:2048'],
 
             'days.*.exercises.*.sets' => ['sometimes'],
@@ -70,8 +70,8 @@ class StoreMesocycleRequest extends FormRequest
         return [
             'days.required' => __('mesocycle.days_required'),
             'days.*.exercises.required' => __('mesocycle.exercises_required'),
-            'days.*.exercises.*.exerciseID.required' => __('mesocycle.exercise_required'),
-            'days.*.exercises.*.exerciseID.min' => __('mesocycle.exercise_required'),
+            'days.*.exercises.*.exerciseId.required' => __('mesocycle.exercise_required'),
+            'days.*.exercises.*.exerciseId.min' => __('mesocycle.exercise_required'),
         ];
     }
 
@@ -83,7 +83,7 @@ class StoreMesocycleRequest extends FormRequest
         return [
             'days.*.label' => __('mesocycle.attr.day_label'),
             'days.*.exercises' => __('mesocycle.attr.exercises'),
-            'days.*.exercises.*.exerciseID' => __('mesocycle.attr.exercise'),
+            'days.*.exercises.*.exerciseId' => __('mesocycle.attr.exercise'),
             'days.*.exercises.*.muscleGroup' => __('mesocycle.attr.muscle_group'),
         ];
     }

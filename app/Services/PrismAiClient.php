@@ -123,47 +123,47 @@ class PrismAiClient implements AiClient
     {
       "label": "Push",
       "exercises": [
-        { "muscleGroup": 1, "exerciseID": 26 },
-        { "muscleGroup": 1, "exerciseID": 44 },
-        { "muscleGroup": 5, "exerciseID": 157 },
-        { "muscleGroup": 5, "exerciseID": 130 },
-        { "muscleGroup": 3, "exerciseID": 89 },
-        { "muscleGroup": 3, "exerciseID": 93 }
+        { "muscleGroup": 1, "exerciseId": 26 },
+        { "muscleGroup": 1, "exerciseId": 44 },
+        { "muscleGroup": 5, "exerciseId": 157 },
+        { "muscleGroup": 5, "exerciseId": 130 },
+        { "muscleGroup": 3, "exerciseId": 89 },
+        { "muscleGroup": 3, "exerciseId": 93 }
       ]
     },
     {
       "label": "Pull",
       "exercises": [
-        { "muscleGroup": 2, "exerciseID": 53 },
-        { "muscleGroup": 2, "exerciseID": 56 },
-        { "muscleGroup": 2, "exerciseID": 78 },
-        { "muscleGroup": 4, "exerciseID": 105 },
-        { "muscleGroup": 4, "exerciseID": 109 },
-        { "muscleGroup": 10, "exerciseID": 164 }
+        { "muscleGroup": 2, "exerciseId": 53 },
+        { "muscleGroup": 2, "exerciseId": 56 },
+        { "muscleGroup": 2, "exerciseId": 78 },
+        { "muscleGroup": 4, "exerciseId": 105 },
+        { "muscleGroup": 4, "exerciseId": 109 },
+        { "muscleGroup": 10, "exerciseId": 164 }
       ]
     },
     {
       "label": "Legs",
       "exercises": [
-        { "muscleGroup": 6, "exerciseID": 1 },
-        { "muscleGroup": 6, "exerciseID": 188 },
-        { "muscleGroup": 6, "exerciseID": 189 },
-        { "muscleGroup": 7, "exerciseID": 197 },
-        { "muscleGroup": 8, "exerciseID": 213 },
-        { "muscleGroup": 9, "exerciseID": 216 }
+        { "muscleGroup": 6, "exerciseId": 1 },
+        { "muscleGroup": 6, "exerciseId": 188 },
+        { "muscleGroup": 6, "exerciseId": 189 },
+        { "muscleGroup": 7, "exerciseId": 197 },
+        { "muscleGroup": 8, "exerciseId": 213 },
+        { "muscleGroup": 9, "exerciseId": 216 }
       ]
     },
     {
       "label": "Upper",
       "exercises": [
-        { "muscleGroup": 1, "exerciseID": 26 },
-        { "muscleGroup": 2, "exerciseID": 53 },
-        { "muscleGroup": 1, "exerciseID": 44 },
-        { "muscleGroup": 2, "exerciseID": 78 },
-        { "muscleGroup": 5, "exerciseID": 157 },
-        { "muscleGroup": 3, "exerciseID": 101 },
-        { "muscleGroup": 4, "exerciseID": 105 },
-        { "muscleGroup": 10, "exerciseID": 178 }
+        { "muscleGroup": 1, "exerciseId": 26 },
+        { "muscleGroup": 2, "exerciseId": 53 },
+        { "muscleGroup": 1, "exerciseId": 44 },
+        { "muscleGroup": 2, "exerciseId": 78 },
+        { "muscleGroup": 5, "exerciseId": 157 },
+        { "muscleGroup": 3, "exerciseId": 101 },
+        { "muscleGroup": 4, "exerciseId": 105 },
+        { "muscleGroup": 10, "exerciseId": 178 }
       ]
     }
   ],

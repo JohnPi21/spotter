@@ -1,11 +1,11 @@
 import { router } from "@inertiajs/vue3";
 
 export function useSet() {
-    const updateSet = async (set: ExerciseSet, dayExerciseID: number) => {
+    const updateSet = async (set: ExerciseSet, dayExerciseId: number) => {
         if (!set.status) return;
 
         router.patch(
-            route("sets.update", { dayExercise: dayExerciseID, set: set.id }),
+            route("sets.update", { dayExercise: dayExerciseId, set: set.id }),
             { ...set },
             {
                 preserveState: true,
@@ -15,9 +15,9 @@ export function useSet() {
         );
     };
 
-    const addSet = (dayExerciseID: number) => {
+    const addSet = (dayExerciseId: number) => {
         router.post(
-            route("sets.store", { dayExercise: dayExerciseID }),
+            route("sets.store", { dayExercise: dayExerciseId }),
             {},
             {
                 preserveScroll: true,
@@ -26,8 +26,8 @@ export function useSet() {
         );
     };
 
-    const removeSet = (dayExerciseID: number, setID: number) => {
-        router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
+    const removeSet = (dayExerciseId: number, setId: number) => {
+        router.delete(route("sets.destroy", { dayExercise: dayExerciseId, set: setId }), {
             preserveState: true,
             preserveScroll: true,
         });

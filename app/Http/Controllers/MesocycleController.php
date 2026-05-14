@@ -11,8 +11,8 @@ use App\Models\Mesocycle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Log;
 
 class MesocycleController extends Controller implements HasMiddleware
 {
@@ -38,17 +38,21 @@ class MesocycleController extends Controller implements HasMiddleware
         ]);
     }
 
-    // CANCEL THIS ROUTE
-    public function show(Mesocycle $mesocycle): \Inertia\Response
+    public function edit(Mesocycle $mesocycle): \Inertia\Response
     {
-        $mesocycle->load([
-            'days.dayExercises' => ['exercise.muscleGroup', 'sets'],
-        ]);
+        $schema = json_decode($mesocycle->mesoTemplate()->value('schema'), true);
 
-        return Inertia::render('mesocycles/show', [
-            'title' => 'Mesocycle',
-            'mesocycle' => $mesocycle,
-        ]);
+        return Inertia::render(
+            'mesocycles/create',
+            $schema
+        );
+    }
+
+    public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle): RedirectResponse
+    {
+        // dd($request->validated());
+
+        return to_route('mesocycles')->with('success', 'Mesocycle updated succesfully.');
     }
 
     public function create(): \Inertia\Response
@@ -63,12 +67,6 @@ class MesocycleController extends Controller implements HasMiddleware
         $userId = $request->user()->id;
 
         $mesoStatus = (bool) Mesocycle::userHasActiveMeso($userId);
-
-        $request->user()->mesoTemplates()->create([
-            'schema' => $mesoDTO->toJson(),
-            'name' => $mesoDTO->name,
-            'frequency' => $mesoDTO->weeks_duration,
-        ]);
 
         $createMesocycle->execute($mesoDTO, $userId, $mesoStatus);
 

@@ -53,14 +53,14 @@ class DemoService
 
                     $idx++;
 
-                    foreach ($ids as $position => $exerciseID) {
+                    foreach ($ids as $position => $exerciseId) {
                         $de = DayExercise::create([
                             'meso_day_id' => $day->id,
-                            'exercise_id' => $exerciseID,
+                            'exercise_id' => $exerciseId,
                             'position' => $position,
                         ]);
 
-                        $isBig = in_array($exerciseID, [1, 197], true); // Squat / Bench
+                        $isBig = in_array($exerciseId, [1, 197], true); // Squat / Bench
                         for ($i = 0; $i < 3; $i++) {
                             $base = $isBig ? random_int(50, 100) : random_int(10, 50);
                             $reps = $base > 50 ? random_int(3, 6) : random_int(6, 12);

@@ -4,7 +4,7 @@
             <ModalsExercises
                 v-model="exercisesModal"
                 :only-one-muscle-group="0"
-                @select="(exerciseID: number) => exerciseSelected(exerciseID)"
+                @select="(exerciseId: number) => exerciseSelected(exerciseId)"
             />
             <ModalsExerciseNote v-model="noteModalOpen" :initial-note="noteModalInitial" @save="saveNote" />
 
@@ -270,12 +270,12 @@ const { isActiveDay } = useDay();
 
 onMounted(() => {});
 
-async function exerciseSelected(exerciseID: number) {
-    pendingExerciseAction.value?.(exerciseID);
+async function exerciseSelected(exerciseId: number) {
+    pendingExerciseAction.value?.(exerciseId);
 }
 
-function openNoteModal(dayExerciseID: number, currentNote?: string | null): void {
-    noteModalExerciseId.value = dayExerciseID;
+function openNoteModal(dayExerciseId: number, currentNote?: string | null): void {
+    noteModalExerciseId.value = dayExerciseId;
     noteModalInitial.value = currentNote ?? "";
     noteModalOpen.value = true;
 }
@@ -287,13 +287,13 @@ function saveNote(note: string): void {
     noteModalExerciseId.value = null;
 }
 
-function openExerciseModal(action: (exerciseID: number) => void): void {
+function openExerciseModal(action: (exerciseId: number) => void): void {
     pendingExerciseAction.value = action;
     exercisesModal.value = true;
 }
 
 type SetStatus = "under" | "hit" | "over";
-type ExerciseAction = (dayExerciseID: number) => void;
+type ExerciseAction = (dayExerciseId: number) => void;
 
 function hasRepTarget(set: ExerciseSet): boolean {
     return set.min_reps != null || set.max_reps != null;
@@ -382,7 +382,7 @@ const dropdownItems = [
             {
                 icon: "material-symbols:add",
                 label: "Add Exercise",
-                action: () => openExerciseModal((exerciseID: number) => addExercise(exerciseID)),
+                action: () => openExerciseModal((exerciseId: number) => addExercise(exerciseId)),
             },
             { icon: "hugeicons:weight-scale", label: "Bodyweight" },
             { icon: "carbon:reset", label: "Reset" },
@@ -400,23 +400,23 @@ const exerciseDropdownItems = [
     {
         icon: "mdi:arrow-up",
         label: "Move Up",
-        action: (dayExerciseID: number) => moveUp(dayExerciseID),
+        action: (dayExerciseId: number) => moveUp(dayExerciseId),
     },
     {
         icon: "mdi:arrow-down",
         label: "Move Down",
-        action: (dayExerciseID: number) => moveDown(dayExerciseID),
+        action: (dayExerciseId: number) => moveDown(dayExerciseId),
     },
     {
         icon: "ph:swap",
         label: "Replace",
-        action: (dayExerciseID: number) =>
-            openExerciseModal((newExerciseID: number) => replaceExercise(dayExerciseID, newExerciseID)),
+        action: (dayExerciseId: number) =>
+            openExerciseModal((newExerciseId: number) => replaceExercise(dayExerciseId, newExerciseId)),
     },
     {
         icon: "material-symbols:add",
         label: "Add Set",
-        action: (dayExerciseID: number) => addSet(dayExerciseID),
+        action: (dayExerciseId: number) => addSet(dayExerciseId),
     },
     {
         icon: "ix:skip",
@@ -427,7 +427,7 @@ const exerciseDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (dayExerciseID: number) => removeExercise(dayExerciseID, day.value),
+        action: (dayExerciseId: number) => removeExercise(dayExerciseId, day.value),
     },
 ];
 
@@ -442,7 +442,7 @@ const setDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (dayExerciseID: number, setID: number) => removeSet(dayExerciseID, setID),
+        action: (dayExerciseId: number, setId: number) => removeSet(dayExerciseId, setId),
     },
 ];
 </script>

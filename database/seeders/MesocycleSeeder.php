@@ -16,13 +16,13 @@ class MesocycleSeeder extends Seeder
      */
     public function run(): void
     {
-        $exerciseIDs = Exercise::pluck('id');
+        $exerciseIds = Exercise::pluck('id');
 
         Mesocycle::factory()
             ->count(20)
             ->create()
-            ->each(function ($meso) use ($exerciseIDs) {
-                for ($week = 1; $week <= $meso->weeks_duration; $week++) {
+            ->each(function ($meso) use ($exerciseIds) {
+                for ($week = 1; $week <= $meso->weeksDuration; $week++) {
 
                     $days = MesoDay::factory()
                         ->count($meso->days_per_week)
@@ -41,12 +41,12 @@ class MesocycleSeeder extends Seeder
                         })
                         ->create();
 
-                    $days->each(function ($day) use ($exerciseIDs) {
+                    $days->each(function ($day) use ($exerciseIds) {
                         $dayExercises = DayExercise::factory()
                             ->count(rand(3, 6))
                             ->sequence(fn () => [
                                 'meso_day_id' => $day->id,
-                                'exercise_id' => $exerciseIDs->random(),
+                                'exercise_id' => $exerciseIds->random(),
                             ])->create();
 
                         $dayExercises->each(
