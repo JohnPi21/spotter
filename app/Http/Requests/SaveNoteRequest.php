@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MesoDay;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -10,13 +11,12 @@ class SaveNoteRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        /** @var MesoDay $day */
         $day = $this->route('day');
 
-        if ($day) {
-            $day->loadMissing('mesocycle');
-        }
+        $day->loadMissing('mesocycle');
 
-        return $day ? Gate::allows('owns', $day->mesocycle) : false;
+        return Gate::allows('owns', $day->mesocycle);
     }
 
     public function rules(): array
