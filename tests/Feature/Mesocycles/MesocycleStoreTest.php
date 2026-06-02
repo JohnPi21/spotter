@@ -5,11 +5,11 @@ namespace Tests\Feature\Mesocycles;
 use App\Models\Exercise;
 use App\Models\Mesocycle;
 use App\Models\MuscleGroup;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
-use App\Models\User;
-use Illuminate\Support\Str;
 
 class MesocycleStoreTest extends TestCase
 {
@@ -29,17 +29,17 @@ class MesocycleStoreTest extends TestCase
                     'label' => 'Day 1',
                     'exercises' => [[
                         'muscleGroup' => $muscleGroup->id,
-                        'exerciseID' => $exercise->id
-                    ]]
+                        'exerciseId' => $exercise->id,
+                    ]],
                 ],
                 [
                     'label' => 'Day 2',
                     'exercises' => [[
                         'muscleGroup' => $muscleGroup->id,
-                        'exerciseID' => $exercise->id
-                    ]]
-                ]
-            ]
+                        'exerciseId' => $exercise->id,
+                    ]],
+                ],
+            ],
 
         ];
     }
@@ -48,12 +48,11 @@ class MesocycleStoreTest extends TestCase
     {
         $payload['name'] = 22;
         $payload['days'][0]['label'] = '';
-        $payload['days'][0]['exercises'][0]['exerciseID'] = 9999;
+        $payload['days'][0]['exercises'][0]['exerciseId'] = 9999;
         $payload['days'][0]['exercises'][0]['muscleGroup'] = 10000;
 
         return $payload;
     }
-
 
     public function test_it_displays_mesocycle_create()
     {
@@ -64,14 +63,14 @@ class MesocycleStoreTest extends TestCase
             ->get(route('mesocycles.create'))
             ->assertOk()
             ->assertInertia(
-                fn(Assert $page) => $page
+                fn (Assert $page) => $page
                     ->component('mesocycles/create')
             );
     }
 
     public function test_it_creates_mesocycles_with_days_and_exercises()
     {
-        /**@var \Illuminate\Contracts\Auth\Authenticatable $user */
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
         $payload = $this->generateValidPayload();
 
@@ -99,7 +98,7 @@ class MesocycleStoreTest extends TestCase
 
     public function test_users_cant_make_mesocycles_for_another_user()
     {
-        /**@var \Illuminate\Contracts\Auth\Authenticatable $user */
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
 
         $payload = $this->generateValidPayload();
@@ -112,7 +111,6 @@ class MesocycleStoreTest extends TestCase
             'user_id' => $user->id,
         ]);
     }
-
 
     public function test_it_fails_creating_mesocycle_with_wrong_payload()
     {

@@ -4,7 +4,7 @@
             <ModalsExercises
                 v-model="exercisesModal"
                 :only-one-muscle-group="0"
-                @select="(exerciseID: number) => exerciseSelected(exerciseID)"
+                @select="(exerciseId: number) => exerciseSelected(exerciseId)"
             />
             <ModalsExerciseNote v-model="noteModalOpen" :initial-note="noteModalInitial" @save="saveNote" />
 
@@ -68,6 +68,24 @@
                     </Link>
                 </div>
             </div>
+
+            <button
+                type="button"
+                class="mt-3 flex items-center justify-between gap-3 rounded border border-input-border bg-input px-3 py-2 text-left transition hover:bg-layer-light disabled:cursor-not-allowed disabled:opacity-50"
+                @click="openBodyWeightModal()"
+                :disabled="isDayFinished"
+            >
+                <div class="flex items-center gap-2">
+                    <Icon icon="hugeicons:weight-scale" width="18px" class="text-accent" />
+                    <div class="flex flex-col">
+                        <span class="text-sm text-secondary">Body weight</span>
+                        <span v-if="hasBodyWeight">{{ day.body_weight }} {{ mesocycle.unit }}</span>
+                        <span v-else>Insert weight for this day</span>
+                    </div>
+                </div>
+
+                <Icon :icon="hasBodyWeight ? 'material-symbols:edit-outline' : 'material-symbols:add'" width="18px" />
+            </button>
         </UiBox>
 
         <!-- ===== Errors ===== -->
@@ -135,19 +153,24 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-6 gap-5">
+            <div class="grid gap-3" :class="setGridClass(dayExercise)">
                 <div
                     class="flex h-fit w-fit cursor-pointer items-center self-center rounded-full bg-input p-1"
                     @click="addSet(dayExercise.id)"
                 >
                     <Icon icon="material-symbols:add" size="1rem" />
                 </div>
-                <div class="col-span-2 text-center">WEIGHT</div>
-                <div class="col-span-2 text-center">REPS</div>
+                <div class="text-center" v-if="!isBodyWeightExercise(dayExercise)">WEIGHT</div>
+                <div class="text-center">REPS</div>
+                <div></div>
                 <div class="justify-self-end">LOG</div>
             </div>
 
-            <div class="grid grid-cols-6 gap-5" v-for="(set, set_idx) in dayExercise.sets">
+            <div
+                class="grid items-center gap-3"
+                :class="setGridClass(dayExercise)"
+                v-for="(set, set_idx) in dayExercise.sets"
+            >
                 <div class="flex items-center justify-start">
                     <UiDropdownMenu :idx="set_idx" left="50px">
                         <template #header>
@@ -168,7 +191,7 @@
                     </UiDropdownMenu>
                 </div>
 
-                <div class="col-span-2">
+                <div v-if="!isBodyWeightExercise(dayExercise)">
                     <InputText
                         :placeholder="set?.target_weight ?? mesocycle.unit"
                         v-model="set.weight"
@@ -177,13 +200,33 @@
                         :disabled="isDayFinished"
                     />
                 </div>
-                <div class="col-span-2">
+                <div>
                     <InputText
-                        :placeholder="set?.target_reps != null ? `${set.target_reps}` : '3 RIR'"
+                        :placeholder="getRepsPlaceholder(set)"
                         v-model="set.reps"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-reps'"
                         :disabled="isDayFinished"
+                    />
+                </div>
+                <div class="flex justify-center">
+                    <Icon
+                        v-if="getSetStatus(set) === 'under'"
+                        icon="material-symbols:trending-down-rounded"
+                        class="text-yellow-400"
+                        width="18px"
+                    />
+                    <Icon
+                        v-else-if="getSetStatus(set) === 'hit'"
+                        icon="material-symbols:track-changes"
+                        class="text-green"
+                        width="18px"
+                    />
+                    <Icon
+                        v-else-if="getSetStatus(set) === 'over'"
+                        icon="material-symbols:trending-up-rounded"
+                        class="text-orange-500"
+                        width="18px"
                     />
                 </div>
                 <div class="flex items-center justify-end">
@@ -193,7 +236,7 @@
                         v-model="set.status"
                         true-value="1"
                         false-value="0"
-                        @change="updateSet(set, dayExercise.id)"
+                        @change="checkSet(set, dayExercise)"
                         class="mr-2"
                         :id="exercise_idx + '-' + set_idx + '-status'"
                         :disabled="isDayFinished"
@@ -204,6 +247,43 @@
 
         <ButtonPrimary @click="toggleDay(day.id)" v-if="!isDayFinished">Finish Workout</ButtonPrimary>
         <ButtonSecondary @click="toggleDay(day.id)" v-else>Reactivate</ButtonSecondary>
+
+        <Modal :show="bodyWeightModal" max-width="sm" @close="closeBodyWeightModal">
+            <form class="flex flex-col gap-4 p-4" @submit.prevent="submitBodyWeight">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3>Body weight</h3>
+                        <p class="text-sm text-secondary">Set your weight for this workout day.</p>
+                    </div>
+
+                    <button type="button" class="rounded p-1 transition hover:bg-input" @click="closeBodyWeightModal">
+                        <Icon icon="material-symbols:close-rounded" width="20px" />
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-secondary" for="body-weight">Weight ({{ mesocycle.unit }})</label>
+                    <InputText
+                        id="body-weight"
+                        type="number"
+                        step="0.1"
+                        min="20"
+                        max="400"
+                        v-model="bodyWeightForm.bodyWeight"
+                        class="w-full"
+                        autofocus
+                    />
+                    <p class="text-sm text-red" v-if="bodyWeightForm.errors.bodyWeight">
+                        {{ bodyWeightForm.errors.bodyWeight }}
+                    </p>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <ButtonSecondary type="button" @click="closeBodyWeightModal">Cancel</ButtonSecondary>
+                    <ButtonPrimary type="submit" :disabled="bodyWeightForm.processing">Save</ButtonPrimary>
+                </div>
+            </form>
+        </Modal>
     </div>
 </template>
 <script setup lang="ts">
@@ -211,6 +291,7 @@ import ButtonPrimary from "@/Components/Button/Primary.vue";
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import Checkbox from "@/Components/Input/Checkbox.vue";
 import InputText from "@/Components/Input/Text.vue";
+import Modal from "@/Components/Modal.vue";
 import ModalsExerciseNote from "@/Components/Modals/ExerciseNote.vue";
 import ModalsExercises from "@/Components/Modals/Exercises.vue";
 import UiBox from "@/Components/Ui/Box.vue";
@@ -221,7 +302,7 @@ import { useExercise } from "@/Composables/useExercise";
 import { useMesocycle } from "@/Composables/useMesocycle";
 import { useSet } from "@/Composables/useSet";
 import { Icon } from "@iconify/vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, useForm } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 
 const props = defineProps<{
@@ -239,6 +320,11 @@ const isDayFinished = computed<boolean>(() => {
     return !!day.value.finished_at;
 });
 const pendingExerciseAction = ref<ExerciseAction | null>(null);
+const pendingBodyWeightSet = ref<PendingBodyWeightSet | null>(null);
+const bodyWeightModal = ref<boolean>(false);
+const bodyWeightForm = useForm({
+    bodyWeight: props.mesocycle.day.body_weight ?? "",
+});
 const { toggleDay } = useMesocycle();
 const { addExercise, moveDown, moveUp, removeExercise, replaceExercise, addNote, removeNote } = useExercise(day);
 const { updateSet, addSet, removeSet } = useSet();
@@ -246,12 +332,12 @@ const { isActiveDay } = useDay();
 
 onMounted(() => {});
 
-async function exerciseSelected(exerciseID: number) {
-    pendingExerciseAction.value?.(exerciseID);
+async function exerciseSelected(exerciseId: number) {
+    pendingExerciseAction.value?.(exerciseId);
 }
 
-function openNoteModal(dayExerciseID: number, currentNote?: string | null): void {
-    noteModalExerciseId.value = dayExerciseID;
+function openNoteModal(dayExerciseId: number, currentNote?: string | null): void {
+    noteModalExerciseId.value = dayExerciseId;
     noteModalInitial.value = currentNote ?? "";
     noteModalOpen.value = true;
 }
@@ -263,12 +349,158 @@ function saveNote(note: string): void {
     noteModalExerciseId.value = null;
 }
 
-function openExerciseModal(action: (exerciseID: number) => void): void {
+function openExerciseModal(action: (exerciseId: number) => void): void {
     pendingExerciseAction.value = action;
     exercisesModal.value = true;
 }
 
-type ExerciseAction = (dayExerciseID: number) => void;
+type SetStatus = "under" | "hit" | "over";
+type ExerciseAction = (dayExerciseId: number) => void;
+type PendingBodyWeightSet = {
+    set: ExerciseSet;
+    dayExerciseId: number;
+};
+
+const hasBodyWeight = computed<boolean>(() => day.value.body_weight != null);
+
+function isBodyWeightExercise(dayExercise: DayExercise): boolean {
+    return dayExercise.exercise.exercise_type === "bodyweight-only";
+}
+
+function setGridClass(dayExercise: DayExercise): string {
+    return isBodyWeightExercise(dayExercise)
+        ? "grid-cols-[24px_minmax(0,1fr)_24px_24px]"
+        : "grid-cols-[24px_minmax(0,1fr)_minmax(0,1fr)_24px_24px]";
+}
+
+function openBodyWeightModal(pendingSet: PendingBodyWeightSet | null = null): void {
+    pendingBodyWeightSet.value = pendingSet;
+    bodyWeightForm.bodyWeight = day.value.body_weight ?? "";
+    bodyWeightForm.clearErrors();
+    bodyWeightModal.value = true;
+}
+
+function closeBodyWeightModal(): void {
+    if (bodyWeightForm.processing) {
+        return;
+    }
+
+    bodyWeightModal.value = false;
+
+    if (pendingBodyWeightSet.value) {
+        pendingBodyWeightSet.value.set.status = false;
+        pendingBodyWeightSet.value = null;
+    }
+}
+
+function submitBodyWeight(): void {
+    bodyWeightForm.patch(route("days.body-weight", { day: day.value.id }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            const submittedBodyWeight = Number(bodyWeightForm.bodyWeight);
+
+            day.value.body_weight = Number.isFinite(submittedBodyWeight) ? submittedBodyWeight : day.value.body_weight;
+            bodyWeightModal.value = false;
+
+            if (pendingBodyWeightSet.value) {
+                const { set, dayExerciseId } = pendingBodyWeightSet.value;
+
+                set.weight = day.value.body_weight ?? undefined;
+                updateSet(set, dayExerciseId);
+                pendingBodyWeightSet.value = null;
+            }
+        },
+    });
+}
+
+function checkSet(set: ExerciseSet, dayExercise: DayExercise): void {
+    if (!set.status) {
+        return;
+    }
+
+    if (!isBodyWeightExercise(dayExercise)) {
+        updateSet(set, dayExercise.id);
+
+        return;
+    }
+
+    if (!hasBodyWeight.value) {
+        openBodyWeightModal({ set, dayExerciseId: dayExercise.id });
+
+        return;
+    }
+
+    set.weight = day.value.body_weight ?? undefined;
+    updateSet(set, dayExercise.id);
+}
+
+function hasRepTarget(set: ExerciseSet): boolean {
+    return set.min_reps != null || set.max_reps != null;
+}
+
+function formatRange(min?: number, max?: number): string | null {
+    if (min == null && max == null) {
+        return null;
+    }
+
+    if (min != null && max != null) {
+        return min === max ? `${min}` : `${min}-${max}`;
+    }
+
+    return `${min ?? max}`;
+}
+
+function formatRir(set: ExerciseSet): string | null {
+    return formatRange(set.min_rir, set.max_rir);
+}
+
+function getRepsPlaceholder(set: ExerciseSet): string {
+    const repRange = formatRange(set.min_reps, set.max_reps);
+
+    if (repRange) {
+        const rirRange = formatRir(set);
+
+        return rirRange ? `${repRange} @ ${rirRange}` : repRange;
+    }
+
+    if (set.target_reps != null) {
+        return `${set.target_reps}`;
+    }
+
+    return "3 RIR";
+}
+
+function parseSetReps(reps?: number | string): number | null {
+    if (reps == null || reps === "") {
+        return null;
+    }
+
+    const parsedReps = Number(reps);
+
+    return Number.isFinite(parsedReps) ? parsedReps : null;
+}
+
+function getSetStatus(set: ExerciseSet): SetStatus | null {
+    if (!hasRepTarget(set)) {
+        return null;
+    }
+
+    const reps = parseSetReps(set.reps);
+
+    if (reps == null) {
+        return null;
+    }
+
+    if (set.min_reps != null && reps < set.min_reps) {
+        return "under";
+    }
+
+    if (set.max_reps != null && reps > set.max_reps) {
+        return "over";
+    }
+
+    return "hit";
+}
 
 const dropdownItems = [
     {
@@ -289,9 +521,9 @@ const dropdownItems = [
             {
                 icon: "material-symbols:add",
                 label: "Add Exercise",
-                action: () => openExerciseModal((exerciseID: number) => addExercise(exerciseID)),
+                action: () => openExerciseModal((exerciseId: number) => addExercise(exerciseId)),
             },
-            { icon: "hugeicons:weight-scale", label: "Bodyweight" },
+            { icon: "hugeicons:weight-scale", label: "Bodyweight", action: () => openBodyWeightModal() },
             { icon: "carbon:reset", label: "Reset" },
             { icon: "carbon:stop-outline", label: "End" },
         ],
@@ -307,23 +539,23 @@ const exerciseDropdownItems = [
     {
         icon: "mdi:arrow-up",
         label: "Move Up",
-        action: (dayExerciseID: number) => moveUp(dayExerciseID),
+        action: (dayExerciseId: number) => moveUp(dayExerciseId),
     },
     {
         icon: "mdi:arrow-down",
         label: "Move Down",
-        action: (dayExerciseID: number) => moveDown(dayExerciseID),
+        action: (dayExerciseId: number) => moveDown(dayExerciseId),
     },
     {
         icon: "ph:swap",
         label: "Replace",
-        action: (dayExerciseID: number) =>
-            openExerciseModal((newExerciseID: number) => replaceExercise(dayExerciseID, newExerciseID)),
+        action: (dayExerciseId: number) =>
+            openExerciseModal((newExerciseId: number) => replaceExercise(dayExerciseId, newExerciseId)),
     },
     {
         icon: "material-symbols:add",
         label: "Add Set",
-        action: (dayExerciseID: number) => addSet(dayExerciseID),
+        action: (dayExerciseId: number) => addSet(dayExerciseId),
     },
     {
         icon: "ix:skip",
@@ -334,7 +566,7 @@ const exerciseDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (dayExerciseID: number) => removeExercise(dayExerciseID, day.value),
+        action: (dayExerciseId: number) => removeExercise(dayExerciseId, day.value),
     },
 ];
 
@@ -349,7 +581,7 @@ const setDropdownItems = [
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (dayExerciseID: number, setID: number) => removeSet(dayExerciseID, setID),
+        action: (dayExerciseId: number, setId: number) => removeSet(dayExerciseId, setId),
     },
 ];
 </script>

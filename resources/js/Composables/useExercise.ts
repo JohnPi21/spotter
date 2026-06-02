@@ -2,37 +2,37 @@ import { router } from "@inertiajs/vue3";
 import { Ref } from "vue";
 
 export function useExercise(day: Ref) {
-    const addExercise = (exerciseID: number) => {
+    const addExercise = (exerciseId: number) => {
         router.post(
             route("dayExercises.store", { day: day.value.id }),
-            { exercise_id: exerciseID },
+            { exercise_id: exerciseId },
             { preserveState: false }
         );
     };
 
-    const replaceExercise = (dayExerciseID: number, newExerciseID: number) => {
+    const replaceExercise = (dayExerciseId: number, newExerciseId: number) => {
         router.patch(route("dayExercises.replace", { day: day.value.id }), {
-            day_exercise_id: dayExerciseID,
-            new_exercise_id: newExerciseID,
+            day_exercise_id: dayExerciseId,
+            new_exercise_id: newExerciseId,
         });
     };
 
-    const removeExercise = async (dayExerciseID: number, day: Day) => {
-        router.delete(route("dayExercise.destroy", { day: day.id, dayExercise: dayExerciseID }), {
+    const removeExercise = async (dayExerciseId: number, day: Day) => {
+        router.delete(route("dayExercise.destroy", { day: day.id, dayExercise: dayExerciseId }), {
             preserveState: "errors",
         });
     };
 
-    const moveUp = (dayExerciseID: number): Promise<void> | undefined => {
-        const position = getPosition(dayExerciseID);
+    const moveUp = (dayExerciseId: number): Promise<void> | undefined => {
+        const position = getPosition(dayExerciseId);
 
         if (position === -1 || position === 0) return;
 
         swap(day.value.day_exercises, position, position - 1);
     };
 
-    const moveDown = (dayExerciseID: number) => {
-        const position = getPosition(dayExerciseID);
+    const moveDown = (dayExerciseId: number) => {
+        const position = getPosition(dayExerciseId);
 
         if (position === -1 || position === day.value.day_exercises.length - 1) return;
 
@@ -41,21 +41,21 @@ export function useExercise(day: Ref) {
         updateOrder();
     };
 
-    const addNote = (dayExerciseID: number, note: string) => {
+    const addNote = (dayExerciseId: number, note: string) => {
         router.put(route("dayExercises.saveNote", { day: day.value.id }), {
-            day_exercise_id: dayExerciseID,
+            day_exercise_id: dayExerciseId,
             note: note,
         });
     };
 
-    const removeNote = (dayExerciseID: number) => {
+    const removeNote = (dayExerciseId: number) => {
         router.delete(route("dayExercises.deleteNote", { day: day.value.id }), {
-            data: { day_exercise_id: dayExerciseID },
+            data: { day_exercise_id: dayExerciseId },
         });
     };
 
-    function getPosition(dayExerciseID: number): number {
-        return day.value.day_exercises.findIndex((dayEx: Exercise) => dayEx.id == dayExerciseID);
+    function getPosition(dayExerciseId: number): number {
+        return day.value.day_exercises.findIndex((dayEx: Exercise) => dayEx.id == dayExerciseId);
     }
 
     async function updateOrder() {

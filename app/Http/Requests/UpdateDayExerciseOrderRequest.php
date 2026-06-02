@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\MesoDay;
 use Gate;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDayExerciseOrderRequest extends FormRequest
 {
@@ -12,9 +13,15 @@ class UpdateDayExerciseOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $this->route()->day->loadMissing('mesocycle');
+        $day = $this->route('day');
 
-        return Gate::allows('owns', $this->route()->day->mesocycle);
+        if (! $day instanceof MesoDay) {
+            return false;
+        }
+
+        $day->loadMissing('mesocycle');
+
+        return Gate::allows('owns', $day->mesocycle);
     }
 
     /**

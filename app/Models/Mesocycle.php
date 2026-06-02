@@ -2,29 +2,37 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property-read int|null $last_day
+ */
 class Mesocycle extends Model
 {
     use HasFactory;
 
     public const STATUS_ACTIVE = 1;
+
     public const STATUS_INACTIVE = 0;
+
     public const MIN_WEEKS = 3;
+
     public const MAX_WEEKS = 12;
 
     protected $guarded = [];
 
     protected $appends = ['last_day'];
 
+    /**
+     * @return HasMany<MesoDay, $this>
+     */
     public function days(): HasMany
     {
         return $this->hasMany(MesoDay::class);
@@ -35,13 +43,17 @@ class Mesocycle extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function lastDay(): Attribute
+    public function mesoTemplate(): BelongsTo
+    {
+        return $this->belongsTo(MesoTemplate::class);
+    }
+
+    protected function lastDay(): Attribute
     {
         return Attribute::make(get: function () {
             // If relation is loaded, use it
             if ($this->relationLoaded('days')) {
-                return $this->days
-                    ->firstWhere('finished_at', null)?->id
+                return $this->days->firstWhere('finished_at', null)->id
                     ?? $this->days->last()?->id;
             }
 
@@ -61,9 +73,9 @@ class Mesocycle extends Model
     }
 
     #[Scope]
-    protected function ownedBy(Builder $query, ?int $userID): void
+    protected function ownedBy(Builder $query, ?int $userId): Builder
     {
-        $query->where('user_id', $userID);
+        return $query->where('user_id', $userId);
     }
 
     #[Scope]

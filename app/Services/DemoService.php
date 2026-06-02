@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\{User, Mesocycle, MesoDay, DayExercise, ExerciseSet};
+use App\Models\DayExercise;
+use App\Models\ExerciseSet;
+use App\Models\Mesocycle;
+use App\Models\MesoDay;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class DemoService
@@ -16,14 +20,14 @@ class DemoService
             }
 
             $meso = Mesocycle::create([
-                'name'           => 'Upper/Lower Hypertrophy',
-                'unit'           => 'kg',
-                'days_per_week'  => 4,
+                'name' => 'Upper/Lower Hypertrophy',
+                'unit' => 'kg',
+                'days_per_week' => 4,
                 'weeks_duration' => 6,
-                'user_id'        => $user->id,
-                'status'         => Mesocycle::STATUS_ACTIVE,
-                'started_at'     => now()->subWeeks(5),
-                'finished_at'    => null,
+                'user_id' => $user->id,
+                'status' => Mesocycle::STATUS_ACTIVE,
+                'started_at' => now()->subWeeks(5),
+                'finished_at' => null,
             ]);
 
             $exercises = [
@@ -38,33 +42,33 @@ class DemoService
                 $idx = 0;
                 foreach ($exercises as $label => $ids) {
                     $day = MesoDay::create([
-                        'label'        => $label,
+                        'label' => $label,
                         'mesocycle_id' => $meso->id,
-                        'week'         => $week,
-                        'day_order'    => $idx + 1,
-                        'position'     => $idx,
-                        'created_at'   => now()->subWeeks(6 - $week),
-                        'finished_at'  => now()->subWeeks(6 - $week)->subDays(count($exercises) - $idx),
+                        'week' => $week,
+                        'day_order' => $idx + 1,
+                        'position' => $idx,
+                        'created_at' => now()->subWeeks(6 - $week),
+                        'finished_at' => now()->subWeeks(6 - $week)->subDays(count($exercises) - $idx),
                     ]);
 
                     $idx++;
 
-                    foreach ($ids as $position => $exerciseID) {
+                    foreach ($ids as $position => $exerciseId) {
                         $de = DayExercise::create([
                             'meso_day_id' => $day->id,
-                            'exercise_id' => $exerciseID,
-                            'position'    => $position,
+                            'exercise_id' => $exerciseId,
+                            'position' => $position,
                         ]);
 
-                        $isBig = in_array($exerciseID, [1, 197], true); // Squat / Bench
+                        $isBig = in_array($exerciseId, [1, 197], true); // Squat / Bench
                         for ($i = 0; $i < 3; $i++) {
                             $base = $isBig ? random_int(50, 100) : random_int(10, 50);
                             $reps = $base > 50 ? random_int(3, 6) : random_int(6, 12);
                             ExerciseSet::create([
                                 'day_exercise_id' => $de->id,
-                                'weight'          => $base + random_int(-5, 5),
-                                'reps'            => $reps,
-                                'finished_at'     => now(),
+                                'weight' => $base + random_int(-5, 5),
+                                'reps' => $reps,
+                                'finished_at' => now(),
                             ]);
                         }
                     }

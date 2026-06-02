@@ -2,14 +2,10 @@
 
 namespace Tests\Feature\ExerciseSets;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Mesocycle;
-use App\Models\ExerciseSet;
-use App\Models\MesoDay;
-use App\Models\DayExercise;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ExerciseSetUpdateTest extends TestCase
 {
@@ -26,7 +22,7 @@ class ExerciseSetUpdateTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('sets.update', [$dayExercise, $set]), [
-                'reps'   => 10,
+                'reps' => 10,
                 'weight' => '100',
                 'status' => 1, // finished
             ])
@@ -34,9 +30,9 @@ class ExerciseSetUpdateTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('exercise_sets', [
-            'id'         => $set->id,
-            'reps'       => 10,
-            'weight'     => 100,
+            'id' => $set->id,
+            'reps' => 10,
+            'weight' => 100,
         ]);
 
         $this->assertNotNull($set->fresh()->finished_at);
@@ -53,7 +49,7 @@ class ExerciseSetUpdateTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('sets.update', [$dayExercise, $set]), [
-                'reps'   => 8,
+                'reps' => 8,
                 'weight' => '60',
                 'status' => 0, // unfinished
             ])
@@ -61,8 +57,8 @@ class ExerciseSetUpdateTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('exercise_sets', [
-            'id'     => $set->id,
-            'reps'   => 8,
+            'id' => $set->id,
+            'reps' => 8,
             'weight' => 60,
         ]);
         $this->assertNull($set->fresh()->finished_at);
@@ -80,7 +76,7 @@ class ExerciseSetUpdateTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('sets.update', [$dayExercise, $set]), [
-                'reps'   => 5,
+                'reps' => 5,
                 'weight' => '50',
                 // no status
             ])
@@ -101,7 +97,7 @@ class ExerciseSetUpdateTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('sets.update', [$dayExercise, $set]), [
-                'reps'   => 999,  // > 64 (invalid)
+                'reps' => 999,  // > 64 (invalid)
                 'weight' => '500,000000', // > 8 (invalid)
                 'status' => 2,    // not in 0,1
             ])
@@ -119,7 +115,7 @@ class ExerciseSetUpdateTest extends TestCase
 
         $this->actingAs($other)
             ->patch(route('sets.update', [$dayExercise, $set]), [
-                'reps'   => 6,
+                'reps' => 6,
                 'weight' => '70',
                 'status' => 1,
             ])

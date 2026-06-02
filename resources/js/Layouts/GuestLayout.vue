@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import Toastr from "@/Components/Ui/Toastr.vue";
 import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
     <div class="flex min-h-screen flex-col items-center pt-6 sm:justify-center sm:pt-0">
+        <Toastr />
         <div>
             <Link href="/" class="flex flex-col items-center justify-center">
                 <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />

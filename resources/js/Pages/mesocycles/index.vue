@@ -14,7 +14,7 @@
                             <div class="flex flex-col gap-1">
                                 <h3>{{ meso.name }}</h3>
                                 <div class="text-sm text-secondary">
-                                    {{ meso.weeks_duration }} WEEKS - {{ meso.days_per_week }} DAYS/WEEK
+                                    {{ meso.weeksDuration }} WEEKS - {{ meso.days_per_week }} DAYS/WEEK
                                 </div>
                             </div>
 
@@ -86,13 +86,13 @@ const mesoDropdown = [
     {
         icon: "ph:swap",
         label: "Set Active",
-        action: (mesocycleID: number) => setActive(mesocycleID),
+        action: (mesocycleId: number) => setActive(mesocycleId),
     },
     {
         icon: "material-symbols:delete-outline",
         label: "Delete",
         class: "!text-red",
-        action: (mesocycleID: number) => destroy(mesocycleID),
+        action: (mesocycleId: number) => destroy(mesocycleId),
     },
 ];
 

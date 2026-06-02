@@ -73,6 +73,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'openai' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/openai.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

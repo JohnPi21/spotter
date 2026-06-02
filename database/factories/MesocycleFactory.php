@@ -2,15 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\DayExercise;
+use App\Models\Exercise;
+use App\Models\ExerciseSet;
 use App\Models\Mesocycle;
+use App\Models\MesoDay;
+use App\Models\MuscleGroup;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Exercise;
-use App\Models\MesoDay;
-use App\Models\DayExercise;
-use App\Models\ExerciseSet;
-use App\Models\MuscleGroup;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 use RuntimeException;
 
 /**
@@ -28,25 +27,25 @@ class MesocycleFactory extends Factory
         $names = ['Beginner', 'Superman', 'Hell for noobs', 'Upper Focus', 'Lower Focus', 'Accessory focus', 'Upper Lower', 'Bro Split', 'High reps', 'Hypertrophy', 'Power', 'Maintenance', 'Compounds'];
 
         return [
-            'name'              => fake()->randomElement($names),
-            'unit'              => 'kg',
-            'days_per_week'     => fake()->numberBetween(1, 7),
-            'weeks_duration'    => fake()->numberBetween(...Mesocycle::weeksRange()),
-            'user_id'           => User::factory(),
-            'notes'             => null,
-            'status'            => fake()->numberBetween(Mesocycle::STATUS_INACTIVE, Mesocycle::STATUS_ACTIVE),
-            'meso_template_id'  => null,
-            'started_at'        => fake()->dateTimeBetween('-1 month', 'now'),
-            'finished_at'       => fake()->optional()->dateTimeBetween('-1 week', 'now'),
+            'name' => fake()->randomElement($names),
+            'unit' => 'kg',
+            'days_per_week' => fake()->numberBetween(1, 7),
+            'weeks_duration' => fake()->numberBetween(...Mesocycle::weeksRange()),
+            'user_id' => User::factory(),
+            'notes' => null,
+            'status' => fake()->numberBetween(Mesocycle::STATUS_INACTIVE, Mesocycle::STATUS_ACTIVE),
+            'meso_template_id' => null,
+            'started_at' => fake()->dateTimeBetween('-1 month', 'now'),
+            'finished_at' => fake()->optional()->dateTimeBetween('-1 week', 'now'),
         ];
     }
 
     /**
      * Build a full structure: days, day_exercises & exercise_sets.
      *
-     * @param int $exercisesPerDay  how many exercises per day
-     * @param int $setsPerExercise  how many sets per exercise
-     * @param ?callable $exercisePicker fn(): Exercise  // optional custom picker
+     * @param  int  $exercisesPerDay  how many exercises per day
+     * @param  int  $setsPerExercise  how many sets per exercise
+     * @param  ?callable  $exercisePicker  fn(): Exercise  // optional custom picker
      */
     public function withFullStructure(
         int $exercisesPerDay = 5,
@@ -99,11 +98,11 @@ class MesocycleFactory extends Factory
 
     public function isActive()
     {
-        return $this->state(fn() => ['status' => Mesocycle::STATUS_ACTIVE]);
+        return $this->state(fn () => ['status' => Mesocycle::STATUS_ACTIVE]);
     }
 
     public function isInactive()
     {
-        return $this->state(fn() => ['status' => Mesocycle::STATUS_INACTIVE]);
+        return $this->state(fn () => ['status' => Mesocycle::STATUS_INACTIVE]);
     }
 }

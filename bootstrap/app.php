@@ -1,24 +1,26 @@
 <?php
 
+use App\Exceptions\AppException;
+use App\Exceptions\DomainException;
+use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Inertia\Inertia;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Sentry\Laravel\Integration;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
-use Illuminate\Auth\AuthenticationException;
-use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -38,9 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         Integration::handles($exceptions);
 
+        $exceptions->render(function (DomainException $e, Request $request) {
+            throw new AppException(status: $e->httpStatus(), error: $e->errorCode(), message: $e->getMessage());
+        });
 
         $exceptions->render(function (\App\Exceptions\AppException $e, Request $request) {
-            // Prefer explicit status over getCode()
             $status = $e->getStatusCode();
 
             $payload = ['status' => $status, 'message' => $e->getMessage(), 'error' => $e->error];
@@ -50,30 +54,27 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return ! $request->isMethod('GET')
-                ? back()->withErrors(['error' => $payload['message']])->withInput()
+                ? back()->with('error', $payload['message'])->withInput()
                 : Inertia::render('ErrorPage', $payload)->toResponse($request)->setStatusCode($status);
         });
-
-
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             $msg = __('Please log in.');
             if ($request->expectsJson()) {
                 return response()->json(['message' => $msg], 401);
             }
-            return redirect()->guest(route('login'))->withErrors(['error' => $msg]);
+
+            return redirect()->guest(route('login'))->with('error', $msg);
         });
-
-
 
         $exceptions->render(function (Illuminate\Session\TokenMismatchException $e, Request $request) {
             $msg = __('Session expired. Please try again.');
             if ($request->expectsJson()) {
                 return response()->json(['message' => $msg], 419);
             }
+
             return back()->withErrors(['error' => $msg])->withInput();
         });
-
 
         // I keep the custom exception handling for common scenarios because of
         // Log it differently
@@ -85,8 +86,9 @@ return Application::configure(basePath: dirname(__DIR__))
             $status = $response->getStatusCode();
 
             // Pass through validation (already formatted by Laravel)
-            if ($exception instanceof ValidationException) return $response;
-
+            if ($exception instanceof ValidationException) {
+                return $response;
+            }
 
             // Authorization / 403
             if (
@@ -106,11 +108,10 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json(['message' => $msg], 403);
                 }
 
-                return !$request->isMethod('GET')
+                return ! $request->isMethod('GET')
                     ? back()->withErrors(['error' => $msg])->withInput()->setStatusCode(302)
                     : Inertia::render('ErrorPage', ['status' => 403, 'message' => $msg])->toResponse($request)->setStatusCode(403);
             }
-
 
             // Not found / 404
             if (
@@ -124,11 +125,10 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json(['message' => $msg], 404);
                 }
 
-                return !$request->isMethod('GET')
+                return ! $request->isMethod('GET')
                     ? back()->withErrors(['error' => $msg])
                     : Inertia::render('ErrorPage', ['status' => 404, 'message' => $msg])->toResponse($request)->setStatusCode(404);
             }
-
 
             // Rate limit / 429
             if ($exception instanceof TooManyRequestsHttpException) {
@@ -138,13 +138,12 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json(['message' => $msg], 429);
                 }
 
-                return !$request->isMethod('GET')
+                return ! $request->isMethod('GET')
                     ? back()->withErrors(['error' => $msg])
                     : Inertia::render('ErrorPage', ['status' => 429, 'message' => $msg])->toResponse($request)->setStatusCode(429);
             }
 
-
-            // Local/testing: keep Laravel’s default 
+            // Local/testing: keep Laravel’s default
             // Disable this to see production response (this triggers the modal overlay instead of inertia response)
             if (app()->environment(['local', 'testing'])) {
                 return $response;
@@ -170,7 +169,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => $generic], $status);
             }
 
-            return !$request->isMethod('GET')
+            return ! $request->isMethod('GET')
                 ? back()->withErrors(['error' => $generic])->withInput()
                 : Inertia::render('ErrorPage', ['status' => $status, 'message' => $generic])->toResponse($request)->setStatusCode($status);
         });

@@ -2,10 +2,9 @@
 
 namespace App\Actions\DayExercise;
 
-use App\Models\MesoDay;
 use App\Models\ExerciseSet;
+use App\Models\MesoDay;
 use Illuminate\Validation\ValidationException;
-use Log;
 
 class CreateDayExercise
 {
@@ -23,7 +22,7 @@ class CreateDayExercise
 
         if ($day->dayExercises->contains('exercise_id', $exerciseId)) {
             throw ValidationException::withMessages([
-                'exercise_id' => "Exercise already exists on this day."
+                'exercise_id' => 'Exercise already exists on this day.',
             ]);
         }
 
@@ -31,7 +30,7 @@ class CreateDayExercise
 
         $dayExercise = $day->dayExercises()->create([
             'exercise_id' => $exerciseId,
-            'position'    => $lastPosition + 1,
+            'position' => $lastPosition + 1,
         ]);
 
         ExerciseSet::create([

@@ -18,25 +18,24 @@ class MesoDayFactory extends Factory
     public function definition(): array
     {
         $notes = json_encode([
-            'title'     => fake()->sentence(3),
-            'tags'      => fake()->words(3),
-            'comment'   => fake()->paragraph(),
+            'title' => fake()->sentence(3),
+            'tags' => fake()->words(3),
+            'comment' => fake()->paragraph(),
         ]);
 
         return [
-            'mesocycle_id'  => Mesocycle::factory(),
-            'week'          => fake()->numberBetween(Mesocycle::MIN_WEEKS, Mesocycle::MAX_WEEKS),
-            'day_order'     => fake()->numberBetween(1, 7),
+            'mesocycle_id' => Mesocycle::factory(),
+            'week' => fake()->numberBetween(Mesocycle::MIN_WEEKS, Mesocycle::MAX_WEEKS),
+            'day_order' => fake()->numberBetween(1, 7),
             'body_weight' => fake()->boolean(80)
                 ? fake()->numberBetween(30, 150)
                 : null,
-            'label'         => fake()->word(),
-            'position'      => fake()->numberBetween(1, 7),
-            'finished_at'   => null,
-            'notes'         => null
+            'label' => fake()->word(),
+            'position' => fake()->numberBetween(1, 7),
+            'finished_at' => null,
+            'notes' => null,
         ];
     }
-
 
     public function isFinished(): Factory
     {

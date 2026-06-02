@@ -13,11 +13,16 @@ declare global {
     type ExerciseSet = {
         id: number;
         day_exercise_id: number;
-        reps: number | null;
-        weight: number | null;
-        target_reps: number | null;
-        target_weight: number | null;
-        finished_at: string | null;
+        reps?: number;
+        weight?: number;
+        target_reps?: number;
+        target_weight?: number;
+        min_reps?: number;
+        max_reps?: number;
+        min_rir?: number;
+        max_rir?: number;
+        percent_one_rep_max?: number;
+        finished_at?: string;
         status: boolean;
         created_at: string;
         updated_at: string;
@@ -85,7 +90,7 @@ declare global {
         name: string;
         unit: string;
         days_per_week: number;
-        weeks_duration: number;
+        weeksDuration: number;
         user_id: number;
         notes: string | null;
         status: number;

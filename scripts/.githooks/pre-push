@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "Running pre push hook:"
+
+echo ""
+
+echo "Running Tests"
+./vendor/bin/sail artisan test || exit 1;

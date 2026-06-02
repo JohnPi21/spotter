@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
-use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,20 +34,20 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
-                'flags' => fn() => [
-                    'hasActiveMeso' =>  $request->user()?->hasActiveMesocycle() ?? false,
+                'flags' => fn () => [
+                    'hasActiveMeso' => $request->user()?->hasActiveMesocycle() ?? false,
                 ],
             ],
-            'ziggy' => fn() => [
+            'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
-                'info' => fn() => $request->session()->get('info'),
-                'warning' => fn() => $request->session()->get('warning'),
-                'custom' => fn() => $request->session()->get('custom'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'info' => fn () => $request->session()->get('info'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'custom' => fn () => $request->session()->get('custom'),
             ],
         ];
     }
