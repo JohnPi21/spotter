@@ -7,6 +7,7 @@ use App\Events\DayFinished;
 use App\Exceptions\AppException;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -48,6 +49,21 @@ class MesoDayController extends Controller
 
             DayFinished::dispatchIf((bool) $day->finished_at, $day->id);
         });
+
+        return redirect()->back()->with('day', $day->finished_at);
+    }
+
+    public function updateBodyWeight(MesoDay $day, Request $request): RedirectResponse
+    {
+        Gate::authorize('owns', $day);
+
+        $validated = $request->validate([
+            'bodyWeight' => ['required', 'numeric', 'max:400', 'min:20'],
+        ]);
+
+        $day->update([
+            'body_weight' => $validated['bodyWeight'],
+        ]);
 
         return redirect()->back()->with('day', $day->finished_at);
     }

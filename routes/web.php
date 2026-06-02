@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::controller(MesoDayController::class)->group(function () {
         Route::get('/mesocycles/{mesocycle}/days/{day}', 'show')->name('days.show');
         Route::patch('/day/{day}', 'toggleDay')->name('days.toggle');
+        Route::patch('/day/{day}/body-weight', 'updateBodyWeight')->name('days.body-weight');
     });
 
     Route::controller(ExerciseSetController::class)->group(function () {
