@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Mesocycle\ActivateMesocycle;
 use App\Actions\Mesocycle\CreateMesocycle;
 use App\Actions\Mesocycle\ResolveActiveMesocycleDay;
+use App\Actions\Mesocycle\UpdateMesocycle;
 use App\Data\Mesocycle\CreateMesocycleData;
 use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\Mesocycle;
@@ -48,9 +49,11 @@ class MesocycleController extends Controller implements HasMiddleware
         );
     }
 
-    public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle): RedirectResponse
+    public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle, UpdateMesocycle $updateMesocycle): RedirectResponse
     {
-        // dd($request->validated());
+        $mesoDTO = CreateMesocycleData::from($request->validated());
+
+        $updateMesocycle->execute($mesoDTO, $mesocycle);
 
         return to_route('mesocycles')->with('success', 'Mesocycle updated succesfully.');
     }
@@ -66,9 +69,9 @@ class MesocycleController extends Controller implements HasMiddleware
 
         $userId = $request->user()->id;
 
-        $mesoStatus = (bool) Mesocycle::userHasActiveMeso($userId);
+        $userHasActiveMeso = (bool) Mesocycle::userHasActiveMeso($userId);
 
-        $createMesocycle->execute($mesoDTO, $userId, $mesoStatus);
+        $createMesocycle->execute($mesoDTO, $userId, $userHasActiveMeso);
 
         return to_route('mesocycles')->with('success', 'Mesocycle created succesfully.');
     }
