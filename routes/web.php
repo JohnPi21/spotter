@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
 
         Route::patch('/mesocycles/{mesocycle}/activate', 'activate')->name('mesocycles.activate');
         Route::delete('/mesocycles/{mesocycle}', 'destroy')->name('mesocycles.destroy');
+
+        Route::get('/mesocycles/{mesocycle}/copy', 'exportAsText')->name('mesocycles.copy');
     });
 
     Route::controller(AiMesocycleController::class)->group(function () {

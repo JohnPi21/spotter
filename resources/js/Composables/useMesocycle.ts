@@ -1,6 +1,10 @@
+import { useToastStore } from "@/stores/toastStore";
 import { router } from "@inertiajs/vue3";
+import axios from "axios";
 
 export function useMesocycle() {
+    const toast = useToastStore();
+
     const addExercise = (exerciseId: number, day: Day) => {
         router.post(
             route("dayExercises.store", { day: day.id }),
@@ -51,6 +55,19 @@ export function useMesocycle() {
         });
     };
 
+    const copyMeso = async (mesocycleId: number): Promise<void> => {
+        try {
+            const response = await axios.get<MesocycleCopyResponse>(
+                route("mesocycles.copy", { mesocycle: mesocycleId })
+            );
+
+            await navigator.clipboard.writeText(response.data.text);
+            toast.success(response.data.message);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const toggleDay = (dayId: number) => {
         router.patch(route("days.toggle", { day: dayId }));
     };
@@ -64,5 +81,7 @@ export function useMesocycle() {
         addSet,
         updateSet,
         toggleDay,
+
+        copyMeso,
     };
 }

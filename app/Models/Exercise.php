@@ -10,6 +10,9 @@ class Exercise extends Model
 {
     use HasFactory;
 
+    /**
+     * @return BelongsTo<MuscleGroup, $this>
+     */
     public function muscleGroup(): BelongsTo
     {
         return $this->belongsTo(MuscleGroup::class);

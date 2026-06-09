@@ -106,6 +106,11 @@ declare global {
         last_day?: Day["id"];
     };
 
+    type MesocycleCopyResponse = {
+        text: string;
+        message: string;
+    };
+
     type DropdownOption = {
         value: string | number | null;
         label: string | number | null;
