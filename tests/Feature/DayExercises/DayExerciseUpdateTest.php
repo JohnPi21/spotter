@@ -6,9 +6,9 @@ use App\Models\DayExercise;
 use App\Models\Exercise;
 use App\Models\Mesocycle;
 use App\Models\User;
-use Tests\MysqlTestCase;
+use Tests\TestCase;
 
-class DayExerciseUpdateTest extends MysqlTestCase
+class DayExerciseUpdateTest extends TestCase
 {
     public function test_user_can_reorder_their_day_exercises()
     {
