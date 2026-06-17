@@ -55,11 +55,11 @@
             <div class="space-y-4 md:hidden">
                 <UiBox
                     v-for="workout in lastWorkouts"
-                    :key="workout.dayID"
+                    :key="workout.dayId"
                     class="relative overflow-hidden rounded-lg bg-layer/70 p-5 shadow-[0_24px_70px_rgba(0,0,0,.75)]"
                 >
                     <Link
-                        :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayID })"
+                        :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayId })"
                         class="block"
                     >
                         <!-- Top row: today / label / finishedAt -->
@@ -128,9 +128,9 @@
                 </div>
 
                 <div class="flex flex-col gap-3" :class="{ 'p-2 blur-sm': !dashboardStats.lastWorkouts }">
-                    <UiBox v-for="workout in lastWorkouts" :key="workout.dayID" class="group hover:bg-layer-light">
+                    <UiBox v-for="workout in lastWorkouts" :key="workout.dayId" class="group hover:bg-layer-light">
                         <Link
-                            :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayID })"
+                            :href="route('days.show', { mesocycle: workout.mesocycle, day: workout.dayId })"
                             class="flex cursor-pointer flex-col items-center justify-between gap-4 p-4 min-[450px]:flex-row"
                         >
                             <div class="flex min-w-32 items-center gap-2">
@@ -259,7 +259,7 @@ type LastWorkout = {
     unit: string;
     muscleGroups: MuscleGroup[];
     mesocycle: number;
-    dayID: number;
+    dayId: number;
 };
 
 type DashboardStats = {
@@ -298,7 +298,7 @@ const props = withDefaults(
                 unit: "kg",
                 muscleGroups: [],
                 mesocycle: 1,
-                dayID: 22,
+                dayId: 22,
             },
             {
                 day: 2,
@@ -310,7 +310,7 @@ const props = withDefaults(
                 unit: "kg",
                 muscleGroups: [],
                 mesocycle: 1,
-                dayID: 22,
+                dayId: 22,
             },
             {
                 day: 3,
@@ -322,7 +322,7 @@ const props = withDefaults(
                 unit: "kg",
                 muscleGroups: [],
                 mesocycle: 1,
-                dayID: 22,
+                dayId: 22,
             },
         ],
     }

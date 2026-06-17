@@ -6,11 +6,11 @@ use App\Events\DayFinished;
 use App\Listeners\UpdateProgressTargets;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class MesoDayUpdateTest extends TestCase
 {
@@ -42,7 +42,7 @@ class MesoDayUpdateTest extends TestCase
         $set = $day->dayExercises->first()->sets->first();
         $set->update(['finished_at' => null]);
 
-        $this->actingAs($user)->patch(route('days.toggle', ['day' => $day->id]))->assertSessionHasErrors();
+        $this->actingAs($user)->patch(route('days.toggle', ['day' => $day->id]))->assertSessionHas('error', __('All sets must be completed'));
 
         $this->assertNull((MesoDay::find($day->id))->finished_at);
         $this->assertDatabaseHas('meso_days', ['id' => $day->id, 'finished_at' => null]);
@@ -64,6 +64,7 @@ class MesoDayUpdateTest extends TestCase
 
     public function test_targets_for_next_week_update_on_day_finish()
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
         $meso = Mesocycle::factory()->for($user)->withFullStructure()->create();
 
@@ -77,7 +78,7 @@ class MesoDayUpdateTest extends TestCase
         ExerciseSet::create([
             'day_exercise_id' => $dayExercise->id,
             'weight' => 50,
-            'reps'   => 8,
+            'reps' => 8,
             'finished_at' => now(),
         ]);
 

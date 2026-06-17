@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MesoDay;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
@@ -12,7 +13,13 @@ class SwapDayExerciseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('owns', $this->route()->day->mesocycle);
+        $day = $this->route('day');
+
+        if (! $day instanceof MesoDay) {
+            return false;
+        }
+
+        return Gate::allows('owns', $day->mesocycle);
     }
 
     /**

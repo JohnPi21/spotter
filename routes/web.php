@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\AiMesocycleController;
+use App\Http\Controllers\DashboardController as Dashboard;
 use App\Http\Controllers\DayExerciseController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MesocycleController;
+use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ExerciseSetController;
+use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ExerciseController;
-use App\Http\Controllers\DashboardController as Dashboard;
-use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -20,15 +20,25 @@ Route::middleware('auth')->group(function () {
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
         Route::get('/mesocycles/current-day', 'currentActiveDay')->name('mesocycles.current');
         Route::post('/mesocycles', 'store')->name('mesocycles.store');
+
         Route::get('/mesocycles/{mesocycle}/edit', 'edit')->name('mesocycles.edit');
-        Route::put('/mesocycles/{id}', 'update')->name('mesocycles.update');
-        Route::patch('/mesocycles/{mesocycle}', 'activate')->name('mesocycles.activate');
+        Route::patch('/mesocycles/{mesocycle}', 'update')->name('mesocycles.update');
+
+        Route::patch('/mesocycles/{mesocycle}/activate', 'activate')->name('mesocycles.activate');
         Route::delete('/mesocycles/{mesocycle}', 'destroy')->name('mesocycles.destroy');
+
+        Route::get('/mesocycles/{mesocycle}/copy', 'exportAsText')->name('mesocycles.copy');
+    });
+
+    Route::controller(AiMesocycleController::class)->group(function () {
+        Route::get('/mesocycles/ai/create', 'create')->name('mesocycles.ai.create');
+        Route::post('/mesocycles/ai/generate', 'generate')->name('mesocycles.ai.generate');
     });
 
     Route::controller(MesoDayController::class)->group(function () {
         Route::get('/mesocycles/{mesocycle}/days/{day}', 'show')->name('days.show');
         Route::patch('/day/{day}', 'toggleDay')->name('days.toggle');
+        Route::patch('/day/{day}/body-weight', 'updateBodyWeight')->name('days.body-weight');
     });
 
     Route::controller(ExerciseSetController::class)->group(function () {
@@ -57,28 +67,26 @@ Route::middleware('auth')->group(function () {
     });
 
     // Get Globally available metadata once (init global data)
-    Route::get("/meta", function () {
+    Route::get('/meta', function () {
         return response()->json([
             // 'exercisesByMuscle' => MuscleGroup::with('exercises')->get(),
         ]);
     });
 
-    Route::get('/boom', fn() => throw new \RuntimeException('Test Sentry'));
+    Route::get('/boom', fn () => throw new \RuntimeException('Test Sentry'));
 });
 
-
-Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
+Route::get('/', fn () => Inertia::render('Landing'))->name('landing');
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'time' => now()], 200);
 });
 
-
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 
 Route::fallback(function (Request $request) {
     return Inertia::render('ErrorPage', [
         'status' => 404,
-        'message' => "Page not found."
+        'message' => 'Page not found.',
     ])->toResponse($request)->setStatusCode(404);
 });

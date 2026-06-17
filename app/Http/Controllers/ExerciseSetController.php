@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\Set\UpdateSetData;
 use App\Http\Requests\UpdateSetRequest;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use App\Data\Set\UpdateSetData;
-use App\Models\MesoDay;
 
 class ExerciseSetController extends Controller
 {

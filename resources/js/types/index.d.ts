@@ -7,6 +7,14 @@ export interface User {
     email_verified_at?: string;
 }
 
+export interface FlashMessages {
+    success?: string | null;
+    error?: string | null;
+    info?: string | null;
+    warning?: string | null;
+    custom?: unknown;
+}
+
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     auth: {
         user: User;
@@ -14,5 +22,6 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
             hasActiveMeso: boolean;
         };
     };
+    flash: FlashMessages;
     ziggy: Config & { location: string };
 };

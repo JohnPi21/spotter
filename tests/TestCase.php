@@ -2,10 +2,10 @@
 
 namespace Tests;
 
+use Database\Seeders\TestCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Spatie\Permission\PermissionRegistrar;
-use Database\Seeders\TestCatalogSeeder;
 
 abstract class TestCase extends BaseTestCase
 {

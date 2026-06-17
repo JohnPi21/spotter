@@ -25,3 +25,9 @@ yarn-error.log
 /docker/certbot/letsencrypt/
 /docker/storage/
 /docker/nginx.conf/
+
+# Agent / AI assistant local instruction files
+/.agents/
+/AGENTS.md
+/CLAUDE.md
+/.github/copilot-instructions.md

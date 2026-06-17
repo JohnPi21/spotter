@@ -2930,5 +2930,41 @@
         "updatedAt": "2023-01-26T22:06:23.109Z",
         "deletedAt": null,
         "notes": []
+    },
+    {
+        "id": 239,
+        "name": "Goblet Squat",
+        "muscleGroupId": 6,
+        "youtubeId": null,
+        "exerciseType": "dumbbell",
+        "userId": null,
+        "createdAt": "2025-12-27T20:27:56.000Z",
+        "updatedAt": "2025-12-27T20:27:56.000Z",
+        "deletedAt": null,
+        "notes": []
+    },
+    {
+        "id": 240,
+        "name": "Machine Hip Adduction",
+        "muscleGroupId": 13,
+        "youtubeId": null,
+        "exerciseType": "machine",
+        "userId": null,
+        "createdAt": "2025-12-27T20:34:35.000Z",
+        "updatedAt": "2025-12-27T20:34:35.000Z",
+        "deletedAt": null,
+        "notes": []
+    },
+    {
+        "id": 241,
+        "name": "Machine Hip Abduction",
+        "muscleGroupId": 14,
+        "youtubeId": null,
+        "exerciseType": "machine",
+        "userId": null,
+        "createdAt": "2025-12-27T20:34:35.000Z",
+        "updatedAt": "2025-12-27T20:34:35.000Z",
+        "deletedAt": null,
+        "notes": []
     }
 ]

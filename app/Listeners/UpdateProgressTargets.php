@@ -5,14 +5,14 @@ namespace App\Listeners;
 use App\Events\DayFinished;
 use App\Models\ExerciseSet;
 use App\Models\MesoDay;
-use DB;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\DB;
 
 class UpdateProgressTargets implements ShouldQueueAfterCommit
 {
     use InteractsWithQueue;
+
     /**
      * Create the event listener.
      */
@@ -28,6 +28,7 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
         $day = MesoDay::with(['mesocycle:id,days_per_week,weeks_duration', 'dayExercises.sets'])->find($event->dayId);
 
         DB::transaction(function () use ($day) {
+            /** @var MesoDay */
             $nextDaySibling = $day->nextWeekSibling()->select('id')->first();
 
             $nextDayExercises = $nextDaySibling->dayExercises()
@@ -38,17 +39,21 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
             $nextDayTargets = $day->dayExercises->flatMap(function ($dayExercise) use ($nextDayExercises) {
                 $nextDayExerciseId = $nextDayExercises->get($dayExercise->exercise_id)?->id;
 
-                if (! $nextDayExerciseId) return null;
+                if (! $nextDayExerciseId) {
+                    return null;
+                }
 
-                return $dayExercise->sets->map(fn($set) => [
+                return $dayExercise->sets->map(fn ($set) => [
                     'day_exercise_id' => $nextDayExercises->get($dayExercise->exercise_id)->id,
-                    'target_weight'  => $set->weight,
-                    'target_reps'    => $set->reps,
-                    'finished_at'    => null,
+                    'target_weight' => $set->weight,
+                    'target_reps' => $set->reps,
+                    'finished_at' => null,
                 ])->toArray();
             })->toArray();
 
-            if(empty($nextDayTargets)) return;
+            if (empty($nextDayTargets)) {
+                return;
+            }
 
             ExerciseSet::whereIn('day_exercise_id', $nextDayExercises->pluck('id'))->delete();
 

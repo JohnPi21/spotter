@@ -120,10 +120,10 @@ const filteredExercises = computed(() => {
     return (exercises?.exercises || []).filter((ex) => ex.name.toLowerCase().includes(search.value.toLowerCase()));
 });
 
-function select(exerciseID: number): void {
-    selected.value = exerciseID;
+function select(exerciseId: number): void {
+    selected.value = exerciseId;
 
-    emit("select", exerciseID);
+    emit("select", exerciseId);
 
     showModal.value = false;
     search.value = "";

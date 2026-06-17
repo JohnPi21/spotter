@@ -5,9 +5,9 @@ namespace Tests\Feature\Mesocycles;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use App\Models\User;
-use Tests\TestCase;
-use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
 
 class MesocycleIndexTest extends TestCase
 {
@@ -40,7 +40,6 @@ class MesocycleIndexTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-
     public function test_it_allows_user_not_have_mesocycles(): void
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
@@ -54,7 +53,6 @@ class MesocycleIndexTest extends TestCase
             });
     }
 
-
     public function test_it_displays_only_mesocycles_owned_by_user()
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
@@ -66,7 +64,7 @@ class MesocycleIndexTest extends TestCase
 
         $props = $this->actingAs($user, 'web')->get(route('mesocycles'))
             ->assertOk()
-            ->assertInertia(fn($page) => $page->has('mesocycles', $ownedMesosCount))
+            ->assertInertia(fn ($page) => $page->has('mesocycles', $ownedMesosCount))
             ->inertiaProps();
 
         $mesocycles = collect($props['mesocycles']);
@@ -95,11 +93,11 @@ class MesocycleIndexTest extends TestCase
             ->get(route('mesocycles'))
             ->assertOk()
             ->assertInertia(
-                fn(Assert $page) => $page
+                fn (Assert $page) => $page
                     ->has('mesocycles', 1)
                     ->has(
                         'mesocycles.0',
-                        fn(Assert $m) => $m
+                        fn (Assert $m) => $m
                             ->has('last_day')
                             ->where('last_day', $meso->last_day)
                             ->etc()
@@ -127,11 +125,11 @@ class MesocycleIndexTest extends TestCase
             ->get(route('mesocycles'))
             ->assertOk()
             ->assertInertia(
-                fn(Assert $page) => $page
+                fn (Assert $page) => $page
                     ->has('mesocycles', 1)
                     ->has(
                         'mesocycles.0',
-                        fn(Assert $m) => $m
+                        fn (Assert $m) => $m
                             ->has('last_day')
                             ->where('last_day', $meso->last_day)
                             ->etc()
@@ -162,7 +160,6 @@ class MesocycleIndexTest extends TestCase
 
         MesoDay::factory()->for($unfinishedMeso)->create();
 
-
         $this->actingAs($user, 'web')
             ->get(route('mesocycles'))
             ->assertOk()
@@ -173,7 +170,6 @@ class MesocycleIndexTest extends TestCase
                 $this->assertEquals($mesoProps[$unfinishedMeso->id]['last_day'], $unfinishedMeso->last_day);
             });
     }
-
 
     public function test_redirects_to_current_day_on_active_mesocycle(): void
     {

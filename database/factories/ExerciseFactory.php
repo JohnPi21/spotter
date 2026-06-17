@@ -23,7 +23,7 @@ class ExerciseFactory extends Factory
         return [
             'name' => fake()->randomElement($exercises),
             'muscle_group_id' => MuscleGroup::factory(),
-            'user_id'   => null,
+            'user_id' => null,
             'youtube_id' => null,
             'exercise_type' => fake()->randomElement($types),
         ];

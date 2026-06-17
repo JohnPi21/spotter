@@ -1,29 +1,33 @@
+import { useToastStore } from "@/stores/toastStore";
 import { router } from "@inertiajs/vue3";
+import axios from "axios";
 
 export function useMesocycle() {
-    const addExercise = (exerciseID: number, day: Day) => {
+    const toast = useToastStore();
+
+    const addExercise = (exerciseId: number, day: Day) => {
         router.post(
             route("dayExercises.store", { day: day.id }),
-            { exercise_id: exerciseID },
+            { exercise_id: exerciseId },
             { preserveState: false }
         );
     };
 
-    const replaceExercise = (exerciseID: number, day: Day) => {
-        router.post(route("dayExercises.replace"), { exercise_id: exerciseID, day: day.id });
+    const replaceExercise = (exerciseId: number, day: Day) => {
+        router.post(route("dayExercises.replace"), { exercise_id: exerciseId, day: day.id });
     };
 
-    const removeExercise = async (dayExerciseID: number, day: Day) => {
-        router.delete(route("dayExercise.destroy", { day: day.id, dayExercise: dayExerciseID }), {
+    const removeExercise = async (dayExerciseId: number, day: Day) => {
+        router.delete(route("dayExercise.destroy", { day: day.id, dayExercise: dayExerciseId }), {
             preserveState: "errors",
         });
     };
 
-    const updateSet = async (set: ExerciseSet, dayExerciseID: number) => {
+    const updateSet = async (set: ExerciseSet, dayExerciseId: number) => {
         if (!set.status) return;
 
         router.patch(
-            route("sets.update", { dayExercise: dayExerciseID, set: set.id }),
+            route("sets.update", { dayExercise: dayExerciseId, set: set.id }),
             { ...set },
             {
                 preserveState: true,
@@ -33,9 +37,9 @@ export function useMesocycle() {
         );
     };
 
-    const addSet = (dayExerciseID: number) => {
+    const addSet = (dayExerciseId: number) => {
         router.post(
-            route("sets.store", { dayExercise: dayExerciseID }),
+            route("sets.store", { dayExercise: dayExerciseId }),
             {},
             {
                 preserveScroll: true,
@@ -44,15 +48,28 @@ export function useMesocycle() {
         );
     };
 
-    const removeSet = (dayExerciseID: number, setID: number) => {
-        router.delete(route("sets.destroy", { dayExercise: dayExerciseID, set: setID }), {
+    const removeSet = (dayExerciseId: number, setId: number) => {
+        router.delete(route("sets.destroy", { dayExercise: dayExerciseId, set: setId }), {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
-    const toggleDay = (dayID: number) => {
-        router.patch(route("days.toggle", { day: dayID }));
+    const copyMeso = async (mesocycleId: number): Promise<void> => {
+        try {
+            const response = await axios.get<MesocycleCopyResponse>(
+                route("mesocycles.copy", { mesocycle: mesocycleId })
+            );
+
+            await navigator.clipboard.writeText(response.data.text);
+            toast.success(response.data.message);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const toggleDay = (dayId: number) => {
+        router.patch(route("days.toggle", { day: dayId }));
     };
 
     return {
@@ -64,5 +81,7 @@ export function useMesocycle() {
         addSet,
         updateSet,
         toggleDay,
+
+        copyMeso,
     };
 }

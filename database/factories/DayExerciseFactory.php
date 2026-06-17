@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\MesoDay;
 use App\Models\Exercise;
+use App\Models\MesoDay;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DayExercise>
@@ -19,17 +19,17 @@ class DayExerciseFactory extends Factory
     public function definition(): array
     {
 
-        $exerciseIDs = Exercise::pluck('id');
+        $exerciseIds = Exercise::pluck('id');
 
         return [
             'meso_day_id' => MesoDay::factory(),
-            'exercise_id' => $exerciseIDs->random(),
-            'position'    => 1,
+            'exercise_id' => $exerciseIds->random(),
+            'position' => 1,
         ];
     }
 
-    public function exercise(int $exerciseID)
+    public function exercise(int $exerciseId)
     {
-        return $this->state(fn() => ['exercise_id' => $exerciseID]);
+        return $this->state(fn () => ['exercise_id' => $exerciseId]);
     }
 }
