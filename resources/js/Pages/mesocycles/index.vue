@@ -22,28 +22,21 @@
                                 <div class="rounded bg-blue px-2 py-0.5 opacity-50" v-if="meso.status === 1">
                                     Current
                                 </div>
-                                <UiDropdownMenu :idx="meso.id" left="-50px" :key="meso.id">
-                                    <template #header>
-                                        <div class="hover:cursor-pointer">
-                                            <Icon icon="iconamoon:menu-kebab-vertical" width="18px" />
-                                        </div>
-                                    </template>
-
-                                    <template v-slot="slotProps">
-                                        <li
-                                            v-for="(item, i) in mesoDropdown"
-                                            :key="i"
+                                <div class="flex items-center text-secondary">
+                                    <template v-for="(item, itemIndex) in mesocycleActions" :key="item.label">
+                                        <span v-if="itemIndex > 0" class="px-2 text-helper" aria-hidden="true">|</span>
+                                        <button
+                                            type="button"
+                                            :title="item.label"
+                                            :aria-label="item.label"
+                                            class="flex items-center justify-center transition hover:text-primary"
                                             :class="item.class"
-                                            @click.prevent="
-                                                item.action(meso.id);
-                                                slotProps.toggle();
-                                            "
+                                            @click.prevent.stop="item.action(meso.id)"
                                         >
-                                            <Icon :icon="item.icon" />
-                                            {{ item.label }}
-                                        </li>
+                                            <Icon :icon="item.icon" width="18" />
+                                        </button>
                                     </template>
-                                </UiDropdownMenu>
+                                </div>
                             </div>
                         </div>
                     </Link>
@@ -57,12 +50,11 @@
 
 <script setup lang="ts">
 import UiBox from "@/Components/Ui/Box.vue";
-import UiDropdownMenu from "@/Components/Ui/DropdownMenu.vue";
 import UiErrors from "@/Components/Ui/Errors.vue";
 import UiTitle from "@/Components/Ui/Title.vue";
+import { useMesocycle } from "@/Composables/useMesocycle";
 import { Icon } from "@iconify/vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import { onMounted } from "vue";
 
 const props = defineProps<{
     title: string;
@@ -71,6 +63,7 @@ const props = defineProps<{
 }>();
 
 const form = useForm({});
+const { copyMeso } = useMesocycle();
 
 function setActive(id: number) {
     form.patch(route("mesocycles.activate", { mesocycle: id }));
@@ -82,21 +75,24 @@ function destroy(id: number) {
     form.delete(route("mesocycles.destroy", { mesocycle: id }));
 }
 
-const mesoDropdown = [
+const mesocycleActions = [
     {
         icon: "ph:swap",
         label: "Set Active",
         action: (mesocycleId: number) => setActive(mesocycleId),
     },
     {
+        icon: "boxicons:copy",
+        label: "Copy mesocycle structure",
+        action: (mesocycleId: number) => copyMeso(mesocycleId),
+    },
+    {
         icon: "material-symbols:delete-outline",
         label: "Delete",
-        class: "!text-red",
+        class: "text-red hover:!text-red",
         action: (mesocycleId: number) => destroy(mesocycleId),
     },
 ];
-
-onMounted(() => {});
 </script>
 
 <style scoped></style>

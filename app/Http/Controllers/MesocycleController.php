@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\Mesocycle\ActivateMesocycle;
 use App\Actions\Mesocycle\CreateMesocycle;
+use App\Actions\Mesocycle\MesocycleToText;
 use App\Actions\Mesocycle\ResolveActiveMesocycleDay;
 use App\Actions\Mesocycle\UpdateMesocycle;
 use App\Data\Mesocycle\CreateMesocycleData;
 use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\Mesocycle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -23,7 +25,7 @@ class MesocycleController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy']),
+            new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy', 'exportAsText']),
         ];
     }
 
@@ -51,6 +53,10 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle, UpdateMesocycle $updateMesocycle): RedirectResponse
     {
+        if ($mesocycle->meso_template_id === null) {
+            return to_route('mesocycles')->with('error', 'Meso template missing for this mesocycle!');
+        }
+
         $mesoDTO = CreateMesocycleData::from($request->validated());
 
         $updateMesocycle->execute($mesoDTO, $mesocycle);
@@ -95,5 +101,13 @@ class MesocycleController extends Controller implements HasMiddleware
         [$currentDayId, $mesocycleId] = $resolve->execute();
 
         return to_route('days.show', ['mesocycle' => $mesocycleId, 'day' => $currentDayId]);
+    }
+
+    public function exportAsText(Mesocycle $mesocycle, MesocycleToText $mesocycleToText): JsonResponse
+    {
+        return response()->json([
+            'text' => $mesocycleToText->execute($mesocycle),
+            'message' => 'Mesocycle structure copied',
+        ]);
     }
 }

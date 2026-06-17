@@ -510,6 +510,7 @@ const dropdownItems = [
             { icon: "tabler:italic", label: "Rename" },
             { icon: "bi:graph-up-arrow", label: "Progressions" },
             { icon: "carbon:book", label: "Summary" },
+            { icon: "boxicons:copy", label: "Copy Meso" },
             { icon: "carbon:stop-outline", label: "End" },
         ],
     },

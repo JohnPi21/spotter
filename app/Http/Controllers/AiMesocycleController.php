@@ -31,10 +31,13 @@ class AiMesocycleController extends Controller
     {
         $aiMesocycleDTO = CreateAiMesocycleData::from($request->validated());
 
-        // pass to agenta
-        $mesoDTO = $agent->generate(Auth::id(), $aiMesocycleDTO);
+        // @TODO implement this route later
+        return to_route('mesocycles')->with('error', 'Feature in development!');
 
-        $mesoTemplate = MesoTemplate::create();
+        // pass to agenta
+        // $mesoDTO = $agent->generate(Auth::id(), $aiMesocycleDTO);
+
+        // $mesoTemplate = MesoTemplate::create();
 
         // send user to preview page
         // @TODO: I also added min and max range for the user to also save the the range he wants to do that exercise

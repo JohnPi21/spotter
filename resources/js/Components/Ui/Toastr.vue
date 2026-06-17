@@ -26,7 +26,9 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-primary">{{ activeToast.title }}</p>
-                                <p class="mt-1 break-words text-sm leading-5 text-secondary">{{ activeToast.message }}</p>
+                                <p class="mt-1 break-words text-sm leading-5 text-secondary">
+                                    {{ activeToast.message }}
+                                </p>
                             </div>
 
                             <button
@@ -46,12 +48,11 @@
 </template>
 
 <script setup lang="ts">
+import { type ToastLevel, type ToastMessage, useToastStore } from "@/stores/toastStore";
 import type { PageProps } from "@/types";
 import { Icon } from "@iconify/vue";
 import { usePage } from "@inertiajs/vue3";
 import { onBeforeUnmount, ref, watch } from "vue";
-
-type ToastLevel = "error" | "success" | "warning" | "info";
 
 type ToastPayload = {
     level: ToastLevel;
@@ -64,14 +65,8 @@ type ToastPayload = {
     dismissLabel: string;
 };
 
-type CustomFlashPayload = {
-    message: string;
-    level?: ToastLevel;
-    title?: string;
-    label?: string;
-};
-
 const page = usePage<PageProps>();
+const toastStore = useToastStore();
 const activeToast = ref<ToastPayload | null>(null);
 
 let dismissTimer: number | null = null;
@@ -88,6 +83,7 @@ function clearDismissTimer(): void {
 function dismiss(): void {
     clearDismissTimer();
     activeToast.value = null;
+    toastStore.dismiss();
 }
 
 function buildToast(level: ToastLevel, message: string, overrides: Partial<ToastPayload> = {}): ToastPayload {
@@ -137,16 +133,16 @@ function buildToast(level: ToastLevel, message: string, overrides: Partial<Toast
     };
 }
 
-function resolveCustomFlashPayload(payload: unknown): ToastPayload | null {
+function resolveCustomFlashPayload(payload: unknown): ToastMessage | null {
     if (typeof payload === "string") {
-        return buildToast("info", payload);
+        return { level: "info", message: payload };
     }
 
     if (!payload || typeof payload !== "object") {
         return null;
     }
 
-    const candidate = payload as Partial<CustomFlashPayload>;
+    const candidate = payload as Partial<ToastMessage>;
 
     if (typeof candidate.message !== "string") {
         return null;
@@ -154,45 +150,57 @@ function resolveCustomFlashPayload(payload: unknown): ToastPayload | null {
 
     const level = candidate.level ?? "info";
 
-    return buildToast(level, candidate.message, {
+    return {
+        level,
+        message: candidate.message,
         label: candidate.label,
         title: candidate.title,
-    });
+    };
 }
 
-function resolveToast(): ToastPayload | null {
+function resolveFlashToast(): ToastMessage | null {
     const errorMessage = page.props.errors?.error;
     const flash = page.props.flash;
 
     if (typeof errorMessage === "string") {
-        return buildToast("error", errorMessage);
+        return { level: "error", message: errorMessage };
     }
 
     if (typeof flash?.error === "string") {
-        return buildToast("error", flash.error);
+        return { level: "error", message: flash.error };
     }
 
     if (typeof flash?.warning === "string") {
-        return buildToast("warning", flash.warning);
+        return { level: "warning", message: flash.warning };
     }
 
     if (typeof flash?.success === "string") {
-        return buildToast("success", flash.success);
+        return { level: "success", message: flash.success };
     }
 
     if (typeof flash?.info === "string") {
-        return buildToast("info", flash.info);
+        return { level: "info", message: flash.info };
     }
 
     return resolveCustomFlashPayload(flash?.custom);
 }
 
-function show(toast: ToastPayload): void {
-    activeToast.value = toast;
+function show(toast: ToastMessage): void {
+    const overrides: Partial<ToastPayload> = {};
+
+    if (toast.label) {
+        overrides.label = toast.label;
+    }
+
+    if (toast.title) {
+        overrides.title = toast.title;
+    }
+
+    activeToast.value = buildToast(toast.level, toast.message, overrides);
     clearDismissTimer();
 
     dismissTimer = window.setTimeout(() => {
-        activeToast.value = null;
+        dismiss();
         dismissTimer = null;
     }, 4500);
 }
@@ -200,17 +208,25 @@ function show(toast: ToastPayload): void {
 watch(
     () => [page.url, page.props.flash, page.props.errors],
     () => {
-        const toast = resolveToast();
+        const toast = resolveFlashToast();
 
         if (!toast) {
-            dismiss();
-
             return;
         }
 
-        show(toast);
+        toastStore.show(toast);
     },
-    { deep: true, immediate: true },
+    { deep: true, immediate: true }
+);
+
+watch(
+    () => toastStore.current,
+    (toast) => {
+        if (toast) {
+            show(toast);
+        }
+    },
+    { deep: true, immediate: true }
 );
 
 onBeforeUnmount(() => {

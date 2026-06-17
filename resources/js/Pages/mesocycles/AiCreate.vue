@@ -162,7 +162,7 @@
                         <textarea
                             v-model="form.notes"
                             rows="4"
-                            placeholder="Favourite lifts, muscle groups you want to emphasise, time constraints, etc."
+                            placeholder="Favourite lifts, prefered reps range, muscle groups you want to emphasise, time constraints, etc."
                             class="rounded-md border border-input-border bg-input px-3 py-2 text-sm text-primary outline-none transition placeholder:text-helper focus:border-accent focus:ring-accent"
                         ></textarea>
                     </div>
