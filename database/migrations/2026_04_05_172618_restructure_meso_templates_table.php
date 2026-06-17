@@ -18,9 +18,9 @@ return new class extends Migration
             }
 
             $table->after('frequency', function () use ($table) {
-                $table->json('schema');
+                $table->json('schema')->nullable();
                 $table->boolean('ai_generated')->default(false);
-                $table->foreignIdFor(AiRequest::class)->nullable();
+                $table->foreignIdFor(AiRequest::class)->nullable()->constrained();
             });
         });
     }

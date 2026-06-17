@@ -53,6 +53,10 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle, UpdateMesocycle $updateMesocycle): RedirectResponse
     {
+        if ($mesocycle->meso_template_id === null) {
+            return to_route('mesocycles')->with('error', 'Meso template missing for this mesocycle!');
+        }
+
         $mesoDTO = CreateMesocycleData::from($request->validated());
 
         $updateMesocycle->execute($mesoDTO, $mesocycle);
