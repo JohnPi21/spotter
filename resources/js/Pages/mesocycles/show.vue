@@ -52,12 +52,12 @@
             </div>
 
             <!-- ===== Calendar ===== -->
-            <div class="flex justify-between gap-1" v-if="showCalendar">
+            <div class="scrollbar flex justify-between gap-1 overflow-x-scroll pb-1" v-if="showCalendar">
                 <div class="flex flex-1 flex-col items-center gap-1" v-for="(week, idx) in mesocycle.calendar">
                     <p>W {{ idx }}</p>
                     <Link
                         :href="route('days.show', { mesocycle: mesocycle.id, day: weekDay.id })"
-                        class="flex w-full flex-col items-center justify-center rounded-sm border border-transparent bg-main px-2 py-1 text-center"
+                        class="flex w-full flex-col items-center justify-center rounded-md border border-transparent bg-main px-2 py-1 text-center"
                         v-for="(weekDay, dayIdx) in week"
                         :class="[
                             { 'bg-orange-700': isActiveDay(weekDay.id) },
