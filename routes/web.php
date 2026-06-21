@@ -8,11 +8,18 @@ use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
+
+    Route::middleware(EnsureAdmin::class)->group(function () {
+        Route::get('/panel', function (Request $request) {
+            dd($request->user());
+        });
+    });
 
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
     Route::controller(MesocycleController::class)->group(function () {
@@ -72,8 +79,6 @@ Route::middleware('auth')->group(function () {
             // 'exercisesByMuscle' => MuscleGroup::with('exercises')->get(),
         ]);
     });
-
-    Route::get('/boom', fn () => throw new \RuntimeException('Test Sentry'));
 });
 
 Route::get('/', fn () => Inertia::render('Landing'))->name('landing');

@@ -14,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class MesocycleController extends Controller implements HasMiddleware
@@ -32,8 +31,6 @@ class MesocycleController extends Controller implements HasMiddleware
     public function index(): \Inertia\Response
     {
         $mesocycles = Mesocycle::query()->mine()->with(['days:id,finished_at,mesocycle_id'])->get();
-
-        Log::info('Mesocycle last day', [$mesocycles->first()?->last_day]);
 
         return Inertia::render('mesocycles/index', [
             'title' => 'Mesocycles',
