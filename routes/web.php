@@ -8,20 +8,14 @@ use App\Http\Controllers\ExerciseSetController;
 use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
 
-    Route::middleware(EnsureAdmin::class)->group(function () {
-        Route::get('/panel', function (Request $request) {
-            dd($request->user());
-        });
-    });
-
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
+
     Route::controller(MesocycleController::class)->group(function () {
         Route::get('/mesocycles', 'index')->name('mesocycles');
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
@@ -88,6 +82,7 @@ Route::get('/health', function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';
 
 Route::fallback(function (Request $request) {
     return Inertia::render('ErrorPage', [

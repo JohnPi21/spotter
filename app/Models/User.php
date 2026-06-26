@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RolesEnum;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,5 +62,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasActiveMesocycle(): bool
     {
         return (bool) Mesocycle::query()->mine()->active()->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(RolesEnum::ADMIN);
     }
 }
