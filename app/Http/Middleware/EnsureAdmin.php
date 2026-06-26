@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\RolesEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,8 +15,8 @@ class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()->hasRole(RolesEnum::ADMIN)) {
-            return redirect()->route('dashboard');
+        if (! $request->user()->isAdmin()) {
+            return abort(404);
         }
 
         return $next($request);
