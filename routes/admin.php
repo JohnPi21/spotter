@@ -11,5 +11,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AdminDashboard::class, 'index']);
 
         Route::get('/users', [UserController::class, 'index'])->name('admin.users.view');
+        Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
     });
 });
