@@ -13,7 +13,7 @@ class MesocycleExportTest extends TestCase
     public function test_owner_can_export_mesocycle_as_text(): void
     {
         $user = User::factory()->create();
-        $mesocycle = Mesocycle::factory()->for($user)->create();
+        $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
 
         $this->mock(MesocycleToText::class, function (MockInterface $mock) use ($mesocycle) {
             $mock->shouldReceive('execute')
@@ -22,6 +22,7 @@ class MesocycleExportTest extends TestCase
                 ->andReturn('exported mesocycle');
         });
 
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user* */
         $this->actingAs($user)
             ->getJson(route('mesocycles.copy', $mesocycle))
             ->assertOk()
@@ -39,6 +40,7 @@ class MesocycleExportTest extends TestCase
             $mock->shouldNotReceive('execute');
         });
 
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user* */
         $this->actingAs($user)
             ->getJson(route('mesocycles.copy', $mesocycle))
             ->assertForbidden();
