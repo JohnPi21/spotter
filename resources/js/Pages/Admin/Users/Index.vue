@@ -70,7 +70,6 @@ const modalTitle = computed(() => (selectedUser.value ? "Edit user" : "Create us
 const form = useForm({
     name: "",
     email: "",
-    password: "",
 });
 
 function openCreateModal(): void {
@@ -84,7 +83,6 @@ function openEditModal(user: User): void {
     selectedUser.value = user;
     form.name = user.name;
     form.email = user.email;
-    form.password = "";
     form.clearErrors();
     modalOpen.value = true;
 }
@@ -264,20 +262,6 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer));
                         <InputLabel for="user-email" value="Email" />
                         <InputText id="user-email" v-model="form.email" type="email" autocomplete="email" />
                         <InputError :message="form.errors.email" />
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <InputLabel for="user-password" :value="selectedUser ? 'New password' : 'Password'" />
-                        <InputText
-                            id="user-password"
-                            v-model="form.password"
-                            type="password"
-                            autocomplete="new-password"
-                        />
-                        <p v-if="selectedUser" class="text-xs text-secondary">
-                            Leave empty to keep the current password.
-                        </p>
-                        <InputError :message="form.errors.password" />
                     </div>
                 </div>
 

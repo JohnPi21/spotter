@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Admin\Requests\StoreUserRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use Illuminate\Http\Request;

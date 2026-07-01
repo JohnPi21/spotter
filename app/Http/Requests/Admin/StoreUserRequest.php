@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Admin\Requests;
+namespace App\Http\Requests\Admin;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
 
 class StoreUserRequest extends FormRequest
 {
@@ -24,8 +23,8 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['string', 'alpha_num', 'max:64', 'min:2'],
-            'email' => ['string', 'email', 'unique:users,email'],
+            'name' => ['required', 'string', 'max:64', 'min:2'],
+            'email' => ['required', 'string', 'email', 'unique:users,email'],
         ];
     }
 }
