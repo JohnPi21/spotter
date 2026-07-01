@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -59,9 +60,17 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        //
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return to_route('admin.users.view')->with('success', 'User updated');
     }
 
     /**
