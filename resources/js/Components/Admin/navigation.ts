@@ -12,6 +12,11 @@ export const adminNavigation: AdminNavigationItem[] = [
         icon: "material-symbols:dashboard-outline",
         exact: true,
     },
+    {
+        name: "Users",
+        path: "/panel/users",
+        icon: "material-symbols:group-outline",
+    },
 ];
 
 export const applicationNavigation: AdminNavigationItem[] = [
