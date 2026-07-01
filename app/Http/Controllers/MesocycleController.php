@@ -102,6 +102,8 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function exportAsText(Mesocycle $mesocycle, MesocycleToText $mesocycleToText): JsonResponse
     {
+        $mesocycle->loadMissing(['days.dayExercises.exercise.muscleGroup', 'days.dayExercises.sets']);
+
         return response()->json([
             'text' => $mesocycleToText->execute($mesocycle),
             'message' => 'Mesocycle structure copied',

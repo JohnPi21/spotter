@@ -8,8 +8,6 @@ class MesocycleToText
 {
     public function execute(Mesocycle $mesocycle): string
     {
-        $mesocycle->loadMissing(['days.dayExercises.exercise.muscleGroup', 'days.dayExercises.sets']);
-
         $text = '';
         $currentWeek = null;
 
