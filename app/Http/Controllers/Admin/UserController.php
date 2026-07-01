@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Admin\Requests\StoreUserRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -14,23 +17,27 @@ class UserController extends Controller
      */
     public function index()
     {
-        return new UserCollection(User::paginate());
+        $users = new UserCollection(User::paginate());
+
+        return Inertia::render('Admin/Users/Index', ['users' => $users]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
+        $user = User::create([
+            ...$request->validated(),
+            'password' => Str::random(32),
+        ]);
+
+        return to_route('admin.users.view')->with('success', 'User created');
     }
 
     /**

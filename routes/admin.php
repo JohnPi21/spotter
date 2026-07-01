@@ -10,6 +10,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware(EnsureAdmin::class)->prefix('panel')->group(function () {
         Route::get('/', [AdminDashboard::class, 'index']);
 
-        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users', [UserController::class, 'index'])->name('admin.users.view');
     });
 });
