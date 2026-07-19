@@ -3,15 +3,19 @@ import ButtonPrimary from "@/Components/Button/Primary.vue";
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import InputError from "@/Components/Input/InputError.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
-import InputSelect from "@/Components/Input/Select.vue";
 import InputText from "@/Components/Input/Text.vue";
 import Modal from "@/Components/Modal.vue";
 import ModalHeader from "@/Components/Modals/Header.vue";
+import IndexFilters, {
+    type IndexFilterField,
+    type IndexFilterPayload,
+    type IndexSortField,
+} from "@/Components/Ui/IndexFilters.vue";
 import UiTable, { type TableColumn } from "@/Components/Ui/Table.vue";
 import type { User } from "@/types";
 import { Icon } from "@iconify/vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, ref } from "vue";
 
 type PaginationLink = {
     url: string | null;
@@ -21,24 +25,14 @@ type PaginationLink = {
 
 type PaginatedUsers = {
     data: User[];
-    meta: {
-        links: PaginationLink[];
-        from: number | null;
-        to: number | null;
-        total: number;
-    };
-};
-
-type UserFilters = {
-    search?: string;
-    demo?: boolean;
-    sort?: "id" | "name" | "email";
-    direction?: "asc" | "desc";
+    links: PaginationLink[];
+    from: number | null;
+    to: number | null;
+    total: number;
 };
 
 const props = defineProps<{
     users: PaginatedUsers;
-    filters?: UserFilters;
 }>();
 
 const columns: TableColumn[] = [
@@ -49,19 +43,55 @@ const columns: TableColumn[] = [
     { key: "actions", label: "", headerClass: "text-right", cellClass: "text-right" },
 ];
 
-const sortOptions = [
-    { value: "id_asc", label: "ID: ascending" },
-    { value: "id_desc", label: "ID: descending" },
-    { value: "name_asc", label: "Name: A–Z" },
-    { value: "name_desc", label: "Name: Z–A" },
-    { value: "email_asc", label: "Email: A–Z" },
-    { value: "email_desc", label: "Email: Z–A" },
-] as const;
+const filterFields = [
+    {
+        key: "id",
+        label: "ID",
+        type: "number",
+        placeholder: "User ID",
+        min: 1,
+        step: 1,
+    },
+    {
+        key: "name",
+        label: "Name",
+        type: "text",
+        placeholder: "Name",
+        pattern: "[A-Za-z]+",
+    },
+    {
+        key: "email",
+        label: "Email",
+        type: "text",
+        inputmode: "email",
+        placeholder: "Email address",
+    },
+    {
+        key: "verified",
+        label: "Verification",
+        type: "select",
+        options: [
+            { value: "", label: "Any status" },
+            { value: "1", label: "Verified" },
+            { value: "0", label: "Unverified" },
+        ],
+    },
+    {
+        key: "created_at",
+        label: "Created date",
+        type: "date",
+    },
+] as const satisfies readonly IndexFilterField[];
 
-const search = ref(props.filters?.search ?? "");
-const demoOnly = ref(props.filters?.demo ?? false);
-const sort = ref(`${props.filters?.sort ?? "id"}_${props.filters?.direction ?? "asc"}`);
-let searchTimer: number | undefined;
+const sortFields = [
+    { value: "id", label: "ID" },
+    { value: "name", label: "Name" },
+    { value: "email", label: "Email" },
+    { value: "verified", label: "Verified" },
+    { value: "created_at", label: "Created date" },
+] as const satisfies readonly IndexSortField[];
+
+const isFiltering = ref(false);
 
 const modalOpen = ref(false);
 const selectedUser = ref<User | null>(null);
@@ -110,36 +140,23 @@ function isVerified(user: User): boolean {
     return Boolean(user.email_verified_at);
 }
 
-function applyFilters(): void {
-    const [sortField, sortDirection] = sort.value.split("_") as [UserFilters["sort"], UserFilters["direction"]];
-
-    router.get(
-        route("admin.users.view"),
-        {
-            search: search.value || undefined,
-            demo: demoOnly.value ? 1 : undefined,
-            sort: sortField,
-            direction: sortDirection,
+function applyFilters(payload: IndexFilterPayload = {}): void {
+    router.get(route("admin.users.view"), payload, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+        onStart: () => {
+            isFiltering.value = true;
         },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        }
-    );
+        onFinish: () => {
+            isFiltering.value = false;
+        },
+    });
 }
 
-function queueSearch(): void {
-    window.clearTimeout(searchTimer);
-    searchTimer = window.setTimeout(applyFilters, 300);
+function clearFilters(): void {
+    applyFilters({});
 }
-
-function toggleDemoUsers(): void {
-    demoOnly.value = !demoOnly.value;
-    applyFilters();
-}
-
-onBeforeUnmount(() => window.clearTimeout(searchTimer));
 </script>
 
 <template>
@@ -155,48 +172,13 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer));
             <ButtonPrimary type="button" @click="openCreateModal">Create user</ButtonPrimary>
         </header>
 
-        <section
-            class="flex flex-col gap-3 rounded-lg border border-layer-border bg-layer p-4 lg:flex-row lg:items-end"
-        >
-            <div class="flex min-w-0 flex-1 flex-col gap-2">
-                <InputLabel for="user-search" value="Search users" />
-                <div class="relative">
-                    <Icon
-                        icon="material-symbols:search"
-                        class="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-helper"
-                        aria-hidden="true"
-                    />
-                    <InputText
-                        id="user-search"
-                        v-model="search"
-                        type="search"
-                        class="w-full pl-10"
-                        placeholder="Search by name or email"
-                        @input="queueSearch"
-                    />
-                </div>
-            </div>
-
-            <button
-                type="button"
-                class="inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition"
-                :class="
-                    demoOnly
-                        ? 'border-border-orange bg-orange text-primary'
-                        : 'border-input-border bg-input text-secondary hover:bg-layer-light hover:text-primary'
-                "
-                :aria-pressed="demoOnly"
-                @click="toggleDemoUsers"
-            >
-                <Icon icon="material-symbols:science-outline" class="size-5" aria-hidden="true" />
-                Demo users
-            </button>
-
-            <div class="flex flex-col gap-2 lg:w-52">
-                <InputLabel for="user-sort" value="Sort by" />
-                <InputSelect id="user-sort" v-model="sort" :options="sortOptions" @change="applyFilters" />
-            </div>
-        </section>
+        <IndexFilters
+            :fields="filterFields"
+            :sorts="sortFields"
+            :processing="isFiltering"
+            @apply="applyFilters"
+            @clear="clearFilters"
+        />
 
         <UiTable :columns="columns" :rows="props.users.data">
             <template #cell-email_verified_at="{ row }">
@@ -223,13 +205,10 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer));
         </UiTable>
 
         <footer class="flex flex-col gap-3 text-sm text-secondary sm:flex-row sm:items-center sm:justify-between">
-            <p>
-                Showing {{ props.users.meta.from ?? 0 }} to {{ props.users.meta.to ?? 0 }} of
-                {{ props.users.meta.total }} users
-            </p>
+            <p>Showing {{ props.users.from ?? 0 }} to {{ props.users.to ?? 0 }} of {{ props.users.total }} users</p>
 
-            <nav v-if="props.users.meta.links.length > 3" aria-label="User pagination" class="flex flex-wrap gap-2">
-                <template v-for="link in props.users.meta.links" :key="link.label">
+            <nav v-if="props.users.links.length > 3" aria-label="User pagination" class="flex flex-wrap gap-2">
+                <template v-for="link in props.users.links" :key="link.label">
                     <Link
                         v-if="link.url"
                         :href="link.url"

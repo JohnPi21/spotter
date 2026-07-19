@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\User\ListUsers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
-use App\Http\Resources\UserCollection;
+use App\Http\Requests\Admin\UserIndexRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(UserIndexRequest $request, ListUsers $listUsers): Response
     {
-        $users = new UserCollection(User::paginate());
+        $users = $listUsers->execute($request->validated());
 
         return Inertia::render('Admin/Users/Index', ['users' => $users]);
     }

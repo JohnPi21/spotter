@@ -17,6 +17,11 @@ export const adminNavigation: AdminNavigationItem[] = [
         path: "/panel/users",
         icon: "material-symbols:group-outline",
     },
+    {
+        name: "Exercises",
+        path: "/panel/exercises",
+        icon: "material-symbols:fitness-center",
+    },
 ];
 
 export const applicationNavigation: AdminNavigationItem[] = [

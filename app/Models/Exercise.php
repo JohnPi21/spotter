@@ -17,4 +17,12 @@ class Exercise extends Model
     {
         return $this->belongsTo(MuscleGroup::class);
     }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\ExerciseController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
@@ -13,5 +14,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('admin.users.view');
         Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+
+        Route::get('/exercises', [ExerciseController::class, 'index'])->name('admin.exercises.view');
     });
 });
