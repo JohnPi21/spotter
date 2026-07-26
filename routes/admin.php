@@ -18,5 +18,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
 
         Route::get('/exercises', [ExerciseController::class, 'index'])->name('admin.exercises.view');
+        Route::post('/exercises', [ExerciseController::class, 'store'])->name('admin.exercises.store');
     });
 });

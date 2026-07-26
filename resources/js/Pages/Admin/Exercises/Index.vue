@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import ButtonPrimary from "@/Components/Button/Primary.vue";
+import ButtonSecondary from "@/Components/Button/Secondary.vue";
+import InputError from "@/Components/Input/InputError.vue";
+import InputLabel from "@/Components/Input/InputLabel.vue";
+import InputSelect from "@/Components/Input/Select.vue";
+import InputText from "@/Components/Input/Text.vue";
+import Modal from "@/Components/Modal.vue";
+import ModalHeader from "@/Components/Modals/Header.vue";
 import IndexFilters, {
     type FilterOption,
     type IndexFilterField,
@@ -7,7 +15,7 @@ import IndexFilters, {
 } from "@/Components/Ui/IndexFilters.vue";
 import UiTable, { type TableColumn } from "@/Components/Ui/Table.vue";
 import { Icon } from "@iconify/vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 
 type PaginationLink = {
@@ -28,6 +36,15 @@ const props = defineProps<{
     exercises: PaginatedExercises;
     exerciseTypes: FilterOption[];
 }>();
+
+const page = usePage();
+
+const muscleGroupOptions = computed<FilterOption[]>(() =>
+    (page.props.admin?.muscleGroups ?? []).map((muscleGroup) => ({
+        value: String(muscleGroup.id),
+        label: muscleGroup.name,
+    }))
+);
 
 const columns: TableColumn[] = [
     { key: "id", label: "ID" },
@@ -50,20 +67,22 @@ const filterFields = computed(
                 step: 1,
             },
             {
+                key: "name",
+                label: "Name",
+                type: "text",
+                placeholder: "Exercise name",
+            },
+            {
                 key: "muscle_group",
                 label: "Muscle group",
-                type: "number",
-                placeholder: "Muscle group ID",
-                min: 1,
-                step: 1,
+                type: "select",
+                options: [{ value: "", label: "Any muscle group" }, ...muscleGroupOptions.value],
             },
             {
                 key: "user",
                 label: "Owner",
-                type: "number",
-                placeholder: "User ID",
-                min: 1,
-                step: 1,
+                type: "user",
+                placeholder: "Any owner",
             },
             {
                 key: "exercise_type",
@@ -89,6 +108,32 @@ const sortFields = [
 ] as const satisfies readonly IndexSortField[];
 
 const isFiltering = ref(false);
+const createModalOpen = ref(false);
+
+const form = useForm({
+    name: "",
+    muscle_group_id: "",
+    exercise_type: "",
+    youtube_id: "",
+});
+
+function openCreateModal(): void {
+    form.reset();
+    form.clearErrors();
+    createModalOpen.value = true;
+}
+
+function closeCreateModal(): void {
+    createModalOpen.value = false;
+    form.clearErrors();
+}
+
+function submit(): void {
+    form.post(route("admin.exercises.store"), {
+        preserveScroll: true,
+        onSuccess: closeCreateModal,
+    });
+}
 
 function formatExerciseType(type: string): string {
     return type
@@ -120,9 +165,13 @@ function clearFilters(): void {
     <div class="flex flex-col gap-6">
         <Head title="Exercises" />
 
-        <header>
-            <p class="text-sm font-medium text-accent">Administration</p>
-            <h1 class="mt-1 text-2xl font-semibold text-primary">Exercises</h1>
+        <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-medium text-accent">Administration</p>
+                <h1 class="mt-1 text-2xl font-semibold text-primary">Exercises</h1>
+            </div>
+
+            <ButtonPrimary type="button" @click="openCreateModal">Create exercise</ButtonPrimary>
         </header>
 
         <IndexFilters
@@ -186,5 +235,75 @@ function clearFilters(): void {
                 </template>
             </nav>
         </footer>
+
+        <Modal :show="createModalOpen" max-width="md" @close="closeCreateModal">
+            <form @submit.prevent="submit">
+                <ModalHeader
+                    title="Create exercise"
+                    class="border-b border-layer-border p-4"
+                    @close="closeCreateModal"
+                />
+
+                <div class="flex flex-col gap-4 p-4">
+                    <div class="flex flex-col gap-2">
+                        <InputLabel for="exercise-name" value="Name" />
+                        <InputText
+                            id="exercise-name"
+                            v-model="form.name"
+                            type="text"
+                            minlength="1"
+                            maxlength="255"
+                            pattern="[A-Za-z\(\) \-]+"
+                            autofocus
+                            required
+                        />
+                        <InputError :message="form.errors.name" />
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <InputLabel for="exercise-muscle-group" value="Muscle group" />
+                        <InputSelect
+                            id="exercise-muscle-group"
+                            v-model="form.muscle_group_id"
+                            :options="muscleGroupOptions"
+                            placeholder="Select a muscle group"
+                            required
+                        />
+                        <InputError :message="form.errors.muscle_group_id" />
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <InputLabel for="exercise-type" value="Type" />
+                        <InputSelect
+                            id="exercise-type"
+                            v-model="form.exercise_type"
+                            :options="props.exerciseTypes"
+                            placeholder="Select an exercise type"
+                            required
+                        />
+                        <InputError :message="form.errors.exercise_type" />
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <InputLabel for="exercise-youtube-id" value="YouTube ID" />
+                        <InputText
+                            id="exercise-youtube-id"
+                            v-model="form.youtube_id"
+                            type="text"
+                            maxlength="255"
+                            placeholder="Optional"
+                        />
+                        <InputError :message="form.errors.youtube_id" />
+                    </div>
+                </div>
+
+                <footer class="flex justify-end gap-3 border-t border-layer-border p-4">
+                    <ButtonSecondary type="button" @click="closeCreateModal">Cancel</ButtonSecondary>
+                    <ButtonPrimary type="submit" :disabled="form.processing">
+                        {{ form.processing ? "Creating…" : "Create exercise" }}
+                    </ButtonPrimary>
+                </footer>
+            </form>
+        </Modal>
     </div>
 </template>

@@ -6,6 +6,9 @@ use App\Actions\Exercise\ListExercises;
 use App\Enums\EquipmentsEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExerciseIndexRequest;
+use App\Http\Requests\Admin\StoreExerciseRequest;
+use App\Models\Exercise;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,9 +36,11 @@ class ExerciseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreExerciseRequest $request): RedirectResponse
     {
-        //
+        Exercise::create($request->validated());
+
+        return to_route('admin.exercises.view')->with('success', 'Exercise created');
     }
 
     /**

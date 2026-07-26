@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UserLookup from "@/Components/Admin/UserLookup.vue";
 import ButtonSecondary from "@/Components/Button/Secondary.vue";
 import InputLabel from "@/Components/Input/InputLabel.vue";
 import InputSelect from "@/Components/Input/Select.vue";
@@ -26,12 +27,17 @@ type FilterSelectField = FilterFieldBase & {
     options: readonly FilterOption[];
 };
 
+type FilterUserField = FilterFieldBase & {
+    type: "user";
+    placeholder?: string;
+};
+
 export type FilterOption = {
     value: string;
     label: string;
 };
 
-export type IndexFilterField = FilterInputField | FilterSelectField;
+export type IndexFilterField = FilterInputField | FilterSelectField | FilterUserField;
 
 export type IndexSortField = {
     value: string;
@@ -140,8 +146,15 @@ onBeforeUnmount(() => window.clearTimeout(submitTimer));
             <div v-for="field in fields" :key="field.key" class="flex min-w-0 flex-col gap-2">
                 <InputLabel :for="`index-filter-${field.key}`" :value="field.label" />
 
+                <UserLookup
+                    v-if="field.type === 'user'"
+                    :id="`index-filter-${field.key}`"
+                    v-model="values[field.key]"
+                    :placeholder="field.placeholder"
+                />
+
                 <InputSelect
-                    v-if="field.type === 'select'"
+                    v-else-if="field.type === 'select'"
                     :id="`index-filter-${field.key}`"
                     v-model="values[field.key]"
                     :options="field.options"

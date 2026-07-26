@@ -23,6 +23,7 @@ final class ListExercises
      *     filter?: array{
      *         id?: int|string,
      *         muscle_group?: int|string,
+     *         name?: string,
      *         user?: int|string,
      *         exercise_type?: string,
      *         youtube_id?: string
@@ -75,6 +76,7 @@ final class ListExercises
      *     id?: int|string,
      *     muscle_group?: int|string,
      *     user?: int|string,
+     *     name?: string,
      *     exercise_type?: string,
      *     youtube_id?: string
      * }  $filters
@@ -89,6 +91,10 @@ final class ListExercises
             ->when(
                 array_key_exists('muscle_group', $filters),
                 fn (Builder $query) => $query->where('muscle_group_id', $filters['muscle_group']),
+            )
+            ->when(
+                array_key_exists('name', $filters),
+                fn (Builder $query) => $query->whereLike('name', '%'.$filters['name'].'%')
             )
             ->when(
                 array_key_exists('user', $filters),

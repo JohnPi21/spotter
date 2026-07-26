@@ -10,6 +10,7 @@ class UserLookupControllerTest extends TestCase
 {
     public function test_admin_can_load_user_options_without_a_search_term(): void
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $admin */
         $admin = User::factory()->create();
         $admin->assignRole(RolesEnum::ADMIN->value);
         User::factory()->create();
@@ -22,6 +23,7 @@ class UserLookupControllerTest extends TestCase
 
     public function test_admin_can_search_users_by_name_or_email(): void
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $admin */
         $admin = User::factory()->create();
         $admin->assignRole(RolesEnum::ADMIN->value);
         $nameMatch = User::factory()->create([
@@ -58,6 +60,7 @@ class UserLookupControllerTest extends TestCase
 
     public function test_lookup_pagination_preserves_the_search_term(): void
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $admin */
         $admin = User::factory()->create();
         $admin->assignRole(RolesEnum::ADMIN->value);
         User::factory()->count(16)->create([
@@ -74,6 +77,7 @@ class UserLookupControllerTest extends TestCase
 
     public function test_non_admin_cannot_access_user_lookup(): void
     {
+        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
         $user = User::factory()->create();
 
         $this->actingAs($user)

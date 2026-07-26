@@ -12,6 +12,7 @@ class ExerciseIndexRequest extends FormRequest
     private const array SORT_FIELDS = [
         'id',
         'muscle_group',
+        'name',
         'user',
         'exercise_type',
         'created_at',
@@ -20,6 +21,7 @@ class ExerciseIndexRequest extends FormRequest
     private const array FILTER_FIELDS = [
         'id',
         'muscle_group',
+        'name',
         'user',
         'exercise_type',
         'youtube_id',
