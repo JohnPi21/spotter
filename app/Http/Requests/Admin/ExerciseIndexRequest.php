@@ -48,6 +48,7 @@ class ExerciseIndexRequest extends FormRequest
             'filter' => ['sometimes', 'array:'.implode(',', self::FILTER_FIELDS)],
             'filter.id' => ['sometimes', 'integer'],
             'filter.muscle_group' => ['sometimes', 'integer'],
+            'filter.name' => ['sometimes', 'string', 'max:255'],
             'filter.user' => ['sometimes', 'integer'],
             'filter.exercise_type' => ['sometimes', Rule::enum(EquipmentsEnum::class)],
             'filter.youtube_id' => ['sometimes', 'string', 'max:255'],

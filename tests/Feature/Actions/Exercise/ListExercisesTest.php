@@ -70,6 +70,18 @@ class ListExercisesTest extends TestCase
         $this->assertSame([$matchingExercise->id], $exercises->pluck('id')->all());
     }
 
+    public function test_it_filters_exercises_by_partial_name(): void
+    {
+        $matchingExercise = $this->createExercise(['name' => 'Incline dumbbell press']);
+        $this->createExercise(['name' => 'Barbell squat']);
+
+        $exercises = (new ListExercises)->execute([
+            'filter' => ['name' => 'dumbbell'],
+        ]);
+
+        $this->assertSame([$matchingExercise->id], $exercises->pluck('id')->all());
+    }
+
     public function test_it_filters_exercises_by_partial_youtube_id(): void
     {
         $matchingExercise = $this->createExercise(['youtube_id' => 'prefix-video-code-suffix']);
@@ -110,6 +122,19 @@ class ListExercisesTest extends TestCase
         ]);
 
         $this->assertSame(['Alice exercise', 'Charlie exercise'], $exercises->pluck('name')->all());
+    }
+
+    public function test_it_sorts_exercises_by_name(): void
+    {
+        $this->createExercise(['name' => 'Squat']);
+        $this->createExercise(['name' => 'Bench press']);
+
+        $exercises = (new ListExercises)->execute([
+            'sort' => 'name',
+            'direction' => 'asc',
+        ]);
+
+        $this->assertSame(['Bench press', 'Squat'], $exercises->pluck('name')->all());
     }
 
     public function test_it_uses_id_descending_as_the_default_sort(): void

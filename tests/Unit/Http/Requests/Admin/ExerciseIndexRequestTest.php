@@ -19,6 +19,7 @@ class ExerciseIndexRequestTest extends TestCase
             'filter' => [
                 'id' => '42',
                 'muscle_group' => '3',
+                'name' => 'Press',
                 'user' => '7',
                 'exercise_type' => EquipmentsEnum::DUMBBELL->value,
                 'youtube_id' => 'abc123',
@@ -36,6 +37,7 @@ class ExerciseIndexRequestTest extends TestCase
         return [
             'id' => ['id'],
             'muscle group' => ['muscle_group'],
+            'name' => ['name'],
             'user' => ['user'],
             'exercise type' => ['exercise_type'],
             'created at' => ['created_at'],
@@ -55,7 +57,7 @@ class ExerciseIndexRequestTest extends TestCase
     {
         return [
             'unsupported sort field' => [
-                ['sort' => 'name'],
+                ['sort' => 'description'],
                 'sort',
             ],
             'uppercase direction' => [
@@ -63,7 +65,7 @@ class ExerciseIndexRequestTest extends TestCase
                 'direction',
             ],
             'unsupported filter field' => [
-                ['filter' => ['name' => 'Squat']],
+                ['filter' => ['description' => 'Squat']],
                 'filter',
             ],
             'non-integer id' => [
@@ -73,6 +75,10 @@ class ExerciseIndexRequestTest extends TestCase
             'non-integer muscle group' => [
                 ['filter' => ['muscle_group' => 'chest']],
                 'filter.muscle_group',
+            ],
+            'non-string name' => [
+                ['filter' => ['name' => ['Squat']]],
+                'filter.name',
             ],
             'non-integer user' => [
                 ['filter' => ['user' => 'john']],

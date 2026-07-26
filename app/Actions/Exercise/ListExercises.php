@@ -12,6 +12,7 @@ final class ListExercises
 {
     private const array SORT_COLUMNS = [
         'id' => 'id',
+        'name' => 'name',
         'exercise_type' => 'exercise_type',
         'created_at' => 'created_at',
     ];
