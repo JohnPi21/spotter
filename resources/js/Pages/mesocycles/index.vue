@@ -54,7 +54,7 @@ import UiErrors from "@/Components/Ui/Errors.vue";
 import UiTitle from "@/Components/Ui/Title.vue";
 import { useMesocycle } from "@/Composables/useMesocycle";
 import { Icon } from "@iconify/vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
 
 const props = defineProps<{
     title: string;
@@ -76,6 +76,11 @@ function destroy(id: number) {
 }
 
 const mesocycleActions = [
+    {
+        icon: "material-symbols:edit-outline",
+        label: "Edit",
+        action: (mesocycleId: number) => router.visit(route("mesocycles.edit", { mesocycle: mesocycleId })),
+    },
     {
         icon: "ph:swap",
         label: "Set Active",
