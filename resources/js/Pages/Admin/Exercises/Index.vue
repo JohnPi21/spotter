@@ -53,6 +53,7 @@ const columns: TableColumn[] = [
     { key: "exercise_type", label: "Type" },
     { key: "user", label: "Owner" },
     { key: "youtube_id", label: "Video", headerClass: "text-right", cellClass: "text-right" },
+    { key: "actions", label: "Actions", headerClass: "text-right", cellClass: "text-right" },
 ];
 
 const filterFields = computed(
@@ -108,7 +109,9 @@ const sortFields = [
 ] as const satisfies readonly IndexSortField[];
 
 const isFiltering = ref(false);
-const createModalOpen = ref(false);
+const modalOpen = ref(false);
+const selectedExercise = ref<Exercise | null>(null);
+const modalTitle = computed(() => (selectedExercise.value ? "Edit exercise" : "Create exercise"));
 
 const form = useForm({
     name: "",
@@ -118,21 +121,39 @@ const form = useForm({
 });
 
 function openCreateModal(): void {
+    selectedExercise.value = null;
     form.reset();
     form.clearErrors();
-    createModalOpen.value = true;
+    modalOpen.value = true;
 }
 
-function closeCreateModal(): void {
-    createModalOpen.value = false;
+function openEditModal(exercise: Exercise): void {
+    selectedExercise.value = exercise;
+    form.name = exercise.name;
+    form.muscle_group_id = String(exercise.muscle_group_id);
+    form.exercise_type = exercise.exercise_type;
+    form.youtube_id = exercise.youtube_id ?? "";
+    form.clearErrors();
+    modalOpen.value = true;
+}
+
+function closeModal(): void {
+    modalOpen.value = false;
     form.clearErrors();
 }
 
 function submit(): void {
-    form.post(route("admin.exercises.store"), {
+    const options = {
         preserveScroll: true,
-        onSuccess: closeCreateModal,
-    });
+        onSuccess: closeModal,
+    };
+
+    if (selectedExercise.value) {
+        form.put(`/panel/exercises/${selectedExercise.value.id}`, options);
+        return;
+    }
+
+    form.post(route("admin.exercises.store"), options);
 }
 
 function formatExerciseType(type: string): string {
@@ -205,9 +226,15 @@ function clearFilters(): void {
                     class="inline-flex rounded-md border border-input-border bg-input p-2 text-primary transition hover:bg-layer-light"
                     aria-label="Open exercise video"
                 >
-                    <Icon icon="material-symbols:open-in-new" class="size-5" aria-hidden="true" />
+                    <Icon icon="material-symbols:visibility-outline" class="size-5" aria-hidden="true" />
                 </a>
                 <span v-else class="text-secondary">—</span>
+            </template>
+
+            <template #cell-actions="{ row }">
+                <ButtonSecondary type="button" class="p-2" aria-label="Edit exercise" @click="openEditModal(row)">
+                    <Icon icon="material-symbols:edit-outline" class="size-5" aria-hidden="true" />
+                </ButtonSecondary>
             </template>
         </UiTable>
 
@@ -236,13 +263,9 @@ function clearFilters(): void {
             </nav>
         </footer>
 
-        <Modal :show="createModalOpen" max-width="md" @close="closeCreateModal">
+        <Modal :show="modalOpen" max-width="md" @close="closeModal">
             <form @submit.prevent="submit">
-                <ModalHeader
-                    title="Create exercise"
-                    class="border-b border-layer-border p-4"
-                    @close="closeCreateModal"
-                />
+                <ModalHeader :title="modalTitle" class="border-b border-layer-border p-4" @close="closeModal" />
 
                 <div class="flex flex-col gap-4 p-4">
                     <div class="flex flex-col gap-2">
@@ -298,9 +321,17 @@ function clearFilters(): void {
                 </div>
 
                 <footer class="flex justify-end gap-3 border-t border-layer-border p-4">
-                    <ButtonSecondary type="button" @click="closeCreateModal">Cancel</ButtonSecondary>
+                    <ButtonSecondary type="button" @click="closeModal">Cancel</ButtonSecondary>
                     <ButtonPrimary type="submit" :disabled="form.processing">
-                        {{ form.processing ? "Creating…" : "Create exercise" }}
+                        {{
+                            form.processing
+                                ? selectedExercise
+                                    ? "Saving…"
+                                    : "Creating…"
+                                : selectedExercise
+                                  ? "Save changes"
+                                  : "Create exercise"
+                        }}
                     </ButtonPrimary>
                 </footer>
             </form>

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreExerciseRequest extends FormRequest
+class UpdateExerciseRequest extends FormRequest
 {
     /**
      * Prepare the data for validation.
@@ -52,7 +52,7 @@ class StoreExerciseRequest extends FormRequest
                 'min:1',
                 'max:255',
                 'regex:/\A[A-Za-z() \-]+\z/',
-                Rule::unique(Exercise::class),
+                Rule::unique(Exercise::class)->ignore($this->route('exercise')),
             ],
             'muscle_group_id' => [
                 'required',

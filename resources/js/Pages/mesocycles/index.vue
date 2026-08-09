@@ -23,7 +23,7 @@
                                     Current
                                 </div>
                                 <div class="flex items-center text-secondary">
-                                    <template v-for="(item, itemIndex) in mesocycleActions" :key="item.label">
+                                    <template v-for="(item, itemIndex) in actionsForMesocycle(meso)" :key="item.label">
                                         <span v-if="itemIndex > 0" class="px-2 text-helper" aria-hidden="true">|</span>
                                         <button
                                             type="button"
@@ -65,6 +65,14 @@ const props = defineProps<{
 const form = useForm({});
 const { copyMeso } = useMesocycle();
 
+type MesocycleAction = {
+    icon: string;
+    label: string;
+    class?: string;
+    visible?: (mesocycle: Mesocycle) => boolean;
+    action: (mesocycleId: number) => void;
+};
+
 function setActive(id: number) {
     form.patch(route("mesocycles.activate", { mesocycle: id }));
 }
@@ -75,7 +83,7 @@ function destroy(id: number) {
     form.delete(route("mesocycles.destroy", { mesocycle: id }));
 }
 
-const mesocycleActions = [
+const mesocycleActions: MesocycleAction[] = [
     {
         icon: "material-symbols:edit-outline",
         label: "Edit",
@@ -84,6 +92,7 @@ const mesocycleActions = [
     {
         icon: "ph:swap",
         label: "Set Active",
+        visible: (mesocycle: Mesocycle) => mesocycle.status !== 1,
         action: (mesocycleId: number) => setActive(mesocycleId),
     },
     {
@@ -98,6 +107,10 @@ const mesocycleActions = [
         action: (mesocycleId: number) => destroy(mesocycleId),
     },
 ];
+
+function actionsForMesocycle(mesocycle: Mesocycle): MesocycleAction[] {
+    return mesocycleActions.filter((action) => action.visible?.(mesocycle) ?? true);
+}
 </script>
 
 <style scoped></style>
