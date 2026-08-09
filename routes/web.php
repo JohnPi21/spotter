@@ -15,6 +15,7 @@ use Inertia\Inertia;
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
+
     Route::controller(MesocycleController::class)->group(function () {
         Route::get('/mesocycles', 'index')->name('mesocycles');
         Route::get('/mesocycles/create', 'create')->name('mesocycles.create');
@@ -72,8 +73,6 @@ Route::middleware('auth')->group(function () {
             // 'exercisesByMuscle' => MuscleGroup::with('exercises')->get(),
         ]);
     });
-
-    Route::get('/boom', fn () => throw new \RuntimeException('Test Sentry'));
 });
 
 Route::get('/', fn () => Inertia::render('Landing'))->name('landing');
@@ -83,6 +82,7 @@ Route::get('/health', function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';
 
 Route::fallback(function (Request $request) {
     return Inertia::render('ErrorPage', [

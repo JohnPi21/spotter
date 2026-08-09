@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         if (app()->environment(['local', 'testing'])) {
-            // $this->call([MesocycleSeeder::class]);
+            $this->call([MesocycleSeeder::class]);
         }
     }
 }

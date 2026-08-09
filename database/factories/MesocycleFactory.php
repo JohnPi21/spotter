@@ -66,7 +66,7 @@ class MesocycleFactory extends Factory
                 ->each(function (MesoDay $day) use ($exercisesPerDay, $setsPerExercise, $exercisePicker) {
                     // Pick exercises (random by default, or via custom picker)
                     $exerciseIds = collect(range(1, $exercisesPerDay))->map(function () use ($exercisePicker) {
-                        return optional($exercisePicker ? $exercisePicker() : Exercise::inRandomOrder()->first())->id;
+                        return optional($exercisePicker ? $exercisePicker() : Exercise::query()->inRandomOrder()->first())->id;
                     })->filter()->unique()->values();
 
                     // Create DayExercise rows for those exercises

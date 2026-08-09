@@ -16,6 +16,12 @@ export interface FlashMessages {
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+    admin?: {
+        muscleGroups: {
+            id: number;
+            name: string;
+        }[];
+    };
     auth: {
         user: User;
         flags: {

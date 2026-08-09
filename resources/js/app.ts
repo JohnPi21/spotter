@@ -3,7 +3,8 @@ import { createPinia } from "pinia";
 import { createApp, DefineComponent, h } from "vue";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 import "./bootstrap";
-import Layout from "./Layouts/MainLayout.vue";
+import AdminLayout from "./Layouts/AdminLayout.vue";
+import MainLayout from "./Layouts/MainLayout.vue";
 
 const appName = import.meta.env.VITE_APP_NAME || "Spotter";
 
@@ -15,7 +16,7 @@ createInertiaApp({
 
         // Ensure default layout is applied
         if (!page.layout) {
-            page.layout = Layout;
+            page.layout = name.startsWith("Admin/") ? AdminLayout : MainLayout;
         }
 
         return page;
