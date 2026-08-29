@@ -30,4 +30,5 @@ yarn-error.log
 /.agents/
 /AGENTS.md
 /CLAUDE.md
+LEARNING_ROADMAP.md
 /.github/copilot-instructions.md
