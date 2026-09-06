@@ -21,12 +21,14 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Inspect current repo
-              run: echo ls ./
+              run: |
+                  pwd
+                  ls -la
 
             - name: Run the docker image
               run: |
                   docker build -t spotacus:latest .
-                  echo docker images
+                  docker images
 
             # checkout the repo current branch
 
