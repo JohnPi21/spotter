@@ -36,11 +36,11 @@ jobs:
 
             - name: Boot that mf up and stop it after
               run: |
-                  docker run -d --rm spotacus:latest
+                  docker run -d --rm --name=spotacus-test spotacus:latest
                   sleep 5
                   docker ps
-                  docker logs spotacus:latest
-                  docker stop spotacus:latest
+                  docker logs spotacus-test
+                  docker stop spotacus-test
 
             # checkout the repo current branch
 
