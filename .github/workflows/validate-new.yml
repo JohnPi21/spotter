@@ -20,9 +20,12 @@ jobs:
             - name: Pull the current branch
               uses: actions/checkout@v7
 
+            - name: Inspect current repo
+              run: echo ls ./
+
             - name: Run the docker image
               run: |
-                  docker build
+                  docker build -t spotacus:latest .
                   echo docker images
 
             # checkout the repo current branch
