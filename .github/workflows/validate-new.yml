@@ -20,15 +20,20 @@ jobs:
             - name: Pull the current branch
               uses: actions/checkout@v7
 
-            - name: Inspect current repo
-              run: |
-                  pwd
-                  ls -la
+            - name: Build image with cache
+              uses: docker/build-push-action@v7
+              with:
+                  context: .
+                  load: true
+                  tags: spotacus:latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-            - name: Run the docker image
+            - run: docker image ls
+
+            - name: Boot that mf up
               run: |
-                  docker build -t spotacus:latest .
-                  docker images
+                  docker run --rm spotacus:latest
 
             # checkout the repo current branch
 
