@@ -1,0 +1,45 @@
+name: Validation Pipeline
+
+on:
+    pull_request:
+        branches:
+            - main
+            - prod
+    push:
+        branches:
+            - tests/*
+
+permissions:
+    contents: read
+
+jobs:
+    build:
+        runs-on: ubuntu-24.04
+
+        steps:
+            - name: Pull the current branch
+              uses: actions/checkout@v7
+
+            - name: Run the docker image
+              run: |
+                  docker build
+                  echo docker images
+
+            # checkout the repo current branch
+
+            # build the image
+
+            # login to a registry
+
+            # push it to a registry
+
+            # get the tags to identify the build image
+
+    # test:
+    # login to a registry again
+
+    # pull the image
+
+    # run it
+
+    # start testing it
