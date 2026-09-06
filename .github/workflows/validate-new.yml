@@ -36,7 +36,7 @@ jobs:
 
             - name: Boot that mf up and stop it after
               run: |
-                  docker run --rm spotacus:latest
+                  docker run -d --rm spotacus:latest
                   sleep 5
                   docker ps
                   docker logs spotacus:latest
