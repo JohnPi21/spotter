@@ -12,6 +12,9 @@ on:
 permissions:
     contents: read
 
+env:
+    CI_COMPOSE_PATH: ./docker/ci/docker-compose.ci.yml
+
 jobs:
     build:
         runs-on: ubuntu-24.04
@@ -34,17 +37,12 @@ jobs:
 
             - run: docker image ls
 
-            - name: Boot that mf up and stop it after
+            - name: Boot up laravel and test code
               run: |
-                  docker run -d --rm --name=spotacus-test spotacus:latest
-                  sleep 5
-                  docker ps
-                  docker logs spotacus-test
-                  docker stop spotacus-test
-
-            # checkout the repo current branch
-
-            # build the image
+                  docker compose -f ${{env.CI_COMPOSE_PATH}} up -d
+                  docker compose -f ${{env.CI_COMPOSE_PATH}} exec app bash
+                  ls
+                  php artisan migrate
 
             # login to a registry
 
