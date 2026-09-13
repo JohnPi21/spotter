@@ -6,7 +6,7 @@ services:
         #   dockerfile: Dockerfile
         image: spotacus:latest
         # image: ${IMAGE}@${DIGEST}
-        pull_policy: always
+        # pull_policy: always
         env_file:
             - .env.ci # this stays (process env vars)
         working_dir: /var/www/html
