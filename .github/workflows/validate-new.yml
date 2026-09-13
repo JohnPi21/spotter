@@ -42,7 +42,8 @@ jobs:
                   docker compose -f ${{env.CI_COMPOSE_PATH}} up -d
                   docker compose -f ${{env.CI_COMPOSE_PATH}} exec app bash
                   ls
-                  php artisan migrate
+                  composer install
+                  php artisan migrate:fresh --seed
 
             # login to a registry
 
