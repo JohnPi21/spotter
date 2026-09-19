@@ -40,13 +40,13 @@ jobs:
             - name: Boot up laravel and test code
               run: |
                   docker compose -f ${{env.CI_COMPOSE_PATH}} up -d
-                  docker compose -f ${{env.CI_COMPOSE_PATH}} exec app bash
-                  ls
-                  composer install --no-progress --no-interaction --prefer-dist
-                  php artisan migrate:fresh --seed --force
-                  php artisan test
-                  echo "SUCESS"
-                  exit
+                  docker compose -f ${{env.CI_COMPOSE_PATH}} exec -T app bash -lc '
+                    set -e
+                    ls
+                    composer install --no-progress --no-interaction --prefer-dist
+                    php artisan migrate:fresh --seed --force
+                    php artisan test
+                    '
 
             - run: echo test finsihed
 
