@@ -26,6 +26,7 @@ jobs:
 
         outputs:
             identifier_tag: ${{env.REGISTRY_URL}}:${{github.sha}}
+            digest: ${{steps.registryPush.outputs.digest}}
 
         steps:
             - name: Pull the current branch
@@ -41,7 +42,6 @@ jobs:
                   load: true
                   tags: |
                       ${{env.REGISTRY_URL}}:${{github.sha}}
-                      ${{env.REGISTRY_URL}}:spotacus:latest
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
@@ -69,15 +69,25 @@ jobs:
                   password: ${{secrets.GITHUB_TOKEN}}
 
             - name: Push to registry
+              id: registryPush
               run: |
                   docker push ${{env.REGISTRY_URL}}:${{github.sha}}
-                  docker push ${{env.REGISTRY_URL}}:spotacus:latest
+                  docker push ${{env.REGISTRY_URL}}:spotacus-latest
                   docker image ls ghcr.io/johnpi21/spotter
+                  digest=$(docker buildx imagetools inspect \
+                    ${{env.REGISTRY_URL}}:${{github.sha}} \
+                    --format '{{.Manifest.Digest}}')
+                  echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
-            # get the tags to identify the build image
+    test:
+        needs: build
+        runs-on: ubuntu-24.04
+        env:
+            IMAGE_DIGEST: ${{needs.build.outputs.digest}}
 
-    # test:
-    # login to a registry again
+        steps:
+            - name: Show the image digest
+              run: echo ${{env.IMAGE_DIGEST}}
 
     # pull the image
 
