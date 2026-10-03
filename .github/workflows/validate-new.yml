@@ -42,6 +42,7 @@ jobs:
                   load: true
                   tags: |
                       ${{env.REGISTRY_URL}}:${{github.sha}}
+                      ${{env.REGISTRY_URL}}:spotacus-latest
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
