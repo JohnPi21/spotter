@@ -1,10 +1,10 @@
 services:
     app:
         # Testing ci / cd on local
-        # build:
-        #   context: ../../
-        #   dockerfile: Dockerfile
-        image: spotacus:latest
+        build:
+            context: ../../
+            dockerfile: Dockerfile
+        # image: spotacus:latest
         # image: ${IMAGE}@${DIGEST}
         # pull_policy: always
         env_file:
