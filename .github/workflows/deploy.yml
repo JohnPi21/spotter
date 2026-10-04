@@ -1,192 +1,111 @@
-name: CI/CD Pipeline
+name: Release
 
 on:
     push:
-        tags:
-            - v*
-
-concurrency:
-    group: prod
-    cancel-in-progress: true
+        tags: ["v*"]
 
 permissions:
     contents: read
-    packages: write
 
-env:
-    REGISTRY: ghcr.io
-    TAG: ${{ github.sha }}
+concurrency:
+    group: production-release
+    cancel-in-progress: false
 
 jobs:
-    is-prod:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Run this workflow only for tags pushed to prod
-              if: ${{ ! github.head_ref == 'prod' }}
-              run: |
-                  echo "Deployment can only be triggered by v-tags on branch prod. This was pushed on ${{github.head_ref}}"
-                  exit 1
-
-    build:
-        runs-on: ubuntu-latest
-
+    verify:
+        runs-on: ubuntu-24.04
         outputs:
-            tag: ${{ steps.meta.outputs.tag }}
-            image: ${{ steps.normalize.outputs.image }}
-            digest: ${{ steps.build.outputs.digest }}
-
+            commit: ${{ steps.commit.outputs.sha }}
         steps:
             - uses: actions/checkout@v4
-
-            - uses: docker/login-action@v3
               with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-
-            - uses: docker/setup-buildx-action@v3
-
-            # centralize metadata/tags
-            - id: meta
-              run: echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-
-            # normalize image name to lowercase and expose as output + env
-            - id: normalize
-              shell: bash
+                  fetch-depth: 0
+                  persist-credentials: false
+            - name: Verify release commit belongs to main
+              id: commit
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
               run: |
-                  IMAGE_LC="${REGISTRY}/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
-                  echo "image=${IMAGE_LC}" >> "$GITHUB_OUTPUT"
-                  echo "IMAGE=${IMAGE_LC}" >> "$GITHUB_ENV"
+                  COMMIT=$(bash scripts/verify-release.sh)
+                  echo "sha=$COMMIT" >> "$GITHUB_OUTPUT"
 
-            # Build the CI image and PUSH it so test can pull it
-            - id: build
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  file: ./Dockerfile
-                  push: true
-                  tags: ${{ steps.normalize.outputs.image }}:${{ steps.meta.outputs.tag }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
-
-    test:
-        runs-on: ubuntu-latest
-        needs: build
-
-        env:
-            IMAGE: ${{ needs.build.outputs.image }}
-            TAG: ${{ needs.build.outputs.tag }}
-            DIGEST: ${{ needs.build.outputs.digest }}
-        steps:
-            - uses: actions/checkout@v4
-
-            # login so compose can pull from GHCR
-            - uses: docker/login-action@v3
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Pull by digest to verify
-              run: docker pull "${IMAGE}@${DIGEST}"
-
-            - name: Pull images (CI)
-              run: docker compose -f docker/ci/docker-compose.ci.yml pull
-
-            - name: Start MySQL (Wait until ready)
-              run: docker compose -f docker/ci/docker-compose.ci.yml up -d --wait mysql
-
-            - name: Install dev dependencies (CI)
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
-                  composer install --no-interaction --prefer-dist --no-progress
-
-            - name: Migrate fresh + seed
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
-                    php artisan migrate:fresh --seed --force
-
-            - name: Run tests
-              run: |
-                  docker compose -f docker/ci/docker-compose.ci.yml run --rm app \
-                    vendor/bin/phpunit --configuration phpunit.xml
-
-            - name: MySQL logs (on failure)
-              if: failure()
-              run: docker compose -f docker/ci/docker-compose.ci.yml logs --no-color mysql
-
-            - name: Echo exit code
-              if: always()
-              run: |
-                  echo "Previous step exit code: $?"
-
-            - name: Tear down
-              if: always()
-              run: docker compose -f docker/ci/docker-compose.ci.yml down -v
+    validate:
+        needs: verify
+        permissions:
+            contents: read
+            packages: write
+        uses: ./.github/workflows/validate.yml
+        with:
+            publish-image: true
 
     promote:
-        runs-on: ubuntu-latest
-        needs: [build, test]
-
+        runs-on: ubuntu-24.04
+        needs: [verify, validate]
+        permissions:
+            contents: read
+            packages: write
         steps:
+            - uses: docker/setup-buildx-action@v3
             - uses: docker/login-action@v3
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Promote tested image
+            - name: Attach release tag to tested digest
+              env:
+                  IMAGE: ${{ needs.validate.outputs.image }}
+                  DIGEST: ${{ needs.validate.outputs.digest }}
+                  RELEASE_TAG: ${{ github.ref_name }}
               run: |
-                  IMAGE="${{ needs.build.outputs.image }}"
-                  DIGEST="${{ needs.build.outputs.digest }}"
-                  SHA_TAG="${{ needs.build.outputs.tag }}"
-
-                  docker buildx imagetools create \
-                    -t "$IMAGE:$SHA_TAG" \
-                    -t "$IMAGE:prod-latest" \
-                    "$IMAGE@$DIGEST"
+                  [[ "$RELEASE_TAG" =~ ^v[A-Za-z0-9_.-]+$ ]]
+                  docker buildx imagetools create --prefer-index=false \
+                      --tag "$IMAGE:$RELEASE_TAG" "$IMAGE@$DIGEST"
 
     deploy:
-        runs-on: ubuntu-latest
-        needs: promote
-
-        environment:
-            name: production
-            url: https://spotacus.app
+        runs-on: ubuntu-24.04
+        needs: [verify, validate, promote]
+        timeout-minutes: 15
+        environment: production
         steps:
             - uses: actions/checkout@v4
-
-            - name: Prepare known_hosts (EC2)
-              run: |
-                  mkdir -p ~/.ssh && chmod 700 ~/.ssh
-                  echo "${{ secrets.EC2_HOST_KEY }}" >> ~/.ssh/known_hosts
-                  chmod 644 ~/.ssh/known_hosts
-
-            - name: Deploy via SSH
-              uses: appleboy/ssh-action@v1.0.3
               with:
-                  host: ${{ secrets.EC2_HOST }}
-                  username: ${{ secrets.EC2_USER }}
-                  key: ${{ secrets.EC2_SSH_KEY }}
-                  script: |
-                      set -euo pipefail
-                      cd /var/www/spotacus
-
-                      echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin || true
-
-                      git fetch origin
-                      git reset --hard origin/prod
-
-                      docker compose --env-file docker/.env.prod -p spotacus -f docker/compose.prod.yml pull
-                      docker compose --env-file docker/.env.prod -p spotacus -f docker/compose.prod.yml up -d --remove-orphans
-
-                      chmod +x deploy/post_deploy.sh
-                      ./deploy/post_deploy.sh
-
-            - name: Mark deployment as inactive
+                  ref: ${{ needs.verify.outputs.commit }}
+                  persist-credentials: false
+            - name: Deploy tested digest and matching source revision
+              env:
+                  EC2_HOST: ${{ secrets.EC2_HOST }}
+                  EC2_USER: ${{ secrets.EC2_USER }}
+                  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+                  EC2_HOST_KEY: ${{ secrets.EC2_HOST_KEY }}
+                  GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+                  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+                  APP_IMAGE_REF: ${{ needs.validate.outputs.image }}@${{ needs.validate.outputs.digest }}
+                  RELEASE_COMMIT: ${{ needs.verify.outputs.commit }}
+                  RELEASE_TAG: ${{ github.ref_name }}
               run: |
-                  curl -X POST \
-                    -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Accept: application/vnd.github+json" \
-                    https://api.github.com/repos/${{ github.repository }}/deployments/${{ github.run_id }}/statuses \
-                    -d '{"state":"inactive"}'
+                  set -euo pipefail
+                  install -d -m 700 ~/.ssh
+                  printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+                  printf '%s\n' "$EC2_HOST_KEY" > ~/.ssh/known_hosts
+                  chmod 600 ~/.ssh/known_hosts
+                  trap 'rm -f ~/.ssh/deploy_key' EXIT
+                  [[ "$GHCR_USERNAME" =~ ^[A-Za-z0-9_-]+$ ]]
+                  [[ "$RELEASE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
+                  [[ "$RELEASE_TAG" =~ ^v[A-Za-z0-9_.-]+$ ]]
+                  [[ "$APP_IMAGE_REF" =~ ^ghcr.io/[a-z0-9_./-]+@sha256:[a-f0-9]{64}$ ]]
+                  SSH=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "$EC2_USER@$EC2_HOST")
+                  printf '%s\n' "$GHCR_TOKEN" | "${SSH[@]}" "docker login ghcr.io --username '$GHCR_USERNAME' --password-stdin"
+                  "${SSH[@]}" "bash -s -- '$RELEASE_COMMIT' '$APP_IMAGE_REF' '$RELEASE_TAG'" <<'REMOTE'
+                  set -euo pipefail
+                  cd /var/www/spotacus
+                  exec 9>.git/deploy.lock
+                  flock -n 9
+                  git diff --quiet
+                  git diff --cached --quiet
+                  git fetch origin "$1"
+                  git checkout --detach "$1"
+                  export RELEASE_COMMIT="$1" APP_IMAGE_REF="$2" RELEASE_TAG="$3"
+                  bash deploy/post_deploy.sh
+                  REMOTE
+                  printf 'Released `%s`\n\nCommit: `%s`\n\nImage: `%s`\n' "$RELEASE_TAG" "$RELEASE_COMMIT" "$APP_IMAGE_REF" >> "$GITHUB_STEP_SUMMARY"
