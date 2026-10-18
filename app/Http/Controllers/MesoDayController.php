@@ -17,7 +17,7 @@ class MesoDayController extends Controller
     public function show(int $mesocycle, MesoDay $day, MakeMesocycleCalendar $makeCalendarAction): \Inertia\Response
     {
 
-        $day->load(['dayExercises' => fn ($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
+        $day->load(['dayExercises' => fn($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
 
         Gate::authorize('view', $day);
 

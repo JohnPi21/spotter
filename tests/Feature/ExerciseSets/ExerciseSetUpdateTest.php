@@ -11,6 +11,68 @@ class ExerciseSetUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_json_update_returns_only_the_saved_set(): void
+    {
+        $user = User::factory()->create();
+        $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
+        $dayExercise = $mesocycle->days()->first()->dayExercises()->first();
+        $set = $dayExercise->sets()->first();
+
+        $this->actingAs($user)
+            ->patchJson(route('sets.update', [$dayExercise, $set]), [
+                'reps' => 3,
+                'weight' => '25',
+                'status' => true,
+            ])
+            ->assertOk()
+            ->assertJsonPath('set.id', $set->id)
+            ->assertJsonPath('set.reps', 3)
+            ->assertJsonPath('set.weight', '25.00')
+            ->assertJsonMissingPath('set.day_exercise')
+            ->assertJsonMissingPath('mesocycle');
+
+        $this->assertNotNull($set->fresh()->finished_at);
+    }
+
+    public function test_json_update_returns_validation_errors_without_changing_the_set(): void
+    {
+        $user = User::factory()->create();
+        $mesocycle = Mesocycle::factory()->for($user)->withFullStructure()->create();
+        $dayExercise = $mesocycle->days()->first()->dayExercises()->first();
+        $set = $dayExercise->sets()->first();
+        $original = $set->getAttributes();
+
+        $this->actingAs($user)
+            ->patchJson(route('sets.update', [$dayExercise, $set]), [
+                'reps' => 999,
+                'weight' => 'invalid',
+                'status' => true,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['reps', 'weight']);
+
+        $this->assertSame($original, $set->fresh()->getAttributes());
+    }
+
+    public function test_json_update_cannot_modify_another_users_set(): void
+    {
+        [$owner, $other] = User::factory()->count(2)->create();
+        $mesocycle = Mesocycle::factory()->for($owner)->withFullStructure()->create();
+        $dayExercise = $mesocycle->days()->first()->dayExercises()->first();
+        $set = $dayExercise->sets()->first();
+        $original = $set->getAttributes();
+
+        $this->actingAs($other)
+            ->patchJson(route('sets.update', [$dayExercise, $set]), [
+                'reps' => 3,
+                'weight' => '25',
+                'status' => true,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame($original, $set->fresh()->getAttributes());
+    }
+
     public function test_user_can_update_own_set_and_mark_finished()
     {
         /** @var \Illuminate\Contracts\Auth\Authenticatable $user */

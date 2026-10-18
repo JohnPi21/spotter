@@ -43,7 +43,7 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
                     return null;
                 }
 
-                return $dayExercise->sets->map(fn ($set) => [
+                return $dayExercise->sets->map(fn($set) => [
                     'day_exercise_id' => $nextDayExercises->get($dayExercise->exercise_id)->id,
                     // 'target_weight' => $set->weight,
                     // 'target_reps' => $set->reps,

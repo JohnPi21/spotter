@@ -6,6 +6,7 @@ use App\Data\Set\UpdateSetData;
 use App\Http\Requests\UpdateSetRequest;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
@@ -22,11 +23,15 @@ class ExerciseSetController extends Controller
         return back();
     }
 
-    public function update(UpdateSetRequest $request, DayExercise $dayExercise, ExerciseSet $set): RedirectResponse
+    public function update(UpdateSetRequest $request, DayExercise $dayExercise, ExerciseSet $set): JsonResponse|RedirectResponse
     {
         $updateSetDTO = UpdateSetData::from($request->validated());
 
         $set->update($updateSetDTO->toArray());
+
+        if ($request->expectsJson()) {
+            return response()->json(['set' => $set->refresh()->withoutRelations()]);
+        }
 
         return to_route('days.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day])->with('success', 'Set has been updated!');
     }
