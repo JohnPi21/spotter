@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController as Dashboard;
 use App\Http\Controllers\DayExerciseController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ExerciseSetController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MesocycleController;
 use App\Http\Controllers\MesoDayController;
 use App\Http\Controllers\ProfileController;
@@ -77,9 +78,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', fn () => Inertia::render('Landing'))->name('landing');
 
-Route::get('/health', function () {
-    return response()->json(['status' => 'ok', 'time' => now()], 200);
-});
+Route::get('/health', HealthController::class)->name('health');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

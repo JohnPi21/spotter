@@ -23,6 +23,7 @@ pnpm-debug.log*
 dist
 build
 /public/hot
+/public/build
 /public/storage
 /public/vendor
 
@@ -36,7 +37,8 @@ vendor
 !/storage/logs
 bootstrap/cache/*
 .env
-.env.*     # any environment-specific envs
+# Environment-specific files must stay outside the image.
+.env.*
 .phpunit.result.cache
 
 # -----------------------------------------

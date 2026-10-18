@@ -1,4 +1,4 @@
-x-app-image: &app_image ${APP_IMAGE}:${APP_TAG}
+x-app-image: &app_image ${APP_IMAGE_REF:?Set APP_IMAGE_REF to the tested registry digest}
 x-app-env: &app_env ["../.env"]
 name: spotacus
 
@@ -34,6 +34,8 @@ services:
         image: *app_image
         restart: unless-stopped
         env_file: *app_env
+        volumes:
+            - ../storage:/var/www/html/storage
         depends_on:
             mysql:
                 condition: service_healthy
@@ -58,6 +60,8 @@ services:
         image: *app_image
         restart: unless-stopped
         env_file: *app_env
+        volumes:
+            - ../storage:/var/www/html/storage
         depends_on:
             mysql:
                 condition: service_healthy
