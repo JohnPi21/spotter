@@ -3,6 +3,9 @@ services:
         image: ${APP_IMAGE_REF:?Set the built image reference}
         env_file: .env.ci
         working_dir: /var/www/html
+        depends_on:
+            mysql:
+                condition: service_healthy
         volumes:
             - vendor-ci:/var/www/html/vendor
             - ./.env.ci:/var/www/html/.env:ro

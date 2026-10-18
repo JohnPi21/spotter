@@ -82,30 +82,4 @@ jobs:
                   APP_IMAGE_REF: ${{ needs.validate.outputs.image }}@${{ needs.validate.outputs.digest }}
                   RELEASE_COMMIT: ${{ needs.verify.outputs.commit }}
                   RELEASE_TAG: ${{ github.ref_name }}
-              run: |
-                  set -euo pipefail
-                  install -d -m 700 ~/.ssh
-                  printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key
-                  chmod 600 ~/.ssh/deploy_key
-                  printf '%s\n' "$EC2_HOST_KEY" > ~/.ssh/known_hosts
-                  chmod 600 ~/.ssh/known_hosts
-                  trap 'rm -f ~/.ssh/deploy_key' EXIT
-                  [[ "$GHCR_USERNAME" =~ ^[A-Za-z0-9_-]+$ ]]
-                  [[ "$RELEASE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
-                  [[ "$RELEASE_TAG" =~ ^v[A-Za-z0-9_.-]+$ ]]
-                  [[ "$APP_IMAGE_REF" =~ ^ghcr.io/[a-z0-9_./-]+@sha256:[a-f0-9]{64}$ ]]
-                  SSH=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "$EC2_USER@$EC2_HOST")
-                  printf '%s\n' "$GHCR_TOKEN" | "${SSH[@]}" "docker login ghcr.io --username '$GHCR_USERNAME' --password-stdin"
-                  "${SSH[@]}" "bash -s -- '$RELEASE_COMMIT' '$APP_IMAGE_REF' '$RELEASE_TAG'" <<'REMOTE'
-                  set -euo pipefail
-                  cd /var/www/spotacus
-                  exec 9>.git/deploy.lock
-                  flock -n 9
-                  git diff --quiet
-                  git diff --cached --quiet
-                  git fetch origin "$1"
-                  git checkout --detach "$1"
-                  export RELEASE_COMMIT="$1" APP_IMAGE_REF="$2" RELEASE_TAG="$3"
-                  bash deploy/post_deploy.sh
-                  REMOTE
-                  printf 'Released `%s`\n\nCommit: `%s`\n\nImage: `%s`\n' "$RELEASE_TAG" "$RELEASE_COMMIT" "$APP_IMAGE_REF" >> "$GITHUB_STEP_SUMMARY"
+              run: bash scripts/deploy.sh

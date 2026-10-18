@@ -62,6 +62,7 @@ jobs:
                   DIGEST: ${{ steps.build.outputs.digest }}
                   LOCAL_IMAGE: ${{ steps.image.outputs.tag }}
               run: |
+                  # Here instead of reusing the same local image, we check if pulling works fine
                   if [ "$PUBLISH_IMAGE" = true ]; then
                       [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
                       APP_IMAGE_REF="$IMAGE@$DIGEST"

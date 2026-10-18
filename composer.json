@@ -49,6 +49,12 @@
         }
     },
     "scripts": {
+        "check": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php vendor/bin/pint --test",
+            "@php vendor/bin/phpstan analyse --memory-limit=2G --no-progress",
+            "@php artisan test --without-tty"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

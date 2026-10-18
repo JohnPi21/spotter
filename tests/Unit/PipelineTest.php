@@ -57,41 +57,48 @@ BASH;
     /**
      * @return array<string, array{string}>
      */
-    public static function serviceFreeFailures(): array
+    public static function validationFailures(): array
     {
         return [
+            'dependency installation' => ['app composer install'],
+            'stack startup' => ['180 runtime nginx'],
             'frontend lint' => ['eslint'],
-            'PHP style' => ['vendor/bin/pint'],
-            'static analysis' => ['vendor/bin/phpstan'],
-            'unit tests' => ['--testsuite=Unit'],
+            'frontend types' => ['vue-tsc'],
+            'database preparation' => ['artisan migrate:fresh'],
+            'PHP checks' => ['app composer check'],
         ];
     }
 
-    #[DataProvider('serviceFreeFailures')]
-    public function test_service_free_failure_prevents_database_start_and_cleans_up(string $failure): void
+    #[DataProvider('validationFailures')]
+    public function test_validation_failure_prevents_smoke_checks_and_cleans_up(string $failure): void
     {
         $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh', ['FAIL_MATCH' => $failure]);
         $this->assertSame(17, $process->getExitCode(), $process->getErrorOutput());
-        $this->assertStringNotContainsString('up -d --wait', $this->commands());
+        $this->assertStringNotContainsString('curl ', $this->commands());
+        $this->assertStringContainsString('logs --no-color --tail=100', $this->commands());
         $this->assertStringContainsString('down --volumes --remove-orphans', $this->commands());
     }
 
-    public function test_database_failure_prevents_smoke_tests_and_cleans_up(): void
+    public function test_database_preparation_failure_prevents_php_checks(): void
     {
-        $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh', ['FAIL_MATCH' => '--testsuite=Feature']);
+        $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh', ['FAIL_MATCH' => 'artisan migrate:fresh']);
         $this->assertSame(17, $process->getExitCode());
-        $this->assertStringNotContainsString('180 runtime nginx', $this->commands());
+        $this->assertStringNotContainsString('app composer check', $this->commands());
         $this->assertStringContainsString('down --volumes --remove-orphans', $this->commands());
     }
 
-    public function test_successful_validation_starts_database_after_unit_tests_and_checks_runtime(): void
+    public function test_successful_validation_prepares_database_runs_shared_php_checks_and_checks_runtime(): void
     {
         $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh');
         $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
         $commands = $this->commands();
-        $this->assertLessThan(strpos($commands, '180 mysql'), strpos($commands, '--testsuite=Unit'));
-        $this->assertStringContainsString('run --rm --no-deps app composer install', $commands);
+        $this->assertLessThan(strpos($commands, 'app composer check'), strpos($commands, 'artisan migrate:fresh'));
+        $this->assertLessThan(strpos($commands, 'artisan migrate:fresh'), strpos($commands, '180 runtime nginx'));
+        $this->assertStringContainsString('run --rm app composer install', $commands);
+        $this->assertStringNotContainsString('--no-deps', $commands);
+        $this->assertSame(1, substr_count($commands, 'app composer check'));
         $this->assertStringContainsString('180 runtime nginx', $commands);
+        $this->assertStringContainsString('http://127.0.0.1:8080/health', $commands);
         $this->assertStringContainsString('/login', $commands);
         $this->assertStringContainsString('public/build/manifest.json', $commands);
         $this->assertStringContainsString('down --volumes --remove-orphans', $commands);
@@ -230,6 +237,75 @@ BASH;
         $process->run();
 
         return $process;
+    }
+
+    public function test_deployment_passes_credentials_through_stdin_and_sends_remote_script(): void
+    {
+        $process = $this->runDeployment();
+
+        $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+        $commands = $this->commands();
+        $this->assertStringContainsString('StrictHostKeyChecking=yes', $commands);
+        $this->assertStringContainsString('UserKnownHostsFile=', $commands);
+        $this->assertStringContainsString('docker login ghcr.io', $commands);
+        $this->assertStringNotContainsString('test-registry-token', $commands);
+        $this->assertSame("test-registry-token\n", file_get_contents($this->directory.'/login-input'));
+        $remoteScript = file_get_contents($this->directory.'/remote-script');
+        $this->assertStringContainsString('flock -n 9', $remoteScript);
+        $this->assertStringContainsString('git checkout --detach "$1"', $remoteScript);
+        $this->assertStringContainsString('bash deploy/post_deploy.sh', $remoteScript);
+        $this->assertStringContainsString($this->imageReference(), file_get_contents($this->directory.'/summary'));
+        $this->assertSame([], glob($this->directory.'/spotacus-ssh.*'));
+    }
+
+    public function test_deployment_login_failure_cleans_credentials_and_prevents_remote_deployment(): void
+    {
+        $process = $this->runDeployment(['FAIL_MATCH' => 'docker login']);
+
+        $this->assertSame(17, $process->getExitCode());
+        $this->assertFileDoesNotExist($this->directory.'/remote-script');
+        $this->assertFileDoesNotExist($this->directory.'/summary');
+        $this->assertSame([], glob($this->directory.'/spotacus-ssh.*'));
+    }
+
+    public function test_deployment_rejects_invalid_release_values_before_connecting(): void
+    {
+        $process = $this->runDeployment(['RELEASE_TAG' => 'main']);
+
+        $this->assertFalse($process->isSuccessful());
+        $this->assertFileDoesNotExist($this->directory.'/commands.log');
+        $this->assertSame([], glob($this->directory.'/spotacus-ssh.*'));
+    }
+
+    /**
+     * @param  array<string, string>  $environment
+     */
+    private function runDeployment(array $environment = []): Process
+    {
+        $stub = <<<'BASH'
+#!/usr/bin/env bash
+set -eu
+printf '%s\n' "$*" >> "$COMMAND_LOG"
+if [[ -n "${FAIL_MATCH:-}" && "$*" == *"$FAIL_MATCH"* ]]; then exit 17; fi
+if [[ "$*" == *'docker login'* ]]; then
+    cat > "$RUNNER_TEMP/login-input"
+else
+    cat > "$RUNNER_TEMP/remote-script"
+fi
+BASH;
+        file_put_contents($this->directory.'/bin/ssh', $stub);
+        chmod($this->directory.'/bin/ssh', 0700);
+
+        return $this->runScript(dirname(__DIR__, 2).'/scripts/deploy.sh', array_merge([
+            'RUNNER_TEMP' => $this->directory,
+            'GITHUB_STEP_SUMMARY' => $this->directory.'/summary',
+            'EC2_HOST' => 'example.test',
+            'EC2_USER' => 'deployer',
+            'EC2_SSH_KEY' => 'test-private-key',
+            'EC2_HOST_KEY' => 'example.test ssh-ed25519 test-host-key',
+            'GHCR_USERNAME' => 'test-user',
+            'GHCR_TOKEN' => 'test-registry-token',
+        ], $environment));
     }
 
     private function imageReference(): string

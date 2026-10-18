@@ -25,25 +25,21 @@ trap 'exit 143' TERM
 
 echo "Installing test tooling after the image build"
 npm ci --no-audit --no-fund
-"${DC[@]}" run --rm --no-deps app composer install --no-interaction --prefer-dist --no-progress
+"${DC[@]}" run --rm app composer install --no-interaction --prefer-dist --no-progress
 
-echo "Checking code quality without database services"
+echo "Starting the validation stack"
+"${DC[@]}" up -d --wait --wait-timeout 180 runtime nginx
+
+echo "Checking frontend code quality"
 npx --no-install eslint resources/js --max-warnings=0
 npx --no-install vue-tsc --noEmit
-"${DC[@]}" run --rm --no-deps app vendor/bin/pint --test
-"${DC[@]}" run --rm --no-deps app vendor/bin/phpstan analyse --memory-limit=2G --no-progress
 
-echo "Running unit tests without database services"
-"${DC[@]}" run --rm --no-deps app vendor/bin/phpunit --configuration phpunit.xml --testsuite=Unit
-
-echo "Starting the isolated test database after quality and unit checks pass"
-"${DC[@]}" up -d --wait --wait-timeout 180 mysql
-"${DC[@]}" run --rm --no-deps app php artisan migrate:fresh --force --no-interaction
-"${DC[@]}" run --rm --no-deps app vendor/bin/pest --configuration phpunit.xml --testsuite=Feature
+echo "Preparing the isolated test database and checking PHP"
+"${DC[@]}" run --rm app php artisan migrate:fresh --force --no-interaction
+"${DC[@]}" run --rm app composer check
 
 echo "Checking the image with its original production dependencies"
-"${DC[@]}" up -d --wait --wait-timeout 180 runtime nginx
 SMOKE_URL="http://127.0.0.1:${CI_HTTP_PORT:-8080}"
-curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --max-time 15 "$SMOKE_URL/up" > /dev/null
+curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --max-time 15 "$SMOKE_URL/health" > /dev/null
 curl --fail --silent --show-error "$SMOKE_URL/login" > /dev/null
 "${DC[@]}" exec -T runtime sh -c 'test -s public/build/manifest.json'
