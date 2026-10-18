@@ -30,6 +30,13 @@ npm ci --no-audit --no-fund
 echo "Starting the validation stack"
 "${DC[@]}" up -d --wait --wait-timeout 180 runtime nginx
 
+echo "Copying Ziggy from the built image for runner-side TypeScript checks"
+# TypeScript runs on the runner, but its Ziggy imports point into Composer's vendor directory inside Docker.
+# Copy Ziggy to bridge those filesystems. Long term, run frontend checks in a tooling container with
+# Node and Composer dependencies together, so checks do not depend on copying vendor files to the runner.
+mkdir -p "$REPO_ROOT/vendor/tightenco/ziggy"
+"${DC[@]}" cp runtime:/var/www/html/vendor/tightenco/ziggy/. "$REPO_ROOT/vendor/tightenco/ziggy/"
+
 echo "Checking frontend code quality"
 npx --no-install eslint resources/js --max-warnings=0
 npx --no-install vue-tsc --noEmit

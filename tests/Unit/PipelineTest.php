@@ -62,6 +62,7 @@ BASH;
         return [
             'dependency installation' => ['app composer install'],
             'stack startup' => ['180 runtime nginx'],
+            'Ziggy copy' => ['cp runtime:/var/www/html/vendor/tightenco/ziggy/.'],
             'frontend lint' => ['eslint'],
             'frontend types' => ['vue-tsc'],
             'database preparation' => ['artisan migrate:fresh'],
@@ -87,6 +88,17 @@ BASH;
         $this->assertStringContainsString('down --volumes --remove-orphans', $this->commands());
     }
 
+    public function test_ziggy_copy_failure_prevents_frontend_checks(): void
+    {
+        $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh', [
+            'FAIL_MATCH' => 'cp runtime:/var/www/html/vendor/tightenco/ziggy/.',
+        ]);
+
+        $this->assertSame(17, $process->getExitCode());
+        $this->assertStringNotContainsString('eslint', $this->commands());
+        $this->assertStringNotContainsString('vue-tsc', $this->commands());
+    }
+
     public function test_successful_validation_prepares_database_runs_shared_php_checks_and_checks_runtime(): void
     {
         $process = $this->runScript(dirname(__DIR__, 2).'/scripts/ci.sh');
@@ -98,6 +110,10 @@ BASH;
         $this->assertStringNotContainsString('--no-deps', $commands);
         $this->assertSame(1, substr_count($commands, 'app composer check'));
         $this->assertStringContainsString('180 runtime nginx', $commands);
+        $copyCommand = 'cp runtime:/var/www/html/vendor/tightenco/ziggy/.';
+        $this->assertStringContainsString($copyCommand, $commands);
+        $this->assertLessThan(strpos($commands, $copyCommand), strpos($commands, '180 runtime nginx'));
+        $this->assertLessThan(strpos($commands, 'vue-tsc'), strpos($commands, $copyCommand));
         $this->assertStringContainsString('http://127.0.0.1:8080/health', $commands);
         $this->assertStringContainsString('/login', $commands);
         $this->assertStringContainsString('public/build/manifest.json', $commands);
