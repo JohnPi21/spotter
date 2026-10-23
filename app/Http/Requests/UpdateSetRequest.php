@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\ExerciseSet;
-use Gate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class UpdateSetRequest extends FormRequest
 {

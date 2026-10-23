@@ -29,11 +29,7 @@ class ExerciseSetController extends Controller
 
         $set->update($updateSetDTO->toArray());
 
-        if ($request->expectsJson()) {
-            return response()->json(['set' => $set->refresh()->withoutRelations()]);
-        }
-
-        return to_route('days.show', [$set->dayExercise->day->mesocycle, $set->dayExercise->day])->with('success', 'Set has been updated!');
+        return response()->json(['set' => $set->refresh()->withoutRelations()]);
     }
 
     public function destroy(DayExercise $dayExercise, ExerciseSet $set)

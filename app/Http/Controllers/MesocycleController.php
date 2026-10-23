@@ -30,7 +30,34 @@ class MesocycleController extends Controller implements HasMiddleware
 
     public function index(): \Inertia\Response
     {
-        $mesocycles = Mesocycle::query()->mine()->with(['days:id,finished_at,mesocycle_id'])->get();
+        $mesocycles = Mesocycle::query()->mine()->withWorkoutStructure()->orderByDesc('status')->orderByDesc('updated_at')->get();
+
+        // dd($mesocycles);
+        // $setsByMuscleGroup = [];
+        // foreach ($mesocycles as $mesocycle) {
+        //     $daysPerWeek = $mesocycle->days_per_week;
+        //     $weeksDuration = $mesocycle->weeks_duration;
+
+        //     ### SETS PER MUSCLE GROUP IS PER MONTH, I NEED PER WEEK.
+
+        //     foreach ($mesocycle->days as $day) {
+        //         foreach ($day->dayExercises as $dayExercise) {
+        //             $muscleGroup = $dayExercise->exercise->muscleGroup->name;
+
+        //             if (! isset($setsByMuscleGroup[$muscleGroup])) {
+        //                 $setsByMuscleGroup[$muscleGroup] = 0;
+        //             }
+
+        //             $setsByMuscleGroup[$muscleGroup] += $dayExercise->sets->count() ?? 0;
+        //         }
+        //     }
+        // }
+
+        // dd($setsByMuscleGroup);
+
+        $mesocycles->each(function (Mesocycle $meso) {
+            $meso->setAttribute('last_edited', $meso->updated_at->diffForHumans());
+        });
 
         return Inertia::render('mesocycles/index', [
             'title' => 'Mesocycles',

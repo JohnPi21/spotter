@@ -67,6 +67,15 @@ class Mesocycle extends Model
     }
 
     #[Scope]
+    protected function withWorkoutStructure(Builder $query): void
+    {
+        $query->with([
+            'days.dayExercises.exercise.muscleGroup',
+            'days.dayExercises.sets',
+        ]);
+    }
+
+    #[Scope]
     protected function mine(Builder $query): void
     {
         $this->ownedBy($query, Auth::id());

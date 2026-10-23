@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Mesocycle\MakeMesocycleCalendar;
-use App\Events\DayFinished;
+use App\Events\DayToggled;
 use App\Exceptions\AppException;
 use App\Models\MesoDay;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +17,7 @@ class MesoDayController extends Controller
     public function show(int $mesocycle, MesoDay $day, MakeMesocycleCalendar $makeCalendarAction): \Inertia\Response
     {
 
-        $day->load(['dayExercises' => fn($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
+        $day->load(['dayExercises' => fn ($q) => $q->orderBy('position'), 'dayExercises.exercise.muscleGroup', 'dayExercises.sets', 'mesocycle']);
 
         Gate::authorize('view', $day);
 
@@ -30,6 +30,7 @@ class MesoDayController extends Controller
         $day->makeHidden('mesocycle');
 
         $mesocycle->setRelation('day', $day);
+        // dd($mesocycle->day->dayExercises->flatMap->sets);
 
         return Inertia::render('mesocycles/show', ['mesocycle' => $mesocycle]);
     }
@@ -39,15 +40,16 @@ class MesoDayController extends Controller
         Gate::authorize('owns', $day);
 
         DB::transaction(function () use ($day) {
-            DB::table('meso_days')->lockForUpdate()->find($day->getKey());
+            $day->mesocycle()->lockForUpdate()->firstOrFail();
+            $day->refresh();
 
-            if (! $day->canFinish()) {
+            if (! $day->isFinished() && ! $day->canFinish()) {
                 throw new AppException(422, __('All sets must be completed'), 'SETS_UNFINISHED');
             }
 
             $day->update(['finished_at' => $day->finished_at ? null : now()]);
 
-            DayFinished::dispatchIf((bool) $day->finished_at, $day->id);
+            DayToggled::dispatch($day->id);
         });
 
         return redirect()->back()->with('day', $day->finished_at);

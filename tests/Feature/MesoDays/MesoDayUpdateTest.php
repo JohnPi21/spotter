@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\MesoDays;
 
-use App\Events\DayFinished;
+use App\Events\DayToggled;
 use App\Listeners\UpdateProgressTargets;
 use App\Models\DayExercise;
 use App\Models\ExerciseSet;
@@ -108,7 +108,7 @@ class MesoDayUpdateTest extends TestCase
             ->assertSessionHasNoErrors();
 
         // Run listener manually (after-commit queue)
-        (new UpdateProgressTargets)->handle(new DayFinished($day->id));
+        (new UpdateProgressTargets)->handle(new DayToggled($day->id));
 
         $after = ExerciseSet::where('day_exercise_id', $nextDayExercise->id)->count();
 
