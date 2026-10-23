@@ -2,12 +2,17 @@
 
 namespace App\Events;
 
-use App\Models\MesoDay;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DayFinished
+/**
+ * Subscribed listeners:
+ *
+ * @see \App\Listeners\ToggleMesocycle Updates mesocycle completion synchronously.
+ * @see \App\Listeners\UpdateProgressTargets Queues progression updates for finished days after commit.
+ */
+class DayToggled
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

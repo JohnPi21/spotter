@@ -188,8 +188,7 @@ class MesocycleStructureHelper
 
             $definedSets = $mesoDTO->days[$map['dayOrder']]->exercises[$map['position']]->sets;
 
-            // Sets may have null values, we filter them here and check again
-            $definedSets = collect($definedSets)->filter(fn (SetTemplateData $item) => collect($item)->contains(fn ($value) => $value != null));
+            $definedSets = collect($definedSets);
 
             if ($definedSets->isEmpty()) {
                 $sets[] = [

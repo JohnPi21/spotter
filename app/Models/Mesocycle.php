@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 /**
+ * @property array|null $schema
+ * @property array|null $planned_stats
  * @property-read int|null $last_day
  */
 class Mesocycle extends Model
@@ -28,6 +30,14 @@ class Mesocycle extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'schema' => 'array',
+            'planned_stats' => 'array',
+        ];
+    }
+
     protected $appends = ['last_day'];
 
     /**
@@ -43,6 +53,9 @@ class Mesocycle extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<MesoTemplate, $this>
+     */
     public function mesoTemplate(): BelongsTo
     {
         return $this->belongsTo(MesoTemplate::class);
@@ -64,6 +77,15 @@ class Mesocycle extends Model
                 ->value('id')
                 ?? $this->days()->latest('id')->value('id');
         });
+    }
+
+    #[Scope]
+    protected function withWorkoutStructure(Builder $query): void
+    {
+        $query->with([
+            'days.dayExercises.exercise.muscleGroup',
+            'days.dayExercises.sets',
+        ]);
     }
 
     #[Scope]

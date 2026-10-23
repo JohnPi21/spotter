@@ -89,7 +89,7 @@
         </UiBox>
 
         <!-- ===== Errors ===== -->
-        <UiErrors :errors="errors" />
+        <UiErrors :errors="{ ...errors, ...setErrors }" />
 
         <!-- ===== Exercises ===== -->
         <UiBox class="flex flex-col gap-2" v-for="(dayExercise, exercise_idx) in day.day_exercises">
@@ -197,7 +197,7 @@
                         v-model="set.weight"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-weight'"
-                        :disabled="isDayFinished"
+                        :disabled="isDayFinished || isSavingSet(set.id)"
                     />
                 </div>
                 <div>
@@ -206,7 +206,7 @@
                         v-model="set.reps"
                         class="w-full"
                         :id="exercise_idx + '-' + set_idx + '-reps'"
-                        :disabled="isDayFinished"
+                        :disabled="isDayFinished || isSavingSet(set.id)"
                     />
                 </div>
                 <div class="flex justify-center">
@@ -239,7 +239,7 @@
                         @change="checkSet(set, dayExercise)"
                         class="mr-2"
                         :id="exercise_idx + '-' + set_idx + '-status'"
-                        :disabled="isDayFinished"
+                        :disabled="isDayFinished || isSavingSet(set.id)"
                     />
                 </div>
             </div>
@@ -327,7 +327,7 @@ const bodyWeightForm = useForm({
 });
 const { toggleDay } = useMesocycle();
 const { addExercise, moveDown, moveUp, removeExercise, replaceExercise, addNote, removeNote } = useExercise(day);
-const { updateSet, addSet, removeSet } = useSet();
+const { updateSet, addSet, removeSet, isSavingSet, setErrors } = useSet();
 const { isActiveDay } = useDay();
 
 onMounted(() => {});
