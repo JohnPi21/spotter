@@ -96,6 +96,11 @@ declare global {
         notes: string | null;
         status: number;
         meso_template_id: number | null;
+        planned_stats?: {
+            muscle_groups_count: number;
+            sets_per_week: number;
+            muscle_groups: Array<{ id: number; name: string; sets: number }>;
+        } | null;
         started_at: string | null;
         finished_at: string | null;
         deleted_at: string | null;

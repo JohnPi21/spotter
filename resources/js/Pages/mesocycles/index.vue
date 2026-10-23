@@ -40,6 +40,10 @@
                         >
                             <span>{{ meso.weeks_duration ?? meso.weeksDuration ?? "—" }} weeks</span>
                             <span>{{ meso.days_per_week }} days / week</span>
+                            <template v-if="meso.planned_stats">
+                                <span>{{ meso.planned_stats.muscle_groups_count }} muscle groups</span>
+                                <span>{{ meso.planned_stats.sets_per_week }} planned sets / week</span>
+                            </template>
                             <span v-if="meso.last_edited" class="text-helper">Edited {{ meso.last_edited }}</span>
                         </div>
                     </div>
@@ -70,7 +74,7 @@
                     :id="`mesocycle-details-${meso.id}`"
                     class="flex flex-col gap-5 border-t border-layer-border bg-input/40 p-4 sm:p-5"
                 >
-                    <dl class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                         <div class="flex flex-col gap-1 rounded-lg border border-layer-border bg-layer p-3">
                             <dt class="text-[13px] leading-relaxed text-secondary">Duration</dt>
                             <dd class="text-2xl font-medium tabular-nums leading-tight tracking-tight text-primary">
@@ -88,7 +92,13 @@
                         <div class="flex flex-col gap-1 rounded-lg border border-layer-border bg-layer p-3">
                             <dt class="text-[13px] leading-relaxed text-secondary">Muscle groups</dt>
                             <dd class="text-2xl font-medium tabular-nums leading-tight tracking-tight text-primary">
-                                {{ sampleMuscleGroups.length }}
+                                {{ meso.planned_stats?.muscle_groups_count ?? "—" }}
+                            </dd>
+                        </div>
+                        <div class="flex flex-col gap-1 rounded-lg border border-layer-border bg-layer p-3">
+                            <dt class="text-[13px] leading-relaxed text-secondary">Planned sets / week</dt>
+                            <dd class="text-2xl font-medium tabular-nums leading-tight tracking-tight text-primary">
+                                {{ meso.planned_stats?.sets_per_week ?? "—" }}
                             </dd>
                         </div>
                     </dl>
@@ -99,20 +109,23 @@
                                 :id="`template-heading-${meso.id}`"
                                 class="text-[15px] font-medium leading-snug text-primary"
                             >
-                                Template breakdown
+                                Planned weekly volume
                             </h4>
-                            <span class="text-xs leading-relaxed text-secondary">Sample data · layout preview</span>
+                            <span class="text-xs leading-relaxed text-secondary">Primary muscle groups</span>
                         </div>
-                        <div class="overflow-hidden rounded-lg border border-layer-border bg-layer">
+                        <p v-if="!meso.planned_stats" class="text-sm text-secondary">
+                            Planned volume is not available for this mesocycle yet.
+                        </p>
+                        <div v-else class="overflow-hidden rounded-lg border border-layer-border bg-layer">
                             <div
                                 class="grid grid-cols-2 gap-3 border-b border-layer-border px-3 py-2.5 text-xs font-medium text-secondary sm:px-4"
                             >
                                 <span>Muscle group</span>
-                                <span class="text-right">Sets / template week</span>
+                                <span class="text-right">Sets / week</span>
                             </div>
                             <div
-                                v-for="group in sampleMuscleGroups"
-                                :key="group.name"
+                                v-for="group in meso.planned_stats?.muscle_groups ?? []"
+                                :key="group.id"
                                 class="grid grid-cols-2 items-center gap-3 border-b border-layer-border/60 px-3 py-2.5 last:border-0 sm:px-4"
                             >
                                 <span class="text-sm leading-relaxed text-secondary">{{ group.name }}</span>
@@ -124,7 +137,9 @@
                                     >
                                         <div
                                             class="h-full rounded-full bg-secondary/60"
-                                            :style="{ width: `${(group.sets / 12) * 100}%` }"
+                                            :style="{
+                                                width: `${(group.sets / Math.max(...(meso.planned_stats?.muscle_groups.map((item) => item.sets) ?? [1]))) * 100}%`,
+                                            }"
                                         />
                                     </div>
                                     <span
@@ -178,15 +193,6 @@ const props = defineProps<{
 }>();
 
 const expandedId = ref<number | null>(props.mesocycles[0]?.id ?? null);
-
-const sampleMuscleGroups = [
-    { name: "Chest", sets: 9 },
-    { name: "Back", sets: 12 },
-    { name: "Quads", sets: 9 },
-    { name: "Hamstrings", sets: 6 },
-    { name: "Shoulders", sets: null },
-    { name: "Biceps", sets: 6 },
-];
 
 function toggleDetails(id: number): void {
     expandedId.value = expandedId.value === id ? null : id;

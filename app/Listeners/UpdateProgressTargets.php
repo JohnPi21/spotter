@@ -27,7 +27,7 @@ class UpdateProgressTargets implements ShouldQueueAfterCommit
         }
 
         DB::transaction(function () use ($day) {
-            /** @var MesoDay */
+            /** @var MesoDay|null */
             $nextDaySibling = $day->nextWeekSibling()->select('id')->first();
 
             if (! $nextDaySibling) {

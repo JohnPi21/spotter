@@ -1,198 +1,221 @@
 <template>
-    <div class="mb-4 mt-2 flex items-center justify-between">
-        <div class="flex flex-col">
-            <InputText v-model="meso.name" placeholder="Untitled Meso" />
-            <InputError :message="errors['name']" />
-        </div>
-        <ButtonPrimary :disabled="mesoForm.processing" @click="submit">{{ submitLabel }}</ButtonPrimary>
-    </div>
-
-    <!-- <UiErrors :errors="errors" /> -->
-    <InputError :message="errors['days']" />
-
-    <div class="flex flex-wrap gap-2" v-if="days.length > 0">
-        <UiBox class="flex h-fit flex-1 flex-col gap-2 lg:max-w-[350px]" v-for="(day, dayIdx) in days" :key="dayIdx">
-            <div class="flex items-center justify-between gap-3">
-                <InputText v-model="day.label" />
-
-                <Icon
-                    icon="material-symbols-light:delete-outline"
-                    width="22px"
-                    class="cursor-pointer transition hover:text-red"
-                    @click="removeDay(dayIdx)"
-                />
+    <div class="flex flex-col gap-3">
+        <div class="mb-4 mt-2 flex items-center justify-between">
+            <div class="flex flex-col">
+                <InputText v-model="meso.name" placeholder="Untitled Meso" />
+                <InputError :message="errors['name']" />
             </div>
-            <InputError :message="errors[`days.${dayIdx}.label`]" />
-
-            <template v-if="day.exercises.length > 0">
-                <UiBox
-                    class="flex flex-col gap-3 bg-layer-light"
-                    v-for="(exercise, exerciseIdx) in day.exercises"
-                    :key="exerciseIdx"
-                >
-                    <!-- Muscle group + delete -->
-                    <div class="flex items-center justify-between">
-                        <span class="rounded bg-orange-700 px-2 text-xs">
-                            {{ exerciseStore.muscleGroups[exercise.muscleGroup]?.name }}
-                        </span>
-                        <Icon
-                            icon="material-symbols-light:delete-outline"
-                            width="20px"
-                            class="cursor-pointer text-gray-500 transition hover:text-red"
-                            @click="removeExercise(dayIdx, exerciseIdx)"
-                        />
-                    </div>
-
-                    <!-- Exercise selector -->
-                    <div class="flex flex-col gap-1">
-                        <ButtonSecondary
-                            @click="openExerciseModal(exercise)"
-                            :class="{ 'bg-layer !text-gray-400': exercise.exerciseId }"
-                            class="w-full"
-                        >
-                            <span v-if="!exercise.exerciseId">Select Exercise</span>
-                            <span v-else>{{ exerciseStore?.exercises[exercise.exerciseId]?.name }}</span>
-                        </ButtonSecondary>
-                        <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.exerciseId`]" />
-                    </div>
-
-                    <!-- Configure toggle -->
-                    <button
-                        type="button"
-                        class="flex items-center gap-1 self-start text-xs text-gray-500 transition hover:text-gray-300"
-                        @click="toggleConfig(exercise)"
-                    >
-                        <Icon
-                            icon="ic:baseline-chevron-right"
-                            width="14px"
-                            class="transition-transform"
-                            :class="{ 'rotate-90': openConfigs.has(exercise) }"
-                        />
-                        Configure
-                    </button>
-
-                    <!-- Collapsible config: 1RM + sets -->
-                    <template v-if="openConfigs.has(exercise)">
-                        <div class="flex flex-col gap-1" v-if="exercise.sets.length > 0">
-                            <div class="grid grid-cols-[18px_1fr_1fr_18px] gap-x-2 text-center text-xs text-gray-500">
-                                <span></span>
-                                <span>Reps</span>
-                                <span>RIR</span>
-                                <span></span>
-                            </div>
-                            <div
-                                v-for="(set, setIdx) in exercise.sets"
-                                :key="setIdx"
-                                class="grid grid-cols-[18px_1fr_1fr_18px] items-center gap-x-2"
-                            >
-                                <span class="text-center text-xs text-gray-500">{{ setIdx + 1 }}</span>
-                                <div class="flex items-center gap-1">
-                                    <InputText
-                                        type="number"
-                                        min="1"
-                                        v-model="set.minReps"
-                                        placeholder="1"
-                                        class="w-full text-center text-sm"
-                                    />
-                                    <span class="text-xs text-gray-500">–</span>
-                                    <InputText
-                                        type="number"
-                                        min="1"
-                                        v-model="set.maxReps"
-                                        placeholder="12"
-                                        class="w-full text-center text-sm"
-                                    />
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <InputText
-                                        type="number"
-                                        min="0"
-                                        v-model="set.minRir"
-                                        placeholder="1"
-                                        class="w-full text-center text-sm"
-                                    />
-                                    <span class="text-xs text-gray-500">–</span>
-                                    <InputText
-                                        type="number"
-                                        min="0"
-                                        v-model="set.maxRir"
-                                        placeholder="3"
-                                        class="w-full text-center text-sm"
-                                    />
-                                </div>
-                                <Icon
-                                    icon="material-symbols-light:delete-outline"
-                                    width="16px"
-                                    class="cursor-pointer text-gray-500 transition hover:text-red"
-                                    @click="removeSet(dayIdx, exerciseIdx, setIdx)"
-                                />
-                            </div>
-                        </div>
-
-                        <ButtonSecondary class="text-xs" @click="addSet(dayIdx, exerciseIdx)">
-                            <Icon icon="ic:baseline-plus" width="16px" />
-                            Add Set
-                        </ButtonSecondary>
-
-                        <div v-if="supportsOneRepMax(exercise)" class="flex flex-col items-center gap-1">
-                            <div class="flex items-center gap-2">
-                                <Icon icon="mdi:arm-flex" width="18px" class="text-accent opacity-75" />
-                                <InputText
-                                    type="number"
-                                    min="0"
-                                    step="0.001"
-                                    v-model="exercise.oneRepMax"
-                                    :placeholder="`1RM`"
-                                    class="w-20 text-center text-sm"
-                                />
-                                <Icon icon="mdi:arm-flex" width="18px" class="scale-x-[-1] text-accent opacity-75" />
-                            </div>
-                            <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.oneRepMax`]" />
-                        </div>
-                    </template>
-                </UiBox>
-            </template>
-
-            <ModalExercise
-                v-model="exerciseModal.show"
-                :only-one-muscle-group="exerciseModal?.exercise?.muscleGroup"
-                :pre-selected="exerciseModal?.exercise?.exerciseId"
-                @select="(exerciseId: number) => setExerciseId(exerciseId)"
-            />
-
-            <ButtonSecondary @click="selectMuscleGroupDay(dayIdx)">
-                <Icon icon="ic:baseline-plus" width="21px" />
-                Add Muscle Group
-            </ButtonSecondary>
-            <InputError :message="errors[`days.${dayIdx}.exercises`]" />
-        </UiBox>
-
-        <ModalMuscleGroups
-            v-model="showMuscleModal"
-            :muscle-groups="exerciseStore.muscleGroups"
-            @select="addMuscleGroup"
-        />
-    </div>
-
-    <div class="flex items-center justify-center" v-else>
-        <ButtonSecondary class="h-fit min-w-40" @click="addDay()" v-if="days.length < 7">
-            <Icon icon="ic:baseline-plus" width="21px" />
-            Add Day
-        </ButtonSecondary>
-    </div>
-
-    <UiBox class="mt-5 flex flex-col-reverse items-center justify-between !gap-4 md:flex-row" v-if="days.length > 0">
-        <div class="flex w-full flex-col md:w-fit">
-            <InputLabel value="Number of Weeks" />
-            <InputRange :min="3" :max="12" v-model="meso.weeksDuration" />
-            <InputError :message="errors['weeksDuration']" />
+            <ButtonPrimary :disabled="mesoForm.processing" @click="submit">{{ submitLabel }}</ButtonPrimary>
         </div>
 
-        <ButtonSecondary class="h-fit w-full min-w-40 md:w-fit" @click="addDay()" v-if="days.length < 7">
-            <Icon icon="ic:baseline-plus" width="21px" />
-            Add Day
-        </ButtonSecondary>
-    </UiBox>
+        <label v-if="isEditing && props.canUpdateTemplate" class="flex items-center gap-2 text-sm text-secondary">
+            <input
+                v-model="mesoForm.updateTemplate"
+                type="checkbox"
+                class="rounded border-layer-border bg-input text-text-orange"
+            />
+            Also update the source template
+        </label>
+        <InputError :message="errors['updateTemplate']" />
+        <InputError :message="errors['days']" />
+
+        <div class="flex flex-wrap gap-2" v-if="days.length > 0">
+            <UiBox
+                class="flex h-fit flex-1 flex-col gap-2 lg:max-w-[350px]"
+                v-for="(day, dayIdx) in days"
+                :key="dayIdx"
+            >
+                <div class="flex items-center justify-between gap-3">
+                    <InputText v-model="day.label" />
+
+                    <Icon
+                        icon="material-symbols-light:delete-outline"
+                        width="22px"
+                        class="cursor-pointer transition hover:text-red"
+                        @click="removeDay(dayIdx)"
+                    />
+                </div>
+                <InputError :message="errors[`days.${dayIdx}.label`]" />
+
+                <template v-if="day.exercises.length > 0">
+                    <UiBox
+                        class="flex flex-col gap-3 bg-layer-light"
+                        v-for="(exercise, exerciseIdx) in day.exercises"
+                        :key="exerciseIdx"
+                    >
+                        <!-- Muscle group + delete -->
+                        <div class="flex items-center justify-between">
+                            <span class="rounded bg-orange-700 px-2 text-xs">
+                                {{ exerciseStore.muscleGroups[exercise.muscleGroup]?.name }}
+                            </span>
+                            <Icon
+                                icon="material-symbols-light:delete-outline"
+                                width="20px"
+                                class="cursor-pointer text-gray-500 transition hover:text-red"
+                                @click="removeExercise(dayIdx, exerciseIdx)"
+                            />
+                        </div>
+
+                        <!-- Exercise selector -->
+                        <div class="flex flex-col gap-1">
+                            <ButtonSecondary
+                                @click="openExerciseModal(exercise)"
+                                :class="{ 'bg-layer !text-gray-400': exercise.exerciseId }"
+                                class="w-full"
+                            >
+                                <span v-if="!exercise.exerciseId">Select Exercise</span>
+                                <span v-else>{{ exerciseStore?.exercises[exercise.exerciseId]?.name }}</span>
+                            </ButtonSecondary>
+                            <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.exerciseId`]" />
+                        </div>
+
+                        <!-- Configure toggle -->
+                        <button
+                            type="button"
+                            class="flex items-center gap-1 self-start text-xs text-gray-500 transition hover:text-gray-300"
+                            @click="toggleConfig(exercise)"
+                        >
+                            <Icon
+                                icon="ic:baseline-chevron-right"
+                                width="14px"
+                                class="transition-transform"
+                                :class="{ 'rotate-90': openConfigs.has(exercise) }"
+                            />
+                            Configure
+                        </button>
+
+                        <!-- Collapsible config: 1RM + sets -->
+                        <template v-if="openConfigs.has(exercise)">
+                            <div class="flex flex-col gap-1" v-if="exercise.sets.length > 0">
+                                <div
+                                    class="grid grid-cols-[18px_1fr_1fr_18px] gap-x-2 text-center text-xs text-gray-500"
+                                >
+                                    <span></span>
+                                    <span>Reps</span>
+                                    <span>RIR</span>
+                                    <span></span>
+                                </div>
+                                <div
+                                    v-for="(set, setIdx) in exercise.sets"
+                                    :key="setIdx"
+                                    class="grid grid-cols-[18px_1fr_1fr_18px] items-center gap-x-2"
+                                >
+                                    <span class="text-center text-xs text-gray-500">{{ setIdx + 1 }}</span>
+                                    <div class="flex items-center gap-1">
+                                        <InputText
+                                            type="number"
+                                            min="1"
+                                            v-model="set.minReps"
+                                            placeholder="1"
+                                            class="w-full text-center text-sm"
+                                        />
+                                        <span class="text-xs text-gray-500">–</span>
+                                        <InputText
+                                            type="number"
+                                            min="1"
+                                            v-model="set.maxReps"
+                                            placeholder="12"
+                                            class="w-full text-center text-sm"
+                                        />
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <InputText
+                                            type="number"
+                                            min="0"
+                                            v-model="set.minRir"
+                                            placeholder="1"
+                                            class="w-full text-center text-sm"
+                                        />
+                                        <span class="text-xs text-gray-500">–</span>
+                                        <InputText
+                                            type="number"
+                                            min="0"
+                                            v-model="set.maxRir"
+                                            placeholder="3"
+                                            class="w-full text-center text-sm"
+                                        />
+                                    </div>
+                                    <Icon
+                                        icon="material-symbols-light:delete-outline"
+                                        width="16px"
+                                        class="cursor-pointer text-gray-500 transition hover:text-red"
+                                        @click="removeSet(dayIdx, exerciseIdx, setIdx)"
+                                    />
+                                </div>
+                            </div>
+
+                            <ButtonSecondary class="text-xs" @click="addSet(dayIdx, exerciseIdx)">
+                                <Icon icon="ic:baseline-plus" width="16px" />
+                                Add Set
+                            </ButtonSecondary>
+
+                            <div v-if="supportsOneRepMax(exercise)" class="flex flex-col items-center gap-1">
+                                <div class="flex items-center gap-2">
+                                    <Icon icon="mdi:arm-flex" width="18px" class="text-accent opacity-75" />
+                                    <InputText
+                                        type="number"
+                                        min="0"
+                                        step="0.001"
+                                        v-model="exercise.oneRepMax"
+                                        :placeholder="`1RM`"
+                                        class="w-20 text-center text-sm"
+                                    />
+                                    <Icon
+                                        icon="mdi:arm-flex"
+                                        width="18px"
+                                        class="scale-x-[-1] text-accent opacity-75"
+                                    />
+                                </div>
+                                <InputError :message="errors[`days.${dayIdx}.exercises.${exerciseIdx}.oneRepMax`]" />
+                            </div>
+                        </template>
+                    </UiBox>
+                </template>
+
+                <ModalExercise
+                    v-model="exerciseModal.show"
+                    :only-one-muscle-group="exerciseModal?.exercise?.muscleGroup"
+                    :pre-selected="exerciseModal?.exercise?.exerciseId"
+                    @select="(exerciseId: number) => setExerciseId(exerciseId)"
+                />
+
+                <ButtonSecondary @click="selectMuscleGroupDay(dayIdx)">
+                    <Icon icon="ic:baseline-plus" width="21px" />
+                    Add Muscle Group
+                </ButtonSecondary>
+                <InputError :message="errors[`days.${dayIdx}.exercises`]" />
+            </UiBox>
+
+            <ModalMuscleGroups
+                v-model="showMuscleModal"
+                :muscle-groups="exerciseStore.muscleGroups"
+                @select="addMuscleGroup"
+            />
+        </div>
+
+        <div class="flex items-center justify-center" v-else>
+            <ButtonSecondary class="h-fit min-w-40" @click="addDay()" v-if="days.length < 7">
+                <Icon icon="ic:baseline-plus" width="21px" />
+                Add Day
+            </ButtonSecondary>
+        </div>
+
+        <UiBox
+            class="mt-5 flex flex-col-reverse items-center justify-between !gap-4 md:flex-row"
+            v-if="days.length > 0"
+        >
+            <div class="flex w-full flex-col md:w-fit">
+                <InputLabel value="Number of Weeks" />
+                <InputRange :min="3" :max="12" v-model="meso.weeksDuration" />
+                <InputError :message="errors['weeksDuration']" />
+            </div>
+
+            <ButtonSecondary class="h-fit w-full min-w-40 md:w-fit" @click="addDay()" v-if="days.length < 7">
+                <Icon icon="ic:baseline-plus" width="21px" />
+                Add Day
+            </ButtonSecondary>
+        </UiBox>
+    </div>
 </template>
 <script setup lang="ts">
 import ButtonPrimary from "@/Components/Button/Primary.vue";
@@ -215,6 +238,7 @@ const props = defineProps<{
     unit?: string;
     weeksDuration?: number;
     days?: DayForm[];
+    canUpdateTemplate?: boolean;
 }>();
 
 const page = usePage();
@@ -237,6 +261,7 @@ const mesoForm = useForm({
     unit: meso.value.unit,
     weeksDuration: meso.value.weeksDuration,
     days: [] as DayForm[],
+    updateTemplate: false,
 });
 
 const exerciseStore = useExerciseStore();
@@ -351,6 +376,7 @@ type SetForm = {
     maxReps: number | null;
     minRir: number | null;
     maxRir: number | null;
+    percentOneRepMax?: number | null;
 };
 
 type DayForm = {

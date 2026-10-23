@@ -37,7 +37,8 @@ class StoreMesocycleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
+            'name' => ['required', 'string', 'max:64'],
+            'updateTemplate' => ['sometimes', 'boolean'],
             'unit' => ['sometimes', Rule::enum(UnitsOfMeasure::class)],
             'weeksDuration' => ['required', 'integer', 'min:3', 'max:12'],
 
@@ -49,7 +50,8 @@ class StoreMesocycleRequest extends FormRequest
             'days.*.exercises.*.exerciseId' => ['required', 'integer', 'min:1'],
             'days.*.exercises.*.oneRepMax' => ['sometimes', 'nullable', 'decimal:0,3', 'max:2048'],
 
-            'days.*.exercises.*.sets' => ['sometimes'],
+            'days.*.exercises.*.sets' => ['sometimes', 'array'],
+            'days.*.exercises.*.sets.*.percentOneRepMax' => ['sometimes', 'nullable', 'integer', 'between:0,255'],
             'days.*.exercises.*.sets.*.minReps' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'days.*.exercises.*.sets.*.maxReps' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'days.*.exercises.*.sets.*.minRir' => ['sometimes', 'nullable', 'integer', 'min:0'],

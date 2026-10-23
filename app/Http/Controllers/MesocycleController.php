@@ -10,10 +10,12 @@ use App\Actions\Mesocycle\UpdateMesocycle;
 use App\Data\Mesocycle\CreateMesocycleData;
 use App\Http\Requests\StoreMesocycleRequest;
 use App\Models\Mesocycle;
+use App\Services\MesocyclePlan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class MesocycleController extends Controller implements HasMiddleware
@@ -24,36 +26,13 @@ class MesocycleController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('can:update,mesocycle', only: ['update', 'activate', 'destroy', 'exportAsText']),
+            new Middleware('can:update,mesocycle', only: ['edit', 'update', 'activate', 'destroy', 'exportAsText']),
         ];
     }
 
     public function index(): \Inertia\Response
     {
-        $mesocycles = Mesocycle::query()->mine()->withWorkoutStructure()->orderByDesc('status')->orderByDesc('updated_at')->get();
-
-        // dd($mesocycles);
-        // $setsByMuscleGroup = [];
-        // foreach ($mesocycles as $mesocycle) {
-        //     $daysPerWeek = $mesocycle->days_per_week;
-        //     $weeksDuration = $mesocycle->weeks_duration;
-
-        //     ### SETS PER MUSCLE GROUP IS PER MONTH, I NEED PER WEEK.
-
-        //     foreach ($mesocycle->days as $day) {
-        //         foreach ($day->dayExercises as $dayExercise) {
-        //             $muscleGroup = $dayExercise->exercise->muscleGroup->name;
-
-        //             if (! isset($setsByMuscleGroup[$muscleGroup])) {
-        //                 $setsByMuscleGroup[$muscleGroup] = 0;
-        //             }
-
-        //             $setsByMuscleGroup[$muscleGroup] += $dayExercise->sets->count() ?? 0;
-        //         }
-        //     }
-        // }
-
-        // dd($setsByMuscleGroup);
+        $mesocycles = Mesocycle::query()->mine()->with(['days:id,finished_at,mesocycle_id'])->orderByDesc('status')->orderByDesc('updated_at')->get();
 
         $mesocycles->each(function (Mesocycle $meso) {
             $meso->setAttribute('last_edited', $meso->updated_at->diffForHumans());
@@ -65,27 +44,29 @@ class MesocycleController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function edit(Mesocycle $mesocycle): \Inertia\Response
+    public function edit(Mesocycle $mesocycle, MesocyclePlan $plan): \Inertia\Response|RedirectResponse
     {
-        $schema = json_decode($mesocycle->mesoTemplate()->value('schema'), true);
+        try {
+            $resolved = $plan->resolve($mesocycle);
+        } catch (ValidationException) {
+            return to_route('mesocycles')->with('error', 'This mesocycle has no usable saved plan or complete week to edit.');
+        }
 
-        return Inertia::render(
-            'mesocycles/create',
-            $schema
-        );
+        $mesocycle->loadMissing('mesoTemplate');
+
+        return Inertia::render('mesocycles/create', [
+            ...$resolved['schema'],
+            'canUpdateTemplate' => $mesocycle->mesoTemplate?->user_id === $mesocycle->user_id,
+        ]);
     }
 
     public function update(StoreMesocycleRequest $request, Mesocycle $mesocycle, UpdateMesocycle $updateMesocycle): RedirectResponse
     {
-        if ($mesocycle->meso_template_id === null) {
-            return to_route('mesocycles')->with('error', 'Meso template missing for this mesocycle!');
-        }
-
         $mesoDTO = CreateMesocycleData::from($request->validated());
 
-        $updateMesocycle->execute($mesoDTO, $mesocycle);
+        $updateMesocycle->execute($mesoDTO, $mesocycle, $request->boolean('updateTemplate'));
 
-        return to_route('mesocycles')->with('success', 'Mesocycle updated succesfully.');
+        return to_route('mesocycles')->with('success', 'Mesocycle updated successfully.');
     }
 
     public function create(): \Inertia\Response

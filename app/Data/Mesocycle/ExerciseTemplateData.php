@@ -17,7 +17,7 @@ class ExerciseTemplateData extends Data
     public function __construct(
         public int $muscleGroup,
         public int $exerciseId,
-        public ?int $oneRepMax,
+        public ?float $oneRepMax,
         public array $sets = [],
     ) {}
 }

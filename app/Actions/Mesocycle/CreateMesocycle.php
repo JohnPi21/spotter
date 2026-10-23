@@ -7,9 +7,9 @@ use App\Data\Mesocycle\MesocycleStructureTypes;
 use App\Models\Mesocycle;
 use App\Models\MesoDay;
 use App\Models\MesoTemplate;
+use App\Services\MesocyclePlan;
 use App\Services\MesocycleStructureHelper;
 use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
 
 /**
  * @phpstan-import-type DayExerciseIdMapItem from MesocycleStructureTypes
@@ -17,7 +17,7 @@ use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
  */
 class CreateMesocycle
 {
-    public function __construct(protected MesocycleStructureHelper $mesoStructure) {}
+    public function __construct(protected MesocycleStructureHelper $mesoStructure, protected MesocyclePlan $plan) {}
 
     public function execute(CreateMesocycleData $mesoDTO, int $userId, bool $userHasActiveMeso): void
     {
@@ -25,13 +25,12 @@ class CreateMesocycle
 
             $daysPerWeek = count($mesoDTO->days);
 
-            // Get data as array with camelCase keys
-            $payload = $mesoDTO->transform(
-                TransformationContextFactory::create()->withoutPropertyNameMapping()
-            );
+            $payload = $this->plan->fromData($mesoDTO);
+            $stats = $this->plan->stats($payload);
 
             $mesoTemplate = MesoTemplate::create([
-                'schema' => json_encode($payload),
+                'schema' => $payload,
+                'planned_stats' => $stats,
                 'name' => $mesoDTO->name,
                 'frequency' => $daysPerWeek,
                 'user_id' => $userId,
@@ -44,6 +43,8 @@ class CreateMesocycle
                 'days_per_week' => $daysPerWeek,
                 'user_id' => $userId,
                 'meso_template_id' => $mesoTemplate->id,
+                'schema' => $payload,
+                'planned_stats' => $stats,
                 'status' => ! $userHasActiveMeso,
             ]);
 
