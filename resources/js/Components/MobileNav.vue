@@ -1,62 +1,32 @@
-<template>
-    <aside id="default-sidebar" class="fixed bottom-0 w-full border border-layer-border bg-layer" aria-label="SideNav">
-        <div class="p-2">
-            <nav class="flex-column flex">
-                <ul class="flex flex-auto list-none justify-between gap-2">
-                    <template v-for="(link, idx) in links" :key="idx">
-                        <li class="rounded p-1 hover:bg-accent" v-if="showLink(link)">
-                            <Link :href="link.path" class="flex items-center gap-2">
-                                <Icon :icon="link.icon" width="25px" />
-                                <!-- <span class="leading-7">{{ link.name }}</span> -->
-                            </Link>
-                        </li>
-                    </template>
-                </ul>
-            </nav>
-        </div>
-    </aside>
-</template>
-<script setup>
+<script setup lang="ts">
+import { useAppNavigation } from "@/Composables/useAppNavigation";
 import { Icon } from "@iconify/vue";
-import { Link, usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { Link } from "@inertiajs/vue3";
 
-const page = usePage();
-
-// const links = [
-//     { name: "Account", path: "/profile", icon: "codicon:account" },
-//     { name: "Mesocycles", path: "/", icon: "icon-park-outline:cycle-one" },
-//     { name: "Current Workout", path: "/mesocycles/current-day", icon: "tabler:barbell" },
-// ];
-
-const links = computed(() => [
-    {
-        name: "Dashboard",
-        path: route("dashboard"),
-        icon: "material-symbols:dashboard-outline",
-    },
-    {
-        name: "Current Workout",
-        path: route("mesocycles.current"),
-        icon: "tabler:barbell",
-        show: page.props.auth.user && page.props?.auth?.flags?.hasActiveMeso,
-    },
-    {
-        name: "Mesocycles",
-        path: route("mesocycles"),
-        icon: "icon-park-outline:cycle-one",
-    },
-    {
-        name: "Account",
-        path: route("profile.edit"),
-        icon: "codicon:account",
-    },
-]);
-
-function showLink(listLink) {
-    if (!listLink.hasOwnProperty("show")) return true;
-
-    return listLink.show;
-}
+const { links } = useAppNavigation();
 </script>
-<style lang="scss" scoped></style>
+
+<template>
+    <nav
+        aria-label="Mobile navigation"
+        class="fixed inset-x-0 bottom-0 z-30 border-t border-layer-border bg-main pb-[env(safe-area-inset-bottom)]"
+    >
+        <ul class="mx-auto flex h-[var(--app-mobile-nav-height)] max-w-[768px] list-none items-stretch">
+            <li v-for="link in links" :key="link.id" class="min-w-0 flex-1">
+                <Link
+                    :href="link.path"
+                    :aria-current="link.active ? 'page' : undefined"
+                    class="flex h-full min-h-[48px] flex-col items-center justify-center gap-1 border-t-2 text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-orange"
+                    :class="
+                        link.active
+                            ? 'border-text-orange text-text-orange'
+                            : 'border-transparent text-secondary hover:text-primary'
+                    "
+                >
+                    <Icon :icon="link.icon" width="21" class="shrink-0" aria-hidden="true" />
+                    <span>{{ link.mobileName }}</span>
+                </Link>
+            </li>
+        </ul>
+    </nav>
+</template>

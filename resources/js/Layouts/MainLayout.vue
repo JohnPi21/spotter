@@ -4,7 +4,7 @@
         <SideNav class="hidden md:block" />
         <Modal />
         <div
-            class="container mx-auto mb-5 px-3 pb-[var(--mobilenav-height)] md:pl-[var(--sidenav-width)]"
+            class="container mx-auto mb-5 min-w-0 px-3 pb-[calc(var(--app-mobile-nav-height)+env(safe-area-inset-bottom)+12px)] md:pb-0 md:pl-[calc(var(--sidenav-width)+24px)]"
             scroll-region=""
         >
             <slot />
